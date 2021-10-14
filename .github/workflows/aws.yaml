@@ -6,7 +6,7 @@ env:
   AWS_REGION: me-south-1
 on:
   push:
-    branches: [ docker_setup, development ]
+    branches: [ master, development ]
 jobs:
   deploy_aws:
     runs-on: ubuntu-latest
@@ -20,7 +20,7 @@ jobs:
           python-version: "3.6"
       - name: Set environment for branch
         run: |
-          if [[ $GITHUB_REF == 'refs/heads/docker_setup' ]]; then
+          if [[ $GITHUB_REF == 'refs/heads/master' ]]; then
               echo "AWS_EB_APP_NAME=production" >> "$GITHUB_ENV"
               echo "APP_ENV=prod" >> "$GITHUB_ENV"
           else
