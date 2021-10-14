@@ -26,13 +26,8 @@ export default DiscourseRoute.extend({
         : ["count:desc", "id"],
       tagsForUser: this.modelFor("user").get("username_lower"),
     });
-
-    this.controllerFor("user-topics-list").setProperties({
-      showToggleBulkSelect: false,
-      selected: [],
-    });
-
     this.controllerFor("user-private-messages").setProperties({
+      showToggleBulkSelect: false,
       pmView: "tags",
     });
   },

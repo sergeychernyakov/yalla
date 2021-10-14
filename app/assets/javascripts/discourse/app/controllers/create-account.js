@@ -140,19 +140,16 @@ export default Controller.extend(
       "serverAccountEmail",
       "serverEmailValidation",
       "accountEmail",
-      "rejectedEmails.[]",
-      "forceValidationReason"
+      "rejectedEmails.[]"
     )
     emailValidation(
       serverAccountEmail,
       serverEmailValidation,
       email,
-      rejectedEmails,
-      forceValidationReason
+      rejectedEmails
     ) {
       const failedAttrs = {
         failed: true,
-        ok: false,
         element: document.querySelector("#new-account-email"),
       };
 
@@ -165,9 +162,6 @@ export default Controller.extend(
         return EmberObject.create(
           Object.assign(failedAttrs, {
             message: I18n.t("user.email.required"),
-            reason: forceValidationReason
-              ? I18n.t("user.email.required")
-              : null,
           })
         );
       }
@@ -243,7 +237,7 @@ export default Controller.extend(
       "authOptions.email",
       "authOptions.email_valid"
     )
-    emailDisabled() {
+    emailValidated() {
       return (
         this.get("authOptions.email") === this.accountEmail &&
         this.get("authOptions.email_valid")
@@ -274,7 +268,7 @@ export default Controller.extend(
         (isEmpty(this.accountUsername) || this.get("authOptions.email"))
       ) {
         // If email is valid and username has not been entered yet,
-        // or email and username were filled automatically by 3rd party auth,
+        // or email and username were filled automatically by 3rd parth auth,
         // then look for a registered username that matches the email.
         discourseDebounce(this, this.fetchExistingUsername, 500);
       }
@@ -413,17 +407,6 @@ export default Controller.extend(
       }
     },
 
-    @discourseComputed("authOptions.associate_url", "authOptions.auth_provider")
-    associateHtml(url, provider) {
-      if (!url) {
-        return;
-      }
-      return I18n.t("create_account.associate", {
-        associate_link: url,
-        provider: I18n.t(`login.${provider}.name`),
-      });
-    },
-
     actions: {
       externalLogin(provider) {
         this.login.send("externalLogin", provider, { signup: true });
@@ -432,7 +415,6 @@ export default Controller.extend(
       createAccount() {
         this.clearFlash();
 
-        this.set("forceValidationReason", true);
         const validation = [
           this.emailValidation,
           this.usernameValidation,
@@ -442,22 +424,23 @@ export default Controller.extend(
         ].find((v) => v.failed);
 
         if (validation) {
+          if (validation.message) {
+            this.flash(validation.message, "error");
+          }
+
           const element = validation.element;
-          if (element) {
-            if (element.tagName === "DIV") {
-              if (element.scrollIntoView) {
-                element.scrollIntoView();
-              }
-              element.click();
-            } else {
-              element.focus();
+          if (element.tagName === "DIV") {
+            if (element.scrollIntoView) {
+              element.scrollIntoView();
             }
+            element.click();
+          } else {
+            element.focus();
           }
 
           return;
         }
 
-        this.set("forceValidationReason", false);
         this.performAccountCreation();
       },
     },

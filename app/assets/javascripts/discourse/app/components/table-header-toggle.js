@@ -1,4 +1,6 @@
 import Component from "@ember/component";
+import I18n from "I18n";
+import discourseComputed from "discourse-common/utils/decorators";
 import { iconHTML } from "discourse-common/lib/icon-library";
 
 export default Component.extend({
@@ -8,9 +10,15 @@ export default Component.extend({
   labelKey: null,
   chevronIcon: null,
   columnIcon: null,
-  translated: false,
-  automatic: false,
-  onActiveRender: null,
+
+  @discourseComputed("field", "labelKey")
+  title(field, labelKey) {
+    if (!labelKey) {
+      labelKey = `directory.${this.field}`;
+    }
+
+    return I18n.t(labelKey + "_long", { defaultValue: I18n.t(labelKey) });
+  },
 
   toggleProperties() {
     if (this.order === this.field) {
@@ -32,15 +40,13 @@ export default Component.extend({
   },
   didReceiveAttrs() {
     this._super(...arguments);
-    if (!this.automatic && !this.translated) {
-      this.set("labelKey", this.field);
-    }
-    this.set("id", `table-header-toggle-${this.field.replace(/\s/g, "")}`);
     this.toggleChevron();
   },
-  didRender() {
-    if (this.onActiveRender && this.chevronIcon) {
-      this.onActiveRender(this.element);
+  init() {
+    this._super(...arguments);
+    if (this.icon) {
+      let columnIcon = iconHTML(this.icon);
+      this.set("columnIcon", `${columnIcon}`.htmlSafe());
     }
   },
 });

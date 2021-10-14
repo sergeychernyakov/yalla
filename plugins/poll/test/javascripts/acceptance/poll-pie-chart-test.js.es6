@@ -1,10 +1,4 @@
-import {
-  acceptance,
-  query,
-  queryAll,
-} from "discourse/tests/helpers/qunit-helpers";
-import { test } from "qunit";
-import { visit } from "@ember/test-helpers";
+import { acceptance, queryAll } from "discourse/tests/helpers/qunit-helpers";
 
 acceptance("Rendering polls with pie charts", function (needs) {
   needs.user();
@@ -16,10 +10,10 @@ acceptance("Rendering polls with pie charts", function (needs) {
   test("Displays the pie chart", async function (assert) {
     await visit("/t/-/topic_with_pie_chart_poll");
 
-    const poll = query(".poll");
+    const poll = queryAll(".poll")[0];
 
     assert.equal(
-      query(".info-number", poll).innerHTML,
+      queryAll(".info-number", poll)[0].innerHTML,
       "2",
       "it should display the right number of voters"
     );

@@ -72,9 +72,7 @@ Answer the following questions when prompted:
     SMTP port? [587]: 
     SMTP user name? [user@example.com]: 
     SMTP password? [pa$$word]: 
-    notification email address? [noreply@x.y.com]: 
-    Optional email address for Let's Encrypt warnings? (ENTER to skip) [me@example.com]: 
-    Optional Maxmind License key (ENTER to continue without MAXMIND GeoLite2 geolocation database) [1234567890123456]: 
+    Let's Encrypt account email? (ENTER to skip) [me@example.com]: 
 
 This will generate an `app.yml` configuration file on your behalf, and then kicks off bootstrap. Bootstrapping takes between **2-8 minutes** to set up your Discourse. If you need to change these settings after bootstrapping, you can run `./discourse-setup` again (it will re-use your previous values from the file) or edit `/containers/app.yml` manually with `nano` and then `./launcher rebuild app`, otherwise your changes will not take effect.
 
@@ -154,7 +152,7 @@ Do you want...
 
 - A Content Delivery Network to speed up worldwide access? [Configure a CDN](https://meta.discourse.org/t/enable-a-cdn-for-your-discourse/14857). We recommend [Fastly](http://www.fastly.com/).
 
-- Import old content from vBulletin, PHPbb, Vanilla, Drupal, BBPress, etc? [See our open source importers](https://github.com/discourse/discourse/tree/main/script/import_scripts).
+- Import old content from vBulletin, PHPbb, Vanilla, Drupal, BBPress, etc? [See our open source importers](https://github.com/discourse/discourse/tree/master/script/import_scripts).
 
 - A user friendly [offline page when rebuilding or upgrading?](https://meta.discourse.org/t/adding-an-offline-page-when-rebuilding/45238)
 
@@ -167,4 +165,4 @@ Help us improve this guide! Feel free to ask about it on [meta.discourse.org][me
  [meta]: https://meta.discourse.org
    [do]: https://www.digitalocean.com/?refcode=5fa48ac82415
   [put]: http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html
-  [mailconfig]: https://github.com/discourse/discourse/blob/main/docs/INSTALL-email.md
+  [mailconfig]: https://github.com/discourse/discourse/blob/master/docs/INSTALL-email.md

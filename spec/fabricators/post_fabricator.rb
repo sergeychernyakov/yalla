@@ -166,7 +166,3 @@ end
 Fabricator(:whisper, from: :post) do
   post_type Post.types[:whisper]
 end
-
-Fabricator(:small_action, from: :post) do
-  post_type Post.types[:small_action]
-end

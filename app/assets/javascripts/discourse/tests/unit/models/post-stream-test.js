@@ -826,7 +826,7 @@ module("Unit | Model | post-stream", function () {
     assert.ok(
       postStream.get("lastAppended"),
       found,
-      "committing a post changes lastAppended"
+      "comitting a post changes lastAppended"
     );
   });
 
@@ -885,7 +885,7 @@ module("Unit | Model | post-stream", function () {
     );
   });
 
-  test("committing and triggerNewPostsInStream race condition", function (assert) {
+  test("comitting and triggerNewPostsInStream race condition", function (assert) {
     const postStream = buildStream(4964);
     const store = postStream.store;
 

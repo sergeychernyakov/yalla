@@ -142,11 +142,6 @@ module HasCustomFields
     super
   end
 
-  def on_custom_fields_change
-    # Callback when custom fields have changed
-    # Override in model
-  end
-
   def custom_fields_preloaded?
     !!@preloaded_custom_fields
   end
@@ -202,11 +197,8 @@ module HasCustomFields
       if row_count == 0
         _custom_fields.create!(name: k, value: v)
       end
-
       custom_fields[k.to_s] = v # We normalize custom_fields as strings
     end
-
-    on_custom_fields_change
   end
 
   def save_custom_fields(force = false)
@@ -233,10 +225,10 @@ module HasCustomFields
             t = {}
             self.class.append_custom_field(t, f.name, f.value)
 
-            if dup.has_key?(f.name) && dup[f.name] == t[f.name]
-              dup.delete(f.name)
-            else
+            if dup[f.name] != t[f.name]
               f.destroy!
+            else
+              dup.delete(f.name)
             end
           end
         end
@@ -261,12 +253,11 @@ module HasCustomFields
         end
       end
 
-      on_custom_fields_change
       refresh_custom_fields_from_db
     end
   end
 
-  # We support unique indexes on certain fields. In the event two concurrent processes attempt to
+  # We support unique indexes on certain fields. In the event two concurrenct processes attempt to
   # update the same custom field we should catch the error and perform an update instead.
   def create_singular(name, value, field_type = nil)
     write_value = value.is_a?(Hash) || field_type == :json ? value.to_json : value

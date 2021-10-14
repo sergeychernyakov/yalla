@@ -24,15 +24,8 @@ export default Component.extend({
   options: alias("model.replyOptions"),
   action: alias("model.action"),
 
-  // Note we update when some other attributes like tag/category change to allow
-  // text customizations to use those.
-  @discourseComputed("options", "action", "model.tags", "model.category")
+  @discourseComputed("options", "action")
   actionTitle(opts, action) {
-    let result = this.model.customizationFor("actionTitle");
-    if (result) {
-      return result;
-    }
-
     if (TITLES[action]) {
       return I18n.t(TITLES[action]);
     }

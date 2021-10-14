@@ -3,15 +3,12 @@ import { scheduleOnce } from "@ember/runloop";
 export default Component.extend({
   classNames: ["modal-body"],
   fixed: false,
-  submitOnEnter: true,
   dismissable: true,
+  autoFocus: true,
 
   didInsertElement() {
     this._super(...arguments);
-    this._modalAlertElement = document.getElementById("modal-alert");
-    if (this._modalAlertElement) {
-      this._modalAlertElement.innerHTML = "";
-    }
+    $("#modal-alert").hide();
 
     let fixedParent = $(this.element).closest(".d-modal.fixed-modal");
     if (fixedParent.length) {
@@ -37,8 +34,10 @@ export default Component.extend({
       const maxHeightFloat = parseFloat(maxHeight) / 100.0;
       if (maxHeightFloat > 0) {
         const viewPortHeight = $(window).height();
-        this.element.style.maxHeight =
-          Math.floor(maxHeightFloat * viewPortHeight) + "px";
+        $(this.element).css(
+          "max-height",
+          Math.floor(maxHeightFloat * viewPortHeight) + "px"
+        );
       }
     }
 
@@ -50,36 +49,27 @@ export default Component.extend({
         "fixed",
         "subtitle",
         "rawSubtitle",
-        "submitOnEnter",
         "dismissable",
-        "headerClass"
+        "headerClass",
+        "autoFocus"
       )
     );
   },
 
   _clearFlash() {
-    if (this._modalAlertElement) {
-      this._modalAlertElement.innerHTML = "";
-      this._modalAlertElement.classList.remove(
-        "alert",
-        "alert-error",
-        "alert-info",
-        "alert-success",
-        "alert-warning"
-      );
+    const modalAlert = document.getElementById("modal-alert");
+    if (modalAlert) {
+      modalAlert.style.display = "none";
+      modalAlert.classList.remove("alert-info", "alert-error", "alert-success");
     }
   },
 
   _flash(msg) {
     this._clearFlash();
-    if (!this._modalAlertElement) {
-      return;
-    }
 
-    this._modalAlertElement.classList.add(
-      "alert",
-      `alert-${msg.messageClass || "success"}`
-    );
-    this._modalAlertElement.innerHTML = msg.text || "";
+    $("#modal-alert")
+      .addClass(`alert alert-${msg.messageClass || "success"}`)
+      .html(msg.text || "")
+      .fadeIn();
   },
 });

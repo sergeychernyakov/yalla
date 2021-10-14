@@ -27,7 +27,7 @@ acceptance("Topic - Bulk Actions", function (needs) {
     await click(queryAll("input.bulk-select")[0]);
     await click(queryAll("input.bulk-select")[1]);
 
-    await click(".bulk-select-actions");
+    await click(".bulk-select-btn");
 
     assert.ok(
       queryAll("#discourse-modal-title")
@@ -113,8 +113,8 @@ acceptance("Topic - Bulk Actions", function (needs) {
     await click(queryAll("input.bulk-select")[0]);
     await click(queryAll("input.bulk-select")[1]);
 
-    await click(".bulk-select-actions");
-    await click(".modal-body .delete-topics");
+    await click(".bulk-select-btn");
+    await click(".modal-body button[aria-label='Delete Topics']");
 
     assert.ok(
       invisible(".topic-bulk-actions-modal"),

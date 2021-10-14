@@ -3,10 +3,10 @@
 require 'rails_helper'
 
 describe Report do
-  let(:user) { Fabricate(:user) }
-  let(:c0) { Fabricate(:category, user: user) }
+  let(:user) { Fabricate(:user) }  # id: 3
+  let(:c0) { Fabricate(:category, user: user) }  # id: 3
   let(:c1) { Fabricate(:category, parent_category: c0, user: user) }  # id: 2
-  let(:c2) { Fabricate(:category, user: user) }
+  let(:c2) { Fabricate(:category, user: user) }  # id: 4
 
   shared_examples 'no data' do
     context "with no data" do
@@ -224,7 +224,7 @@ describe Report do
         end
 
         it 'returns a report with data' do
-          # expected number of records
+          # expected number of recoords
           expect(report.data.count).to eq 4
 
           # sorts the data from oldest to latest dates
@@ -352,8 +352,6 @@ describe Report do
         expect(report.data.find { |d| d[:x] == TrustLevel[0] }[:y]).to eq 3
         expect(report.data.find { |d| d[:x] == TrustLevel[2] }[:y]).to eq 2
         expect(report.data.find { |d| d[:x] == TrustLevel[4] }[:y]).to eq 1
-
-        expect(report.data.find { |d| d[:x] == TrustLevel[0] }[:url]).to eq '/admin/users/list/newuser'
       end
     end
   end
@@ -578,37 +576,6 @@ describe Report do
         expect(row[:topic_id]).to eq(post.topic.id)
       end
     end
-
-    context "with editor filter" do
-      fab!(:posts) { Fabricate.times(3, :post) }
-
-      fab!(:editor_with_two_edits) do
-        Fabricate(:user).tap do |user|
-          2.times do |i|
-            posts[i].revise(user, { raw: "edit #{i + 1}" })
-          end
-        end
-      end
-
-      fab!(:editor_with_one_edit) do
-        Fabricate(:user).tap do |user|
-          posts.last.revise(user, { raw: "edit 3" })
-        end
-      end
-
-      let(:report_with_one_edit) do
-        Report.find('post_edits', { filters: { 'editor' => editor_with_one_edit.username } })
-      end
-
-      let(:report_with_two_edits) do
-        Report.find('post_edits', { filters: { 'editor' => editor_with_two_edits.username } })
-      end
-
-      it "returns a report for a given editor" do
-        expect(report_with_one_edit.data.count).to be(1)
-        expect(report_with_two_edits.data.count).to be(2)
-      end
-    end
   end
 
   describe 'moderator activity' do
@@ -757,7 +724,7 @@ describe Report do
             post.revise(sam, raw: 'updated body')
           end
 
-          it "doesn't count a revision on your own post" do
+          it "doesn't count a revison on your own post" do
             expect(report.data[0][:revision_count]).to eq(1)
             expect(report.data[0][:username]).to eq('sam')
           end

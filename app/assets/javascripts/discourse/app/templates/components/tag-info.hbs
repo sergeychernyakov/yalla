@@ -28,7 +28,7 @@
         {{#if tagInfo.category_restricted}}
           {{i18n "tagging.category_restricted"}}
         {{else}}
-          {{html-safe (i18n "tagging.default_info" basePath=(base-path))}}
+          {{i18n "tagging.default_info"}}
         {{/if}}
       {{/if}}
     </div>
@@ -59,7 +59,7 @@
         {{tag-chooser
           id="add-synonyms"
           tags=newSynonyms
-          blockedTags=(array tagInfo.name)
+          blockedTags=tagInfo.name
           everyTag=true
           excludeSynonyms=true
           excludeHasSynonyms=true

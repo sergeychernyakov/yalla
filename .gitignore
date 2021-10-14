@@ -4,7 +4,6 @@
 /log
 /tmp
 
-/.bundle
 /.env
 /.procfile
 /dump.rdb
@@ -47,7 +46,6 @@
 
 /vendor/bundle/*
 /vendor/data/GeoLite2-City.mmdb
-/vendor/data/GeoLite2-ASN.mmdb
 
 # Front-end
 dist

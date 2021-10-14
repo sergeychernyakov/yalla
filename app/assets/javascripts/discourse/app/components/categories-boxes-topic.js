@@ -3,7 +3,6 @@ import discourseComputed from "discourse-common/utils/decorators";
 
 export default Component.extend({
   tagName: "li",
-  attributeBindings: ["topic.id:data-topic-id"],
 
   @discourseComputed("topic.pinned", "topic.closed", "topic.archived")
   topicStatusIcon(pinned, closed, archived) {

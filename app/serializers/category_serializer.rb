@@ -20,8 +20,7 @@ class CategorySerializer < SiteCategorySerializer
              :custom_fields,
              :topic_featured_link_allowed,
              :search_priority,
-             :reviewable_by_group_name,
-             :default_slow_mode_seconds
+             :reviewable_by_group_name
 
   def reviewable_by_group_name
     object.reviewable_by_group.name
@@ -71,7 +70,11 @@ class CategorySerializer < SiteCategorySerializer
     scope && scope.can_delete?(object)
   end
 
-  def include_cannot_delete_reason?
+  def cannot_delete_reason
+    scope && scope.cannot_delete_category_reason(object)
+  end
+
+  def include_cannot_delete_reason
     !include_can_delete? && scope && scope.can_edit?(object)
   end
 

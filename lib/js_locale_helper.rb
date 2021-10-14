@@ -4,6 +4,7 @@ module JsLocaleHelper
 
   def self.plugin_client_files(locale_str)
     files = Dir["#{Rails.root}/plugins/*/config/locales/client*.#{locale_str}.yml"]
+    files += DiscourseDev.client_locale_files(locale_str) if Rails.env.development?
     I18n::Backend::DiscourseI18n.sort_locale_files(files)
   end
 
@@ -241,7 +242,7 @@ module JsLocaleHelper
       return locale_data if locale_data
     end
 
-    # English should always work
+    # English should alyways work
     ["en", File.join(path, "en.js")] if fallback_to_english
   end
 

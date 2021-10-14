@@ -7,7 +7,6 @@ class CookedPostProcessor
   LIGHTBOX_WRAPPER_CSS_CLASS = "lightbox-wrapper"
   LOADING_SIZE = 10
   LOADING_COLORS = 32
-  GIF_SOURCES_REGEXP = /(giphy|tenor)\.com\//
 
   attr_reader :cooking_options, :doc
 
@@ -142,15 +141,7 @@ class CookedPostProcessor
     span = create_span_node("url", url)
     a.add_child(span)
     span.add_previous_sibling(create_icon_node("far-image"))
-    span.add_next_sibling(
-      create_span_node(
-        "help",
-        I18n.t(
-          "upload.placeholders.too_large_humanized",
-          max_size: ActiveSupport::NumberHelper.number_to_human_size(SiteSetting.max_image_size_kb.kilobytes)
-        )
-      )
-    )
+    span.add_next_sibling(create_span_node("help", I18n.t("upload.placeholders.too_large", max_size_kb: SiteSetting.max_image_size_kb)))
 
     # Only if the image is already linked
     if is_hyperlinked
@@ -329,7 +320,7 @@ class CookedPostProcessor
 
     upload = Upload.get_from_url(src)
 
-    if (upload.present? && upload.animated?) || src.match?(GIF_SOURCES_REGEXP)
+    if upload.present? && upload.animated?
       img.add_class("animated")
     end
 

@@ -2,7 +2,6 @@ import Component from "@ember/component";
 import { Promise } from "rsvp";
 /*eslint no-bitwise:0 */
 import getUrl from "discourse-common/lib/get-url";
-import { htmlSafe } from "@ember/template";
 import { scheduleOnce } from "@ember/runloop";
 
 export const LOREM = `
@@ -42,7 +41,7 @@ export function createPreviewComponent(width, height, obj) {
       height,
       elementWidth: width * scale,
       elementHeight: height * scale,
-      canvasStyle: htmlSafe(`width:${width}px;height:${height}px`),
+      canvasStyle: `width:${width}px;height:${height}px`,
       ctx: null,
       loaded: false,
 
@@ -88,16 +87,10 @@ export function createPreviewComponent(width, height, obj) {
           return false;
         }
 
-        const colorsArray = this.wizard.getCurrentColors(this.colorsId);
-        if (!colorsArray) {
+        const colors = this.wizard.getCurrentColors(this.colorsId);
+        if (!colors) {
           return;
         }
-
-        let colors = {};
-        colorsArray.forEach(function (c) {
-          const name = c.name;
-          colors[name] = `#${c.hex}`;
-        });
 
         const font = this.wizard.getCurrentFont(this.fontId);
         const headingFont = this.wizard.getCurrentFont(
@@ -122,6 +115,12 @@ export function createPreviewComponent(width, height, obj) {
           height: this.height,
         };
         this.paint(options);
+
+        // draw border
+        ctx.beginPath();
+        ctx.strokeStyle = "rgba(0, 0, 0, 0.2)";
+        ctx.rect(0, 0, width, height);
+        ctx.stroke();
       },
 
       categories() {

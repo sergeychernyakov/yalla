@@ -1,19 +1,9 @@
 import DiscourseRoute from "discourse/routes/discourse";
-import I18n from "I18n";
 
 export default DiscourseRoute.extend({
   model() {
-    const user = this.modelFor("user");
-    const draftsStream = user.get("userDraftsStream");
-    draftsStream.reset();
-
-    return draftsStream.findItems(this.site).then(() => {
-      return {
-        stream: draftsStream,
-        isAnotherUsersPage: this.isAnotherUsersPage(user),
-        emptyState: this.emptyState(),
-      };
-    });
+    let userDraftsStream = this.modelFor("user").get("userDraftsStream");
+    return userDraftsStream.load(this.site).then(() => userDraftsStream);
   },
 
   renderTemplate() {
@@ -22,12 +12,6 @@ export default DiscourseRoute.extend({
 
   setupController(controller, model) {
     controller.set("model", model);
-  },
-
-  emptyState() {
-    const title = I18n.t("user_activity.no_drafts_title");
-    const body = I18n.t("user_activity.no_drafts_body");
-    return { title, body };
   },
 
   activate() {

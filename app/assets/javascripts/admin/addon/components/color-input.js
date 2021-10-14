@@ -22,21 +22,9 @@ export default Component.extend({
     return this.onlyHex ? 6 : null;
   }),
 
-  normalize(color) {
-    if (/^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(color)) {
-      if (!color.startsWith("#")) {
-        color = "#" + color;
-      }
-    }
-
-    return color;
-  },
-
   @action
   onHexInput(color) {
-    if (this.attrs.onChangeColor) {
-      this.attrs.onChangeColor(this.normalize(color || ""));
-    }
+    this.attrs.onChangeColor && this.attrs.onChangeColor(color || "");
   },
 
   @observes("hexValue", "brightnessValue", "valid")
@@ -44,9 +32,7 @@ export default Component.extend({
     const hex = this.hexValue;
     let text = this.element.querySelector("input.hex-input");
 
-    if (this.attrs.onChangeColor) {
-      this.attrs.onChangeColor(this.normalize(hex));
-    }
+    this.attrs.onChangeColor && this.attrs.onChangeColor(hex);
 
     if (this.valid) {
       this.styleSelection &&

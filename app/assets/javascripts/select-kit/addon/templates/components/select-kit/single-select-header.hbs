@@ -1,8 +1,7 @@
-<div class="select-kit-header-wrapper">
-  {{#each icons as |icon|}} {{d-icon icon}} {{/each}}
+{{#each icons as |icon|}} {{d-icon icon}} {{/each}}
 
-  {{component selectKit.options.selectedNameComponent
-    item=selectedContent
-    selectKit=selectKit
-  }}
-</div>
+{{component selectKit.options.selectedNameComponent
+  tabindex=tabindex
+  item=selectedContent
+  selectKit=selectKit
+}}

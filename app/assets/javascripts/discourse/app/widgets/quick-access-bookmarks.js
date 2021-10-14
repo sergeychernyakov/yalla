@@ -42,18 +42,13 @@ createWidgetFrom(QuickAccessPanel, "quick-access-bookmarks", {
   },
 
   itemHtml(bookmark) {
-    // for topic level bookmarks we want to jump to the last unread post
-    // instead of the OP
-    let postNumber;
-    if (bookmark.for_topic) {
-      postNumber = bookmark.last_read_post_number + 1;
-    } else {
-      postNumber = bookmark.linked_post_number;
-    }
-
     return this.attach("quick-access-item", {
       icon: this.icon(bookmark),
-      href: postUrl(bookmark.slug, bookmark.topic_id, postNumber),
+      href: postUrl(
+        bookmark.slug,
+        bookmark.topic_id,
+        bookmark.post_number || bookmark.linked_post_number
+      ),
       title: bookmark.name,
       content: bookmark.title,
       username: bookmark.post_user_username,
@@ -68,18 +63,24 @@ createWidgetFrom(QuickAccessPanel, "quick-access-bookmarks", {
   },
 
   loadBookmarksWithReminders() {
-    return ajax(`/u/${this.currentUser.username}/bookmarks.json`).then(
-      ({ user_bookmark_list }) => user_bookmark_list.bookmarks
-    );
+    return ajax(`/u/${this.currentUser.username}/bookmarks.json`, {
+      cache: "false",
+    }).then((result) => {
+      result = result.user_bookmark_list;
+      return result.bookmarks;
+    });
   },
 
   loadUserActivityBookmarks() {
     return ajax("/user_actions.json", {
+      cache: "false",
       data: {
         username: this.currentUser.username,
         filter: UserAction.TYPES.bookmarks,
         no_results_help_key: "user_activity.no_bookmarks",
       },
-    }).then(({ user_actions }) => user_actions);
+    }).then(({ user_actions }) => {
+      return user_actions;
+    });
   },
 });

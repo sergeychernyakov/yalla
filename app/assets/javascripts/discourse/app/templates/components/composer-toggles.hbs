@@ -7,8 +7,8 @@
       icon="bars"
       action=toggleToolbar
       title=toggleToolbarTitle
+      ariaLabel=toggleToolbarTitle
       preventFocus=true
-      tabindex=-1
     }}
   {{/if}}
 
@@ -17,7 +17,7 @@
     icon=toggleIcon
     action=toggleComposer
     title=toggleTitle
-    tabindex=-1
+    ariaLabel=toggleTitle
   }}
 
   {{#unless site.mobileView}}
@@ -26,7 +26,7 @@
       icon=fullscreenIcon
       action=toggleFullscreen
       title=fullscreenTitle
-      tabindex=-1
+      ariaLabel=fullscreenTitle
     }}
   {{/unless}}
 </div>

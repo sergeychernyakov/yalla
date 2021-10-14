@@ -44,19 +44,13 @@ bg:
   anonymous: "Анонимен"
   remove_posts_deleted_by_author: "Изтрит от автора"
   inline_oneboxer:
-    topic_page_title_post_number: "#%{post_number}"
     topic_page_title_post_number_by_user: "#%{post_number} от %{username} "
   themes:
     other_error: "Нещо се обърка при актуализирането на стила"
-    import_error:
-      unpack_failed: "Неуспешно разопаковане на файла"
   emails:
     incoming:
       default_subject: "Тази тема има нужда от заглавие"
       show_trimmed_content: "Показване на съкратеното съдържание"
-      no_subject: "(без тема)"
-      no_body: "(без съдържание)"
-      missing_attachment: "(Прикаченият файл %{filename} липсва)"
       errors:
         empty_email_error: "Се случва, когато raw имейла който получихме беше празен."
         no_message_id_error: "Се случва, когато имейла няма 'Message-Id' хедър."
@@ -88,7 +82,7 @@ bg:
       record_invalid: ! "Валидирането е неуспешно %{errors}"
       restrict_dependent_destroy:
         one: "Записът не може да бъде изтрит, защото е зависим от съществуващите %{record}"
-        other: "Записът не може да бъде изтрит, защото е зависим от съществуващите %{record}"
+        many: "Записът не може да бъде изтрит, защото е зависим от съществуващите %{record}"
       too_long:
         one: прекалено дълго (трябва да бъде само %{count} символ)
         other: е прекалено дълго (максималния брой символи е %{count})
@@ -274,8 +268,16 @@ bg:
       has_subcategories: "Не можете да изтриете тази категория, защото има подкатегории."
       topic_exists_no_oldest: "Не можете да изтриете тази категория, защото броят на темите е %{count}."
   trust_levels:
-    admin: "Админ"
-    staff: "Персонал"
+    newuser:
+      title: "нов потребител"
+    basic:
+      title: "основен потребител"
+    member:
+      title: "потребител"
+    regular:
+      title: "редовен"
+    leader:
+      title: "лидер"
     change_failed_explanation: "Опитахте се да понижите %{user_name} на '%{new_trust_level}'. Обаче тяхното ниво на доверие е вече '%{current_trust_level}'. %{user_name} ще остане на '%{current_trust_level}' - ако искате да понижите потребителското ниво, ниво на доверие първо"
   rate_limiter:
     by_type:
@@ -722,6 +724,7 @@ bg:
     allow_new_registrations: "Позволи регистрация на нови потребители. Махни отметката, за да не може никой да създаде нов акаунт."
     google_oauth2_client_id: "Client ID за Google приложение."
     google_oauth2_client_secret: "Client secret за Google приложение."
+    allow_restore: "Позволи възстановяване, което може да замени ВСИЧКИ данни на сайта! Оставете го погрешно освен ако не планирате да възстановите бекъпа"
     maximum_backups: "Максимално количество бекъпи, които могат да бъдат съхранени на диска. По-старите бекъпи са автоматично изтрити"
     s3_backup_bucket: "Remote bucket за съхранение на бекъпи. ВНИМАНИЕ: Бъдете сигурни, че това е remote bucket."
     active_user_rate_limit_secs: "Колко често обновяваме полето the 'last_seen_at', в секунди "
@@ -887,6 +890,7 @@ bg:
       user: "Потребители"
     results_page: "Резултати от търсенето на '%{term}'"
   original_poster: "Автор"
+  most_posts: "Повечето мнения"
   most_recent_poster: "Последен Автор"
   frequent_poster: "Частен Автор"
   redirected_to_top_reasons:
@@ -1167,10 +1171,8 @@ bg:
       description: Активен потребител на една година с поне една публикация
     nice_topic:
       name: Приятна тема
-      description: Получени 10 харесвания за една тема
     good_topic:
       name: Добра Тема
-      description: Получени 25 харесвания за една тема
     great_topic:
       name: Чудесна тема
       description: Получени 50 харесвания за една тема
@@ -1297,12 +1299,8 @@ bg:
             label: "Автоматизирани съобщения"
       corporate:
         title: "Организация"
-      styling:
-        fields:
-          homepage_style:
-            choices:
-              latest:
-                label: "Последни теми"
+      colors:
+        title: "Цветове"
       logos:
         title: "Логота"
         fields:
@@ -1310,6 +1308,13 @@ bg:
             label: "Главно лого"
       icons:
         title: "Икони"
+      homepage:
+        title: "Начална страница"
+        fields:
+          homepage_style:
+            choices:
+              latest:
+                label: "Последни теми"
       invites:
         title: "Поканете персонал"
       finished:
@@ -1342,6 +1347,8 @@ bg:
         description: "Възстанови тази публикация така че всички потребители да могат да я виждат."
       agree_and_hide:
         description: "Скрий тази публикация и автоматично изпрати съобщение към потребителия спешно да я редактира."
+      delete_spammer:
+        title: "Изтрий спамера "
       delete_single:
         title: "Изтрий"
       disagree_and_restore:
@@ -1355,7 +1362,8 @@ bg:
           title: "Изтрий потребител "
       reject:
         title: "Отхвърли"
-  fallback_username: "потребител"
+      delete_user:
+        title: "Изтрий потребител "
   time:
     <<: *datetime_formats
   activemodel:

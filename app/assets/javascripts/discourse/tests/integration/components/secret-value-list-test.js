@@ -3,9 +3,7 @@ import componentTest, {
   setupRenderingTest,
 } from "discourse/tests/helpers/component-test";
 import {
-  count,
   discourseModule,
-  exists,
   queryAll,
 } from "discourse/tests/helpers/qunit-helpers";
 import I18n from "I18n";
@@ -25,9 +23,8 @@ discourseModule(
         await fillIn(".new-value-input.key", "thirdKey");
         await click(".add-value-btn");
 
-        assert.equal(
-          count(".values .value"),
-          2,
+        assert.ok(
+          queryAll(".values .value").length === 2,
           "it doesn't add the value to the list if secret is missing"
         );
 
@@ -35,9 +32,8 @@ discourseModule(
         await fillIn(".new-value-input.secret", "thirdValue");
         await click(".add-value-btn");
 
-        assert.equal(
-          count(".values .value"),
-          2,
+        assert.ok(
+          queryAll(".values .value").length === 2,
           "it doesn't add the value to the list if key is missing"
         );
 
@@ -45,9 +41,8 @@ discourseModule(
         await fillIn(".new-value-input.secret", "thirdValue");
         await click(".add-value-btn");
 
-        assert.equal(
-          count(".values .value"),
-          3,
+        assert.ok(
+          queryAll(".values .value").length === 3,
           "it adds the value to the list of values"
         );
 
@@ -68,7 +63,7 @@ discourseModule(
         await click(".add-value-btn");
 
         assert.ok(
-          !exists(".values .value"),
+          queryAll(".values .value").length === 0,
           "it doesn't add the value to the list of values"
         );
 
@@ -96,9 +91,8 @@ discourseModule(
 
         await click(".values .value[data-index='0'] .remove-value-btn");
 
-        assert.equal(
-          count(".values .value"),
-          1,
+        assert.ok(
+          queryAll(".values .value").length === 1,
           "it removes the value from the list of values"
         );
 

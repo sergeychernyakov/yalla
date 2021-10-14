@@ -7,6 +7,7 @@ import I18n from "I18n";
 import PreloadStore from "discourse/lib/preload-store";
 import { Promise } from "rsvp";
 import RestModel from "discourse/models/rest";
+import Session from "discourse/models/session";
 import Site from "discourse/models/site";
 import User from "discourse/models/user";
 import { ajax } from "discourse/lib/ajax";
@@ -19,8 +20,7 @@ import getURL from "discourse-common/lib/get-url";
 import { longDate } from "discourse/lib/formatter";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import { resolveShareUrl } from "discourse/helpers/share-url";
-import DiscourseURL, { userPath } from "discourse/lib/url";
-import deprecated from "discourse-common/lib/deprecated";
+import { userPath } from "discourse/lib/url";
 
 export function loadTopicView(topic, args) {
   const data = deepMerge({}, args);
@@ -172,7 +172,12 @@ const Topic = RestModel.extend({
   @discourseComputed("related_messages")
   relatedMessages(relatedMessages) {
     if (relatedMessages) {
-      return relatedMessages.map((st) => this.store.createRecord("topic", st));
+      const store = this.store;
+
+      return this.set(
+        "related_messages",
+        relatedMessages.map((st) => store.createRecord("topic", st))
+      );
     }
   },
 
@@ -239,16 +244,10 @@ const Topic = RestModel.extend({
     return url;
   },
 
-  @discourseComputed("unread_posts", "new_posts")
-  totalUnread(unreadPosts, newPosts) {
-    deprecated("The totalUnread property of the topic model is deprecated");
-    return unreadPosts || newPosts;
-  },
-
-  @discourseComputed("unread_posts", "new_posts")
-  displayNewPosts(unreadPosts, newPosts) {
-    deprecated("The displayNewPosts property of the topic model is deprecated");
-    return unreadPosts || newPosts;
+  @discourseComputed("new_posts", "unread")
+  totalUnread(newPosts, unread) {
+    const count = (unread || 0) + (newPosts || 0);
+    return count > 0 ? count : null;
   },
 
   @discourseComputed("last_read_post_number", "url")
@@ -288,6 +287,25 @@ const Topic = RestModel.extend({
   @discourseComputed("last_poster.username")
   lastPosterUrl(username) {
     return userPath(username);
+  },
+
+  // The amount of new posts to display. It might be different than what the server
+  // tells us if we are still asynchronously flushing our "recently read" data.
+  // So take what the browser has seen into consideration.
+  @discourseComputed("new_posts", "id")
+  displayNewPosts(newPosts, id) {
+    const highestSeen = Session.currentProp("highestSeenByTopic")[id];
+    if (highestSeen) {
+      const delta = highestSeen - this.last_read_post_number;
+      if (delta > 0) {
+        let result = newPosts - delta;
+        if (result < 0) {
+          result = 0;
+        }
+        return result;
+      }
+    }
+    return newPosts;
   },
 
   @discourseComputed("views")
@@ -343,8 +361,12 @@ const Topic = RestModel.extend({
     }).then(() => this.set("archetype", "regular"));
   },
 
-  afterPostBookmarked(post) {
-    post.set("bookmarked", true);
+  afterTopicBookmarked(firstPost) {
+    if (firstPost) {
+      firstPost.set("bookmarked", true);
+      this.set("bookmark_reminder_at", firstPost.bookmark_reminder_at);
+      return [firstPost.id];
+    }
   },
 
   firstPost() {
@@ -357,58 +379,20 @@ const Topic = RestModel.extend({
 
     const postId = postStream.findPostIdForPostNumber(1);
     if (postId) {
-      return this.postById(postId);
+      // try loading from identity map first
+      firstPost = postStream.findLoadedPost(postId);
+      if (firstPost) {
+        return Promise.resolve(firstPost);
+      }
+
+      return this.postStream.loadPost(postId);
     } else {
       return this.postStream.loadPostByPostNumber(1);
     }
   },
 
-  postById(id) {
-    const loaded = this.postStream.findLoadedPost(id);
-    if (loaded) {
-      return Promise.resolve(loaded);
-    }
-
-    return this.postStream.loadPost(id);
-  },
-
-  deleteBookmarks() {
+  deleteBookmark() {
     return ajax(`/t/${this.id}/remove_bookmarks`, { type: "PUT" });
-  },
-
-  bookmarkCount: alias("bookmarks.length"),
-
-  removeBookmark(id) {
-    if (!this.bookmarks) {
-      this.set("bookmarks", []);
-    }
-    this.set(
-      "bookmarks",
-      this.bookmarks.filter((bookmark) => {
-        if (bookmark.id === id && bookmark.for_topic) {
-          this.appEvents.trigger("topic:bookmark-toggled");
-        }
-
-        return bookmark.id !== id;
-      })
-    );
-    this.set("bookmarked", this.bookmarks.length);
-    this.incrementProperty("bookmarksWereChanged");
-  },
-
-  clearBookmarks() {
-    this.toggleProperty("bookmarked");
-
-    const postIds = this.bookmarks.mapBy("post_id");
-    postIds.forEach((postId) => {
-      const loadedPost = this.postStream.findLoadedPost(postId);
-      if (loadedPost) {
-        loadedPost.clearBookmark();
-      }
-    });
-    this.set("bookmarks", []);
-
-    return postIds;
   },
 
   createGroupInvite(group) {
@@ -433,9 +417,9 @@ const Topic = RestModel.extend({
   },
 
   // Delete this topic
-  destroy(deleted_by, opts) {
+  destroy(deleted_by) {
     return ajax(`/t/${this.id}`, {
-      data: { context: window.location.pathname, ...opts },
+      data: { context: window.location.pathname },
       type: "DELETE",
     })
       .then(() => {
@@ -445,9 +429,6 @@ const Topic = RestModel.extend({
           "details.can_delete": false,
           "details.can_recover": true,
         });
-        if (!deleted_by.staff) {
-          DiscourseURL.redirectTo("/");
-        }
       })
       .catch(popupAjaxError);
   },
@@ -629,7 +610,6 @@ Topic.reopenClass({
   munge(json) {
     // ensure we are not overriding category computed property
     delete json.category;
-    json.bookmarks = json.bookmarks || [];
     return json;
   },
 
@@ -768,14 +748,6 @@ Topic.reopenClass({
       if (options.tagName) {
         data.tag_name = options.tagName;
       }
-
-      if (options.private_message_inbox) {
-        data.private_message_inbox = options.private_message_inbox;
-
-        if (options.group_name) {
-          data.group_name = options.group_name;
-        }
-      }
     }
 
     return ajax("/topics/bulk", {
@@ -784,14 +756,7 @@ Topic.reopenClass({
     });
   },
 
-  resetNew(category, include_subcategories, opts = {}) {
-    let { tracked, tag, topicIds } = {
-      tracked: false,
-      tag: null,
-      topicIds: null,
-      ...opts,
-    };
-
+  resetNew(category, include_subcategories, tracked = false, tag = false) {
     const data = { tracked };
     if (category) {
       data.category_id = category.id;
@@ -800,29 +765,8 @@ Topic.reopenClass({
     if (tag) {
       data.tag_id = tag.id;
     }
-    if (topicIds) {
-      data.topic_ids = topicIds;
-    }
 
     return ajax("/topics/reset-new", { type: "PUT", data });
-  },
-
-  pmResetNew(opts = {}) {
-    const data = {};
-
-    if (opts.topicIds) {
-      data.topic_ids = opts.topicIds;
-    }
-
-    if (opts.inbox) {
-      data.inbox = opts.inbox;
-
-      if (opts.groupName) {
-        data.group_name = opts.groupName;
-      }
-    }
-
-    return ajax("/topics/pm-reset-new", { type: "PUT", data });
   },
 
   idForSlug(slug) {

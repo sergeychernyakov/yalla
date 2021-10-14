@@ -67,21 +67,12 @@ class PostRevisor
     end
   end
 
-  def self.track_and_revise(topic_changes, field, attribute)
-    topic_changes.record_change(
-      field,
-      topic_changes.topic.public_send(field),
-      attribute
-    )
-    topic_changes.topic.public_send("#{field}=", attribute)
-  end
-
-  track_topic_field(:title) do |topic_changes, attribute|
-    track_and_revise topic_changes, :title, attribute
-  end
-
-  track_topic_field(:archetype) do |topic_changes, attribute|
-    track_and_revise topic_changes, :archetype, attribute
+  # Fields we want to record revisions for by default
+  %i{title archetype}.each do |field|
+    track_topic_field(field) do |tc, attribute|
+      tc.record_change(field, tc.topic.public_send(field), attribute)
+      tc.topic.public_send("#{field}=", attribute)
+    end
   end
 
   track_topic_field(:category_id) do |tc, category_id, fields|
@@ -120,10 +111,9 @@ class PostRevisor
   end
 
   track_topic_field(:featured_link) do |topic_changes, featured_link|
-    if !SiteSetting.topic_featured_link_enabled ||
-      !topic_changes.guardian.can_edit_featured_link?(topic_changes.topic.category_id)
-      topic_changes.check_result(false)
-    else
+    if SiteSetting.topic_featured_link_enabled &&
+       topic_changes.guardian.can_edit_featured_link?(topic_changes.topic.category_id)
+
       topic_changes.record_change('featured_link', topic_changes.topic.featured_link, featured_link)
       topic_changes.topic.featured_link = featured_link
     end
@@ -131,7 +121,7 @@ class PostRevisor
 
   # AVAILABLE OPTIONS:
   # - revised_at: changes the date of the revision
-  # - force_new_version: bypass grace period edit window
+  # - force_new_version: bypass ninja-edit window
   # - bypass_rate_limiter:
   # - bypass_bump: do not bump the topic, even if last post
   # - skip_validations: ask ActiveRecord to skip validations
@@ -166,7 +156,7 @@ class PostRevisor
     @revised_at = @opts[:revised_at] || Time.now
     @last_version_at = @post.last_version_at || Time.now
 
-    if guardian.affected_by_slow_mode?(@topic) && !grace_period_edit? && SiteSetting.slow_mode_prevents_editing
+    if guardian.affected_by_slow_mode?(@topic) && !ninja_edit?
       @post.errors.add(:base, I18n.t("cannot_edit_on_slow_mode"))
       return false
     end
@@ -180,7 +170,7 @@ class PostRevisor
 
     @validate_topic = true
     @validate_topic = @opts[:validate_topic] if @opts.has_key?(:validate_topic)
-    @validate_topic = !@opts[:skip_validations] if @opts.has_key?(:skip_validations)
+    @validate_topic = !@opts[:validate_topic] if @opts.has_key?(:skip_validations)
 
     @skip_revision = false
     @skip_revision = @opts[:skip_revision] if @opts.has_key?(:skip_revision)
@@ -236,11 +226,6 @@ class PostRevisor
     # it can fire events in sidekiq before the post is done saving
     # leading to corrupt state
     QuotedPost.extract_from(@post)
-
-    # This must be done before post_process_post, because that uses
-    # post upload security status to cook URLs.
-    @post.update_uploads_secure_status(source: "post revisor")
-
     post_process_post
 
     update_topic_word_counts
@@ -293,7 +278,7 @@ class PostRevisor
 
   def should_create_new_version?
     return false if @skip_revision
-    edited_by_another_user? || !grace_period_edit? || owner_changed? || force_new_version? || edit_reason_specified?
+    edited_by_another_user? || !ninja_edit? || owner_changed? || force_new_version? || edit_reason_specified?
   end
 
   def edit_reason_specified?
@@ -342,7 +327,7 @@ class PostRevisor
     end
   end
 
-  def grace_period_edit?
+  def ninja_edit?
     return false if (@revised_at - @last_version_at) > SiteSetting.editing_grace_period.to_i
     return false if @post.reviewable_flag.present?
 
@@ -424,8 +409,6 @@ class PostRevisor
     @post_successfully_saved = @post.save(validate: @validate_post)
     @post.link_post_uploads
     @post.save_reply_relationships
-
-    @editor.increment_post_edits_count if @post_successfully_saved
 
     # post owner changed
     if prev_owner && new_owner && prev_owner != new_owner

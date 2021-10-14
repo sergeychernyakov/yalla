@@ -21,10 +21,9 @@ export function transformBasicPost(post) {
     deletedByAvatarTemplate: null,
     deletedByUsername: null,
     primary_group_name: post.primary_group_name,
-    flair_name: post.flair_name,
-    flair_url: post.flair_url,
-    flair_bg_color: post.flair_bg_color,
-    flair_color: post.flair_color,
+    primary_group_flair_url: post.primary_group_flair_url,
+    primary_group_flair_bg_color: post.primary_group_flair_bg_color,
+    primary_group_flair_color: post.primary_group_flair_color,
     wiki: post.wiki,
     lastWikiEdit: post.last_wiki_edit,
     firstPost: post.post_number === 1,
@@ -39,6 +38,7 @@ export function transformBasicPost(post) {
     bookmarked: post.bookmarked,
     bookmarkReminderAt: post.bookmark_reminder_at,
     bookmarkName: post.bookmark_name,
+    bookmarkReminderType: post.bookmark_reminder_type,
     yours: post.yours,
     shareUrl: post.get("shareUrl"),
     staff: post.staff,
@@ -52,7 +52,6 @@ export function transformBasicPost(post) {
     created_at: post.created_at,
     updated_at: post.updated_at,
     canDelete: post.can_delete,
-    canPermanentlyDelete: post.can_permanently_delete,
     showFlagDelete: false,
     canRecover: post.can_recover,
     canEdit: post.can_edit,
@@ -149,7 +148,6 @@ export default function transformPost(
   postAtts.actionCodeWho = post.action_code_who;
   postAtts.topicUrl = topic.get("url");
   postAtts.isSaving = post.isSaving;
-  postAtts.staged = post.staged;
 
   if (post.notice) {
     postAtts.notice = post.notice;
@@ -262,7 +260,6 @@ export default function transformPost(
     postAtts.canRecoverTopic = postAtts.isDeleted && details.can_recover;
     postAtts.canDeleteTopic = !postAtts.isDeleted && details.can_delete;
     postAtts.expandablePost = topic.expandable_first_post;
-    postAtts.canPermanentlyDeleteTopic = details.can_permanently_delete;
 
     // Show a "Flag to delete" message if not staff and you can't
     // otherwise delete it.

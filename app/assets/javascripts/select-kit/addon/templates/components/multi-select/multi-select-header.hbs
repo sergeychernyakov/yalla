@@ -1,9 +1,18 @@
-<div class="select-kit-header-wrapper">
-  {{#each icons as |icon|}}
-    {{d-icon icon}}
+<div class="choices">
+  {{#each selectedContent as |item|}}
+    {{component selectKit.options.selectedNameComponent
+      tabindex=tabindex
+      item=item
+      selectKit=selectKit
+    }}
   {{/each}}
 
-  {{multi-select/format-selected-content content=selectedContent selectKit=selectKit}}
-
-  {{d-icon caretIcon class="caret-icon"}}
+  {{#unless hasReachedMaximumSelection}}
+    <div class="choice input-wrapper">
+      {{component selectKit.options.filterComponent
+        selectKit=selectKit
+        id=(concat selectKit.uniqueID "-filter")
+      }}
+    </div>
+  {{/unless}}
 </div>

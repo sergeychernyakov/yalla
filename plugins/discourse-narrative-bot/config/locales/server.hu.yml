@@ -12,7 +12,6 @@ hu:
     discourse_narrative_bot_disable_public_replies: "A Discourse eligazító bot nyilvános válaszainak kikapcsolása"
     discourse_narrative_bot_welcome_post_type: "A Discourse eligazító bot üdvözlő üzeneteinek kiküldendő típusai"
     discourse_narrative_bot_welcome_post_delay: "Várjon (n) másodpercet a Discourse eligazító bot üdvözlő üzenetének kiküldése előtt."
-    discourse_narrative_bot_skip_tutorials: "Kihagyandó Discourse eligazító bot eligazítások"
   badges:
     certified:
       name: Hitelesített
@@ -21,15 +20,10 @@ hu:
         Ez a jelvényt az interaktív új felhasználói eligazítás sikeres teljesítéséért jár. Kezdeményező volt és megtanulta a beszélgetés alapvető eszközeit, és ezzel hitelesített lett!
     licensed:
       name: Hivatalos
-      description: "Teljesítette a haladó felhasználói eligazítást"
+      description: "Teljesítette az haladó felhasználói eligazítást"
       long_description: |
         Ez a jelvényt az interaktív haladó felhasználói eligazítás sikeres teljesítéséért jár. Elsajátította a beszélgetés speciális eszközeit, és ezzel teljesen hivatalos lett!
   discourse_narrative_bot:
-    bio: "Üdv, nem igazi személy vagyok. Egy bot vagyok, és megtanítom az oldal használatát. Hogy kapcsolatba lépjem velem, küldjön nekem egy üzenetet, vagy említsen meg engem név szerint."
-    tl2_promotion_message:
-      subject_template: "Most, hogy előléptették, ideje megismerkednie néhány speciális funkcióval!"
-      text_body_template: |
-        Válaszoljon erre az üzenetre a következővel: `@%{discobot_username} %{reset_trigger}`, hogy többet tudjon meg arról, mit is tehet.
     timeout:
       message: |-
         Üdv @%{username}, csak beköszönök, mert nem hallottam Önről egy ideje.
@@ -45,9 +39,6 @@ hu:
       trigger: "kockadobás"
       invalid: |-
         Sajnálom, matematikailag lehetetlen ezt a kockakombinációt dobni. :confounded:
-      not_enough_dice:
-        one: "Csak %{count} kockám van. [Szégyenletes](https://www.toplessrobot.com/2009/04/the_10_most_shameful_rpg_dice.php), tudom!"
-        other: "Csak %{count} kockám van. [Szégyenletes](https://www.toplessrobot.com/2009/04/the_10_most_shameful_rpg_dice.php), tudom!"
       out_of_range: |-
         Tudta, hogy a [legtöbb oldallal rendelkező](https://www.wired.com/2016/05/mathematical-challenge-of-designing-the-worlds-most-complex-120-sided-dice) matematikailag fair kocka 120 oldalas?
       results: |-
@@ -93,7 +84,7 @@ hu:
         "2": "Határozottan így van"
         "3": "Kétségtelenül"
         "4": "Igen, határozottan"
-        "5": "Számíthat rá"
+        "5": "Számíthatsz rá"
         "6": "Ahogy látom, igen"
         "7": "Egészen valószínű"
         "8": "Jók a kilátások"
@@ -132,7 +123,6 @@ hu:
 
           `@%{discobot_username} %{magic_8_ball_trigger}`
           > :crystal_ball: Számíthat rá
-        discobot_disabled: Letiltott engem a beállításaiban. Engedélyeznie kell az új felhasználók eligazítási tippjeit, hogy kapcsolatba léphessenek velem.
       do_not_understand:
         first_response: |-
           Hé, köszönöm a választ!
@@ -148,201 +138,160 @@ hu:
     new_user_narrative:
       reset_trigger: "eligazítás"
       title: "Új felhasználói eligazítás elvégzési tanúsítványa"
-      cert_title: "Az új felhasználói eligazítás teljesítése elismeréseként"
+      cert_title: "Az új felhasználói eligazítás teljesítése elismeréseképp"
       hello:
         title: "Üdvözlet!"
         message: |-
-          Köszönjük, hogy csatlakozott a(z) %{title} oldalhoz, és üdvözöljük!
+          Köszönjük, hogy csatlakoztál a(z) %{title} oldalhoz, és üdvözlünk!
 
-          - Csak egy robot vagyok, de [a barátságos stábunk](%{base_uri}/about) is itt van, hogy segítsen, ha egy emberrel kell beszélnie.
+          – Én ugyan csak egy robot vagyok, de itt [a barátságos stábunkat](%{base_uri}/about) is elérheted, ha élő emberrel szeretnél beszélni.
 
-          - Biztonsági okokból ideiglenesen korlátozzuk, hogy mit tehetnek az új felhasználók. A jövőben [új képességeket](https://blog.discourse.org/2018/06/understanding-discourse-trust-levels/) (és [jelvényeket](%{base_uri}/badges)) fog kapni, ahogy megismerjük.
+          – A frissen regisztrált felhasználók jogköreit biztonsági okokból ideiglenesen korlátozzuk. A jövőben [új képességeket](https://blog.discourse.org/2018/06/understanding-discourse-trust-levels/) (és [jelvényeket](%{base_uri}/badges)) fogsz kapni, és ahogy megismerünk, egyre jobban fognak bővülni a lehetőségeid is!
 
-          - Mindig hiszünk a [civilizált közösségi viselkedésben](%{base_uri}/guidelines).
+          – Kérjük, mindig tartsd be a [civilizált közösségi viselkedés](%{base_uri}/guidelines) írott és íratlan szabályait!
       onebox:
         instructions: |-
-          Következőként meg tudná osztani velem az egyik hivatkozást? Válaszoljon egy olyan **sorral, mely az egyik hivatkozást** tartalmazza, és az automatikusan le fog nyílni, és egy összefoglalót fog tartalmazni.
+          Következőnek meg tudnád osztani velem az egyik linket? Válaszolj egy **linket magában beillesztve** , ami figyeld meg, hogy automatikusan ki fog bővülni, és beillesztve egy összefoglalót is tartalmazz majd.
 
-          Bármelyik hivatkozás másolásához csak érintse meg és tartsa hosszan lenyomva mobilon, vagy kattintson rá a jobb egérgombbal:
+          Bármelyik hivatkozás másolásához csak érintsd meg és tartsd hosszan érintve mobilon, vagy kattints rá jobb egérgombbal:
 
           <https://en.wikipedia.org/wiki/Inherently_funny_word>
           <https://en.wikipedia.org/wiki/Death_by_coconut>
           <https://en.wikipedia.org/wiki/Calculator_spelling>
-        reply: |-
-          Menő! Ez a legtöbb <img src="%{base_uri}/plugins/discourse-narrative-bot/images/font-awesome-link.png" width="16" height="16"> hivatkozás esetén működik. Ne feledje, hogy egy vonalon kell lennie _önmagában_, semmi más ne legyen előtte vagy utána.
         not_found: |-
-          Sajnálom, de nem találtam a hivatkozást a válaszában! :cry:
+          Sajnálom, de nem találta a linket a válaszodban! :cry:
 
-          Megpróbálná hozzáadni a következő hivatkozást, külön sorban, a következő válaszához?
+          Megpróbálnád hozzáadni a következő linket a saját külön sorában a következő válaszodhoz?
 
           <https://en.wikipedia.org/wiki/Exotic_Shorthair>
-      images:
-        instructions: |-
-          Itt egy kép egy egyszarvúról:
-
-          <img src="%{base_uri}/plugins/discourse-narrative-bot/images/unicorn.png" width="520" height="520">
-
-          Ha tetszik (márpedig kinek nem tetszene!), akkor nyomja meg a lenti kedvelés :heart: gombot, a bejegyezés alatt.
-
-          **Válaszol egy képpel?** Bármilyen megteszi! Húzza ide, nyomja meg a feltöltés gombot, vagy csak egyszerűen másolja és illessze be.
-        reply: |-
-          Csinos kép – megnyomtam a kedvelés :heart: gombot, hogy tudja mennyire nagyra értékelem :heart_eyes:
-        like_not_found: |-
-          Elfelejtette kedvelni :heart: a [bejegyzésemet?](%{url}) :crying_cat_face:
-        not_found: |-
-          Úgy néz ki, hogy nem töltött fel képet, így inkább választottam én egy olyat, amelyet _biztosan_ élvezni fog.
-
-          <%{image_url}>
-
-          Próbálja ezt feltölteni következőként, vagy illessze be a hivatkozást egy külön sorban!
       likes:
-        instructions: |-
-          Itt egy kép egy egyszarvúról:
-
-          <img src="%{base_uri}/plugins/discourse-narrative-bot/images/unicorn.png" width="520" height="520">
-
-          Ha tetszik (márpedig kinek nem tetszene!), akkor nyomja meg a lenti kedvelés :heart: gombot, a bejegyezés alatt.
         reply: |-
-          Köszönöm, hogy kedvelte a hozzászólásom!
-        not_found: |-
-          Elfelejtette kedvelni :heart: a [bejegyzésemet?](%{url}) :crying_cat_face:
+          Köszönöm, hogy kedvelted a hozzászólásom!
       formatting:
         instructions: |-
-          Át tudna állítani néhány szót **félkövérre** vagy _dőltre_ a válaszában?
+          Tudnál néhány szót ** félkövérre ** vagy _dőltre_ állítani a válaszodban?
 
-          - írja be: `**félkövér**` vagy `_dőlt_`
+          - írd be: "** félkövér **" vagy "_dőlt_"
 
-          - vagy kattintson a szerkesztő <kbd><b>B</b></kbd> vagy <kbd><i>I</i></kbd> gombjaira
-        reply: |-
-          Nagyszerű munka! HTML és BBCode is használható formázáshoz – további információkért [próbálja ki ezt az oktatóanyagot](http://commonmark.org/help) :nerd:
+          - vagy kattints a szerkesztő <kbd><b>B</b></kbd> vagy <kbd><i>I</i></kbd> gombjaira
         not_found: |-
-          Ó, nem találtam formázást a válaszában. :pencil2:
+          Ó, nem találtam formázást a válaszodban. :pencil2:
 
-          Megpróbálná újra? Ha elakad, használja a szerkesztő <kbd><b>B</b></kbd> félkövér vagy <kbd><i>I</i></kbd> dőlt gombját.
+          Megpróbálnád újra? Ha elakadsz, használja a szerkesztő <kbd><b>B</b></kbd> félkövér vagy <kbd><i>I</i></kbd> dőlt gombját.
       quoting:
         instructions: |-
-          Megpróbálna idézni, amikor válaszol, hogy pontosan tudjam, melyik részre válaszol?
+          Megpróbálnál idézni, amikor válaszolsz, hogy pontosan tudjam, melyik részre válaszolsz?
 
           > Ha ez kávé, kérlek hozz nekem teát; de ha ez tea, kérlek hozz nekem kávét.
           >
           > A magadban beszélés egyik előnye, hogy legalább tudod, hogy valaki meghallgat.
           >
-          > Vannak, akik jól bánnak a szavakkal, mások pedig… hát, nem bánnak jól velük.
+          > Vannak, akik egy módja a szavak, és mások… ó, uh, nincs módja.
 
-          Válassza ki a kívánt &uarr; idézet szövegét, majd nyomja meg az **Idézet** gombot, amely felbukkan a kiválasztás felett — vagy a **Vagy** gombot a bejegyzés alján.
+          Válaszd ki a kívánt &uarr; idézet szövegét, majd nyomd meg a**Idézet** gombot, amely felbukkan a kiválasztás felett — vagy a**Reply** gombot a bejegyzés alján.
 
-          Az idézet alatt írjon be egy-két szót arról, hogy miért azt választotta, mert kíváncsi vagyok :thinking:
-        reply: |-
-          Szép munka, a kedvenc idézetemet választotta! :left_speech_bubble:
+          Az idézet alatt írj be egy-két szót arról, hogy miért választotta ezt, mert kíváncsi vagyok :thinking:
         not_found: |-
-          Hmm úgy tűnik, hogy nem idézett a válaszában!
+          Hmm úgy tűnik, hogy nem idéztél be a válaszodban!
 
-          Ha a bejegyzésemben bármilyen szöveget kijelöl, akkor megjelenik az <kbd>**Idézet**</kbd> gomb. De az is jó, ha kijelöl egy tetszőleges szöveget, és megnyomja a **Válasz** gombot. Megpróbálja újra?
+          Ha a bejegyzésemben bármilyen szöveget kiválasztasz, meg fog jelenni az <kbd>** Idézet **</kbd> gomb. De az is jó, ha kijelölsz bármilyen szöveget és megnyomond a ** Válasz ** gombot. Megpróbálod újra?
       bookmark:
         instructions: |-
-          Ha többet szeretne megtudni, kattintson erre a gombra: <img src="%{base_uri}/plugins/discourse-narrative-bot/images/font-awesome-ellipsis.png" width="16" height="16"> , és <img src="%{base_uri}/plugins/discourse-narrative-bot/images/font-awesome-bookmark.png" width="16" height="16"> **jelölje meg könyvjelzővel ezt az üzenetet**. Ha megteszi, akkor lehet, hogy hamarosan :gift: vár Önre!
+          Ha többet szeretnél megtudni, kattints erre a gombra: <img src="%{base_uri}/plugins/discourse-narrative-bot/images/font-awesome-ellipsis.png" width="16" height="16"> , és <img src="%{base_uri}/plugins/discourse-narrative-bot/images/font-awesome-bookmark.png" width="16" height="16"> ** jelöld meg könyvjelzővel ezt az üzenetet **. Ha megteszed, lehet, hogy hamarosan :gift: fogsz kapni!
         reply: |-
-          Kitűnő! Mostantól bármikor könnyedén visszatérhet a privát beszélgetésünkhöz, közvetlenül a [profilján lévő könyvjelzők lapról](%{bookmark_url}). Csak válassza ki a profilképét a jobb felső sarokban &#8599;
+          Kitűnő! Mostantól bármikor könnyedén visszatérhetsz a privát beszélgetésünkhöz, közvetlenül a [profilodon lévő könyvjelzők lapról] (%{bookmark_url}). Csak válassza ki a profilképedet a jobb felső sarokban &#8599;
         not_found: |-
-          Sajnos nem látok könyvjelzőket ebben a témában. Megtalálta a könyvjelzőt minden egyes bejegyzés alatt? Használja a több megjelenítése gombot <img src="%{base_uri}/plugins/discourse-narrative-bot/images/font-awesome-ellipsis.png" width="16" height="16">, hogy további lehetőségeket jelenítsen meg, ha szükséges.
+          Sajnos nem látok könyvjelzőket ebben a témában. Megtaláltad a könyvjelzőt minden egyes bejegyzés alatt? Használd a mutass többet gombot <img src="%{base_uri}/plugins/discourse-narrative-bot/images/font-awesome-ellipsis.png" width="16" height="16">, hogy további opciókat jeleníts meg, ha szükséges.
       emoji:
         instructions: |-
-          Talán észrevette már, hogy kis képeket használok a válaszaimban :blue_car::dash:. Ezeket [emodzsinak](https://hu.wikipedia.org/wiki/Emodzsi) hívják. Megpróbálna **hozzáadni egy emodzsit** a válaszához? Ezek közül bármelyikkel működni fog:
+          Talán észrevetted már, hogy kis képeket használok a válaszaimban :blue_car::dash:. Ezeket [emoji]nak hívják (https://en.wikipedia.org/wiki/Emoji). Megpróbálnál **hozzáadni egy hangulatjelet ** a válaszodhoz? Ezek közül bármelyikkel működni fog:
 
-          - Írja be így: `:) ;): D: P: O`
+          - Írd be így: `:);): D: P: O`
 
-          - Írjon kettőspontot <kbd>:</kbd> , majd írd be az emodzsi nevét `:tada:`
+          - Írj kettőspontot <kbd>:</kbd> , majd írd be az emoji nevét `:tada:`
 
-          - Nyomja meg az emodzsi gombot <img src="%{base_uri}/plugins/discourse-narrative-bot/images/font-awesome-smile.png" width="16" height="16"> a szerkesztőben, vagy a mobilja billentyűzetén
-        reply: |-
-          Ez :sparkles: _emodzsitasztikus!_ :sparkles:
+          - nyomd meg az emoji-gombot <img src="%{base_uri}/plugins/discourse-narrative-bot/images/font-awesome-smile.png" width="16" height="16"> a szerkesztőben, vagy a mobilod billentyűzetén!
         not_found: |-
-          Hoppá, nem látok emodzsit a válaszában. Jaj, ne! :sob:
+          Upsz, nem látok hangulatjelet a válaszodban... Jaj, ne! :sob:
 
-          Próbáljon beírni egy kettőspontot <kbd>:</kbd> az emodzsi kiválasztó előhívásához, majd írjad be a kívánt emodzsi első néhány betűjét, például: `:bird:`
+          Próbálj beírni egy kettőspontot <kbd>:</kbd> az emoji kiválasztó előhívásához, majd írd be a kívánt emoji első néhány betűjét, például: ':bird:'
 
-          Vagy nyomja meg a szerkesztőben az emodzsi <img src="%{base_uri}/plugins/discourse-narrative-bot/images/font-awesome-smile.png" width="16" height="16"> gombot.
+          Vagy nyomd meg a szerkesztőben az emoji <img src="%{base_uri}/plugins/discourse-narrative-bot/images/font-awesome-smile.png" width="16" height="16"> gombot.
 
-          (Ha mobileszközön van, akkor közvetlenül a billentyűzetről is beírhatja az emodzsit.)
+          (Ha mobileszközön vagy, akkor közvetlenül a billentyűzetről is beírhatod az emojit.)
       mention:
         instructions: |-
-          Néha fel akarhatja hívni valaki figyelmét a válaszára, még akkor is, ha nem kifejezetten neki válaszol. Ilyenkor írjon be egy „@”-ot, majd adja meg a felhasználónevét, hogy megemlítse.
+          Néha fel akarhatod hívni valakinek a figyelmét a válaszodra még akkor is, ha nem kifejezetten neki válaszolsz. Ilyenkore írj be egy „@”-t, majd add meg a felhasználónevét, az említéshez.
 
-          Meg tudnád említeni a válaszában a következőt **`@%{discobot_username}`**?
+          Meg tudnád említeni **`@%{discobot_username}`** -t a válaszodban?
         reply: |-
-          _Kimondta valaki a nevemet!?_ :raised_hand: Azt hiszem, Ön volt az! :wave: Nos, itt vagyok! Köszönöm, hogy megemlített. :ok_hand:
-        not_found: |-
-          Sehol sem látom a nevemet :frowning: Megpróbál újra megemlíteni: `@%{discobot_username}`?
-
-          (És igen, _disco_ van a nevemben, mint a 70-es évekbeli táncőrület. Tényleg [imádom az éjszakai életet!](https://www.youtube.com/watch?v=B_wGI3_sGf8) :dancer:)
+          _Kimondta valaki a nevemet!? _ :raised_hand: Azt hiszem, te voltál! :wave: Nos, itt vagyok! Köszönöm, hogy megemlítettél. :ok_hand:
       flag:
+        instructions: |-
+          Szeretnénk, ha a fórumon zajló beszélgetések kulturáltak tudnának maradni, és ehhez a te segítségedre is szükségünk van. Kérjük, olvasd el [a fórum szabályzatát](%{guidelines_url}), és ha problémát észlelsz, kérjük, jelezd a zászló megnyomásával, hogy titkosan értesítsd a szerzőt vagy [segítőkész munkatársainkat](%{about_url}).
+
+          > :imp: Írtam valami csúnyát ide
+
+          Gondolom tudod mit kell tenned!. Gyerünk, **jelöld meg ezt a bejegyzést** <img src="%{base_uri}/plugins/discourse-narrative-bot/images/font-awesome-flag.png" width="16" height="16"> kifogásolhatóként!
         reply: |-
-          A [stáb](%{base_uri}/groups/staff) privátban értesítve lesz a bejelentéséről. Ha elegendő közösségi tag jelent be egy bejegyzést, akkor az elővigyázatosságból automatikusan el is lesz rejtve. (Mivel valójában nem írtam csúnya bejegyzést :angel:, ezért egyelőre eltávolítottam a jelzőt.)
+          [Munkatársainkat](%{base_uri}/groups/staff) privát módon értesítjük a bejelentésedről. Ha elegendő közösségi tag megjelöl egy bejegyzést, az elővigyázatosságból automatikusan el is lesz rejtve. (Mivel valójában nem írtam egy csúnya bejegyzést :angel:, ezért egyelőre eltávolítottam a zászlót.)
       search:
         hidden_message: |-
-          Hogyan is hagyhatta ki ezt a vízidisznót? :wink:
+          Hogyan is hagyhattad ki ezt a vízidisznót? :wink:
 
           <img src="%{base_uri}/plugins/discourse-narrative-bot/images/capybara-eating.gif"/>
 
-          Észrevette, hogy most újra az elején van? Etesse meg ezt a szegény éhes vízidisznót azzal, hogy **ezzel `%{search_answer}` az emodzsival válaszol**, és így automatikusan a végére ugorhat!
+          Észrevetted, hogy most újra az elején vagy? Etesd meg ezt a szegény éhes vízidisznót azzal, hogy ** válaszolsz a `%{search_answer}` emoji elküldésével ** és máris automatikusan a végére ugorharsz!
       end:
         message: |-
-          Köszönöm, hogy velem tartott @%{username}! Ezt Önnek készítettem, azt hiszem, kiérdemelte:
+          Köszönöm, hogy velem tartottál @%{username}! Ezt neked készítettem, azt hiszem, kiérdemelted:
 
           %{certificate}
 
-          Egyelőre ennyi! Nézze meg a [**legfrissebb témáinkat**](%{base_uri}/latest) vagy böngésszen a [**kategóriáink**](%{base_uri}/categories) között! :sunglasses:
+          Egyelőre ennyi! Nézze meg a [** legfrissebb témáinkat **] (%{base_uri}/latest) vagy böngssz a [**kategóriáink **](%{base_uri}/categories) között! :sunglasses:
 
-          (Ha bármikor újra szeretne velem beszélni, hogy többet tudjon meg, csak írjon rám, vagy említsen meg bármikor: `@%{discobot_username}`)
+          (Ha bármikor szeretnél újra beszélni velem, hogy többet tanulj, csak írj rám vagy említsd meg `@%{discobot_username}` bármikor!)
       certificate:
         alt: "Igazoló oklevél"
     advanced_user_narrative:
       reset_trigger: "haladó oktatás"
-      cert_title: "A haladó felhasználói eligazítás teljesítése elismeréseként"
-      title: ":arrow_up: Haladó felhasználói funkciók"
       start_message: |-
-        _Haladó_ felhasználóként meglátogatta már a [beállítások oldalt](%{base_uri}/my/preferences) @%{username}? Számos módja van a felhasználói élmény testreszabásának, például választhat sötét vagy világos témát is.
+        _advanced_ felhasználóként meglátogattad már a [beállítások oldaladat] (%{base_uri}/my/preferences) @%{username}? Számos módja van a felhasználói élmény testreszabásának, például kiválaszthatsz sötét vagy világos témát is.
 
-        De elkalandoztam, kezdjünk neki!
+        De elkalandozom, kezdjük!
       edit:
-        bot_created_post_raw: "@%{discobot_username} messze a legmenőbb robot, akit ismerek :wink:"
+        bot_created_post_raw: "@%{discobot_username} messze a legmenőbb robot, amit ismerek :wink:"
         instructions: |-
-          Mindenki követ el hibákat. De ne aggódjon, bármikor szerkesztheti a bejegyzéseit, hogy kijavítsa őket!
+          Mindenki követ el hibákat. De ne aggódj, bármikor szerkesztheted a bejegyzéseket a javítás érdekében!
 
-          Elkezdené azzal, hogy **megpróbálja szerkeszteni** a bejegyzést, amelyet épp most hoztam létre Önnek?
+          Elkezdenéd azzal, hogy ** megpróbálod szerkeszteni ** a bejegyzést, amit éppen most hoztam létre neked?
         reply: |-
           Nagyszerű munka!
 
-          Ne feledje, hogy az 5 perc elteltével végrehajtott szerkesztések nyilvános szerkesztési verzióként jelennek meg, és a jobb felső sarokban egy kis ceruza ikon jelenik meg a változatok számával.
-      delete:
-        reply: |-
-          Hűha! :boom:
-
-          A beszélgetések folytonosságának megőrzése érdekében a törlés nem történik meg azonnal, ezért a bejegyzés csak egy idő után kerül eltávolításra.
+          Ne feledd, hogy az 5 perc elteltével végrehajtott szerkesztések nyilvános szerkesztési verzióként jelennek meg, és a jobb felső sarokban egy kis ceruza ikon jelenik meg a javítások számával.
       recover:
-        deleted_post_raw: "Miért törölte a @%{discobot_username} a hozzászólásomat? :anguished:"
         instructions: |-
-          Óh ne! Úgy tűnik, véletlenül töröltem egy új bejegyzést, amelyet most készítettem Önnek.
+          Óh ne! Úgy tűnik, véletlenül töröltem egy új bejegyzést, amelyet most készítettem neked.
 
-          Megtenne nekem egy szívességet, és <img src="%{base_uri}/plugins/discourse-narrative-bot/images/font-awesome-rotate-left.png" width="16" height="16"> **visszavonná a törlést**?
+          Megtennél nekem egy szívességet, és <img src="%{base_uri}/plugins/discourse-narrative-bot/images/font-awesome-rotate-left.png" width="16" height="16"> **visszavonnád a törlést**?
         reply: |-
-          Fú, ez szoros volt! Köszönöm, hogy kijavította :wink:
+          Phew, ez szoros volt! Köszönjük, hogy kijavítottad :wink:
 
-          Ne feledje, hogy csak %{deletion_after} órája van a bejegyzés törlésének visszavonására.
+          Ne feledd, hogy csak %{deletion_after} órád van a bejegyzés visszavonására.
       category_hashtag:
         not_found: |-
-          Hmm, sehol nem látok kategóriát. Vegye figyelembe, hogy a „#” nem lehet az első karakter. Be tudja másolni ezt a következő válaszába?
+          Hmm, sehol nem látok kategóriát. Vedd figyelembe, hogy a "#" nem lehet az első karakter. Be tudod másolni ezt a következő válaszodba?
 
-          ```text
-          Kategóriahivatkozásokat tudok létrehozni a # használatával
+          ```szöveg
+          Kategórialinket tudok létrehozni a # használatával
           ```
       change_topic_notification_level:
-        reply: "Nagyszerű munka! Remélem, hogy nem némította le ezt a témát, sajnos néha kicsit fecsegős vagyok :grin:. \n\nNe feledje, hogy amikor egy témára válaszol, vagy egy témát néhány percnél tovább olvas, akkor azt automatikusan elkezdi követni is. Ezt megváltoztathatja a [felhasználói beállításokban](%{base_uri}/my/preferences)."
+        reply: "Nagyszerű munka! Remélem, hogy nem némítottad le ezt a témát, sajnos néha kicsit fecsegős vagyok. :grin: \n\nNe feledd, hogy amikor egy témára válaszolsz, vagy egy témát néhány percnél tovább olvasol, azt automatikusan elkezded követni is. Ezt megváltoztathatos a [felhasználói beállításokban](%{base_uri}/my/preferences)."
       poll:
         not_found: |-
-          Hoppá! A válaszában nem volt szavazás.
+          Hoppá! A válaszodban nem volt szavazás.
 
-          Használja az <img src="%{base_uri}/plugins/discourse-narrative-bot/images/font-awesome-gear.png" width="16" height="16"> fogaskerék ikont a szerkesztőben, vagy másolja és illessze be ezt a szavazást a következő válaszába:
+          Használd az <img src="%{base_uri}/plugins/discourse-narrative-bot/images/font-awesome-gear.png" width="16" height="16"> fogaskerék ikont a szerkesztőben, vagy másold és illeszd be ezt a szavazást a következő válaszodba:
 
           ```text
           [poll]
@@ -350,37 +299,26 @@ hu:
           * :dog:
           [/poll]
           ```
-        reply: |-
-          Hé, szép kis szavazás! Hogy sikerült a tanításom?
-
-          [poll]
-          * :+1:
-          * :-1:
-          [/poll]
       details:
         instructions: |-
-          Előfordulhat, hogy **el akarja rejteni a részleteket** a válaszaiban:
+          Előfordulhat, hogy **el akarnád rejteni a részleteket** a válaszaiban:
 
-          - Ha egy film vagy tévéműsor cselekményéről beszélünk, akkor spoiler lehet, amit írna.
+          - Amikor egy film vagy tévéműsor cselekménypontjairól beszélünk, és spoiler lehet, amit írnál.
 
-          - Ha a bejegyzés megválaszolásához rengeteg apró részletre van szükség, melyek nehezen befogadhatóak, ha egyszerre kell valakinek elolvasniuk.
+          - Ha a bejegyzés megválaszolásához rengeteg aprórészletre van szükség, amelyek nehezen feldolgozhatóak lehetnek, ha egyszerre kell valakinek elolvasnia.
 
-          [details=Válassza ki ezt, hogy lássa, hogyan működik!]
-          1. Válassza ki a <img src="%{base_uri}/plugins/discourse-narrative-bot/images/font-awesome-gear.png" width="16" height="16"> gombot a szerkesztőben.
-          2. Válassza a „Részletek elrejtése” lehetőséget.
-          3. Szerkessze a részletek összefoglalóját, és adjon hozzá tartalmat.
+          [részletek = Válaszd ki ezt, hogy lásd, hogyan működik!]
+          1. Válaszd ki a <img src="%{base_uri}/plugins/discourse-narrative-bot/images/font-awesome-gear.png" width="16" height="16"> gombot a szerkesztőben.
+          2. Válaszd a "Részletek elrejtése" lehetőséget.
+          3. Szerkeszd a részletek összefoglalóját, és adj hozzá tartalmat.
           [/details]
 
-          Megtenné, hogy kipróbálja a szerkesztőben található <img src="%{base_uri}/plugins/discourse-narrative-bot/images/font-awesome-gear.png" width="16" height="16"> gombot, hogy egy ilyen részletező szakaszt adjon a következő válaszához?
+          Megtennéd, hogy kipróbálod a szerkesztőben található <img src="%{base_uri}/plugins/discourse-narrative-bot/images/font-awesome-gear.png" width="16" height="16"> gombot, hogy egy ilyen "részletek" szekciót adj a következő válaszodhoz?
         not_found: |-
-          Gondjai vannak a részletező elem létrehozásával? Próbálja beilleszteni az alábbiakat a következő válaszába:
+          Gondjaid vannak a részletek widget létrehozásával? Próbáljd beilleszteni az alábbiakat a következő választ:
 
-          ```text
-          [details=Válassza ki a részletekért]
+          ```szöveg
+          [details = Válassz engem a részletekért]
           Itt vannak a részletek
           [/details]
           ```
-        reply: |-
-          Nagyszerű munka — a _részletekre_ figyelése elismerésre méltó!
-      certificate:
-        alt: "Haladó felhasználói eligazítás elvégzési tanúsítványa"

@@ -11,6 +11,7 @@ module ActiveSupport::Dependencies::ZeitwerkIntegration::Inflector
     'pop3_polling_enabled_setting_validator' => 'POP3PollingEnabledSettingValidator',
     'regular' => 'Jobs',
     'scheduled' => 'Jobs',
+    'topic_query_sql' => 'TopicQuerySQL',
     'version' => 'Discourse',
   }
 

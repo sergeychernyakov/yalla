@@ -148,7 +148,8 @@ export default (filterArg, params) => {
         category = model.category,
         canCreateTopic = topics.get("can_create_topic"),
         canCreateTopicOnCategory =
-          canCreateTopic && category.get("permission") === PermissionType.FULL;
+          canCreateTopic && category.get("permission") === PermissionType.FULL,
+        filter = this.filter(category);
 
       this.controllerFor("navigation/category").setProperties({
         canCreateTopicOnCategory: canCreateTopicOnCategory,
@@ -161,7 +162,7 @@ export default (filterArg, params) => {
         category,
         period:
           topics.get("for_period") ||
-          (model.modelParams && model.modelParams.period),
+          (filter.indexOf("/") > 0 ? filter.split("/")[1] : ""),
         selected: [],
         noSubcategories: params && !!params.no_subcategories,
         expandAllPinned: true,
@@ -192,8 +193,6 @@ export default (filterArg, params) => {
           outlet: "header-list-container",
           model: this._categoryList,
         });
-      } else {
-        this.disconnectOutlet({ outlet: "header-list-container" });
       }
       this.render("discovery/topics", {
         controller: "discovery/topics",
@@ -203,8 +202,6 @@ export default (filterArg, params) => {
 
     deactivate() {
       this._super(...arguments);
-
-      this.controllerFor("composer").set("prioritizedCategoryId", null);
       this.searchService.set("searchContext", null);
     },
 

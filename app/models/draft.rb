@@ -7,8 +7,6 @@ class Draft < ActiveRecord::Base
 
   belongs_to :user
 
-  after_commit :update_draft_count, on: [:create, :destroy]
-
   class OutOfSequence < StandardError; end
 
   def self.set(user, key, sequence, data, owner = nil, force_save: false)
@@ -94,8 +92,6 @@ class Draft < ActiveRecord::Base
           owner = :owner,
           updated_at = CURRENT_TIMESTAMP
       SQL
-
-      UserStat.update_draft_count(user.id)
     end
 
     sequence
@@ -161,11 +157,7 @@ class Draft < ActiveRecord::Base
   end
 
   def parsed_data
-    begin
-      JSON.parse(data)
-    rescue JSON::ParserError
-      {}
-    end
+    JSON.parse(data)
   end
 
   def topic_id
@@ -258,8 +250,6 @@ class Draft < ActiveRecord::Base
     # remove old drafts
     delete_drafts_older_than_n_days = SiteSetting.delete_drafts_older_than_n_days.days.ago
     Draft.where("updated_at < ?", delete_drafts_older_than_n_days).destroy_all
-
-    UserStat.update_draft_count
   end
 
   def self.backup_draft(user, key, sequence, data)
@@ -348,9 +338,6 @@ class Draft < ActiveRecord::Base
 
   end
 
-  def update_draft_count
-    UserStat.update_draft_count(self.user_id)
-  end
 end
 
 # == Schema Information

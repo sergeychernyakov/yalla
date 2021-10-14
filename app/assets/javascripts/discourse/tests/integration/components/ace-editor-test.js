@@ -3,7 +3,6 @@ import componentTest, {
 } from "discourse/tests/helpers/component-test";
 import {
   discourseModule,
-  exists,
   queryAll,
 } from "discourse/tests/helpers/qunit-helpers";
 import hbs from "htmlbars-inline-precompile";
@@ -16,7 +15,7 @@ discourseModule("Integration | Component | ace-editor", function (hooks) {
     template: hbs`{{ace-editor mode="css"}}`,
     test(assert) {
       assert.expect(1);
-      assert.ok(exists(".ace_editor"), "it renders the ace editor");
+      assert.ok(queryAll(".ace_editor").length, "it renders the ace editor");
     },
   });
 
@@ -25,7 +24,7 @@ discourseModule("Integration | Component | ace-editor", function (hooks) {
     template: hbs`{{ace-editor mode="html" content="<b>wat</b>"}}`,
     test(assert) {
       assert.expect(1);
-      assert.ok(exists(".ace_editor"), "it renders the ace editor");
+      assert.ok(queryAll(".ace_editor").length, "it renders the ace editor");
     },
   });
 
@@ -34,7 +33,7 @@ discourseModule("Integration | Component | ace-editor", function (hooks) {
     template: hbs`{{ace-editor mode="sql" content="SELECT * FROM users"}}`,
     test(assert) {
       assert.expect(1);
-      assert.ok(exists(".ace_editor"), "it renders the ace editor");
+      assert.ok(queryAll(".ace_editor").length, "it renders the ace editor");
     },
   });
 

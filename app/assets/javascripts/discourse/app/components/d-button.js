@@ -21,7 +21,6 @@ export default Component.extend({
   translatedAriaLabel: null,
   forwardEvent: false,
   preventFocus: false,
-  onKeyDown: null,
 
   isLoading: computed({
     set(key, value) {
@@ -85,14 +84,15 @@ export default Component.extend({
     return translatedLabel;
   },
 
-  @discourseComputed("ariaLabel", "translatedAriaLabel")
-  computedAriaLabel(ariaLabel, translatedAriaLabel) {
+  @discourseComputed("ariaLabel", "translatedAriaLabel", "computedLabel")
+  computedAriaLabel(ariaLabel, translatedAriaLabel, computedLabel) {
     if (ariaLabel) {
       return I18n.t(ariaLabel);
     }
     if (translatedAriaLabel) {
       return translatedAriaLabel;
     }
+    return computedLabel;
   },
 
   @discourseComputed("ariaExpanded")
@@ -102,13 +102,6 @@ export default Component.extend({
     }
     if (ariaExpanded === false) {
       return "false";
-    }
-  },
-
-  keyDown(e) {
-    if (this.onKeyDown) {
-      e.stopPropagation();
-      this.onKeyDown(e);
     }
   },
 
@@ -138,9 +131,6 @@ export default Component.extend({
     if (this.href && this.href.length) {
       DiscourseURL.routeTo(this.href);
     }
-
-    event.preventDefault();
-    event.stopPropagation();
 
     return false;
   },

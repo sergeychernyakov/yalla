@@ -2,7 +2,6 @@ import Controller from "@ember/controller";
 import I18n from "I18n";
 import discourseComputed from "discourse-common/utils/decorators";
 import { isPresent } from "@ember/utils";
-import { next } from "@ember/runloop";
 
 export default Controller.extend({
   queryParams: [
@@ -94,10 +93,6 @@ export default Controller.extend({
     this.setProperties(range);
   },
 
-  refreshModel() {
-    next(() => this.send("refreshRoute"));
-  },
-
   actions: {
     remove(ids) {
       if (!ids) {
@@ -109,7 +104,7 @@ export default Controller.extend({
       });
 
       if (newList.length === 0) {
-        this.refreshModel();
+        this.send("refreshRoute");
       } else {
         this.set("reviewables", newList);
       }
@@ -117,7 +112,7 @@ export default Controller.extend({
 
     resetTopic() {
       this.set("topic_id", null);
-      this.refreshModel();
+      this.send("refreshRoute");
     },
 
     refresh() {
@@ -170,7 +165,7 @@ export default Controller.extend({
         additional_filters: JSON.stringify(this.additionalFilters),
       });
 
-      this.refreshModel();
+      this.send("refreshRoute");
     },
 
     loadMore() {

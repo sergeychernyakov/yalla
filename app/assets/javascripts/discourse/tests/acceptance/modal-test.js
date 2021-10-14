@@ -1,8 +1,6 @@
 import {
   acceptance,
   controllerFor,
-  count,
-  exists,
   queryAll,
 } from "discourse/tests/helpers/qunit-helpers";
 import { click, triggerKeyEvent, visit } from "@ember/test-helpers";
@@ -33,26 +31,35 @@ acceptance("Modal", function (needs) {
   skip("modal", async function (assert) {
     await visit("/");
 
-    assert.ok(!exists(".d-modal:visible"), "there is no modal at first");
+    assert.ok(
+      queryAll(".d-modal:visible").length === 0,
+      "there is no modal at first"
+    );
 
     await click(".login-button");
-    assert.equal(count(".d-modal:visible"), 1, "modal should appear");
+    assert.ok(queryAll(".d-modal:visible").length === 1, "modal should appear");
 
     let controller = controllerFor("modal");
     assert.equal(controller.name, "login");
 
     await click(".modal-outer-container");
     assert.ok(
-      !exists(".d-modal:visible"),
+      queryAll(".d-modal:visible").length === 0,
       "modal should disappear when you click outside"
     );
     assert.equal(controller.name, null);
 
     await click(".login-button");
-    assert.equal(count(".d-modal:visible"), 1, "modal should reappear");
+    assert.ok(
+      queryAll(".d-modal:visible").length === 1,
+      "modal should reappear"
+    );
 
     await triggerKeyEvent("#main-outlet", "keyup", 27);
-    assert.ok(!exists(".d-modal:visible"), "ESC should close the modal");
+    assert.ok(
+      queryAll(".d-modal:visible").length === 0,
+      "ESC should close the modal"
+    );
 
     Ember.TEMPLATES[
       "modal/not-dismissable"
@@ -60,18 +67,16 @@ acceptance("Modal", function (needs) {
 
     run(() => showModal("not-dismissable", {}));
 
-    assert.equal(count(".d-modal:visible"), 1, "modal should appear");
+    assert.ok(queryAll(".d-modal:visible").length === 1, "modal should appear");
 
     await click(".modal-outer-container");
-    assert.equal(
-      count(".d-modal:visible"),
-      1,
+    assert.ok(
+      queryAll(".d-modal:visible").length === 1,
       "modal should not disappear when you click outside"
     );
     await triggerKeyEvent("#main-outlet", "keyup", 27);
-    assert.equal(
-      count(".d-modal:visible"),
-      1,
+    assert.ok(
+      queryAll(".d-modal:visible").length === 1,
       "ESC should not close the modal"
     );
   });
@@ -121,7 +126,7 @@ acceptance("Modal", function (needs) {
 
     run(() => showModal("test-title"));
     assert.ok(
-      !exists(".d-modal .title"),
+      queryAll(".d-modal .title").length === 0,
       "it should not re-use the previous title"
     );
   });
@@ -132,33 +137,33 @@ acceptance("Modal Keyboard Events", function (needs) {
 
   test("modal-keyboard-events", async function (assert) {
     await visit("/t/internationalization-localization/280");
+
     await click(".toggle-admin-menu");
     await click(".admin-topic-timer-update button");
-    await triggerKeyEvent(".d-modal", "keydown", 13);
+    await triggerKeyEvent(".d-modal", "keyup", 13);
 
-    assert.equal(
-      count("#modal-alert:visible"),
-      1,
+    assert.ok(
+      queryAll("#modal-alert:visible").length === 1,
       "hitting Enter triggers modal action"
     );
-    assert.equal(
-      count(".d-modal:visible"),
-      1,
+    assert.ok(
+      queryAll(".d-modal:visible").length === 1,
       "hitting Enter does not dismiss modal due to alert error"
     );
 
-    assert.ok(exists(".d-modal:visible"), "modal should be visible");
-
-    await triggerKeyEvent("#main-outlet", "keydown", 27);
-
-    assert.ok(!exists(".d-modal:visible"), "ESC should close the modal");
+    await triggerKeyEvent("#main-outlet", "keyup", 27);
+    assert.ok(
+      queryAll(".d-modal:visible").length === 0,
+      "ESC should close the modal"
+    );
 
     await click(".topic-body button.reply");
-    await click(".d-editor-button-bar .btn.link");
-    await triggerKeyEvent(".d-modal", "keydown", 13);
 
+    await click(".d-editor-button-bar .btn.link");
+
+    await triggerKeyEvent(".d-modal", "keyup", 13);
     assert.ok(
-      !exists(".d-modal:visible"),
+      queryAll(".d-modal:visible").length === 0,
       "modal should disappear on hitting Enter"
     );
   });

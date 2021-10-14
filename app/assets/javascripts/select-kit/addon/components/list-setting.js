@@ -14,7 +14,7 @@ export default MultiSelectComponent.extend({
 
   selectKitOptions: {
     filterable: true,
-    selectedChoiceComponent: "selectedChoiceComponent",
+    selectedNameComponent: "selectedNameComponent",
   },
 
   modifyComponentForRow(collection) {
@@ -27,11 +27,11 @@ export default MultiSelectComponent.extend({
     }
   },
 
-  selectedChoiceComponent: computed("settingName", function () {
+  selectedNameComponent: computed("settingName", function () {
     if (this.settingName && this.settingName.indexOf("color") > -1) {
-      return "selected-choice-color";
+      return "selected-color";
     } else {
-      return "selected-choice";
+      return "selected-name";
     }
   }),
 

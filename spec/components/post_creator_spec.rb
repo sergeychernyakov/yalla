@@ -166,10 +166,7 @@ describe PostCreator do
             "/latest",
             "/latest",
             "/topic/#{created_post.topic_id}",
-            "/topic/#{created_post.topic_id}",
-            "/user",
-            "/user",
-            "/user"
+            "/topic/#{created_post.topic_id}"
           ].sort
         )
 
@@ -198,10 +195,7 @@ describe PostCreator do
         user_action = messages.find { |m| m.channel == "/u/#{p.user.username}" }
         expect(user_action).not_to eq(nil)
 
-        draft_count = messages.find { |m| m.channel == "/user" }
-        expect(draft_count).not_to eq(nil)
-
-        expect(messages.filter { |m| m.channel != "/distributed_hash" }.length).to eq(7)
+        expect(messages.filter { |m| m.channel != "/distributed_hash" }.length).to eq(5)
       end
 
       it 'extracts links from the post' do
@@ -288,14 +282,12 @@ describe PostCreator do
       it 'creates post stats' do
         Draft.set(user, Draft::NEW_TOPIC, 0, "test")
         Draft.set(user, Draft::NEW_TOPIC, 0, "test1")
-        expect(user.user_stat.draft_count).to eq(1)
 
         begin
           PostCreator.track_post_stats = true
           post = creator.create
           expect(post.post_stat.typing_duration_msecs).to eq(0)
           expect(post.post_stat.drafts_saved).to eq(2)
-          expect(user.reload.user_stat.draft_count).to eq(0)
         ensure
           PostCreator.track_post_stats = false
         end
@@ -511,19 +503,11 @@ describe PostCreator do
             end
 
             context "without regular expressions" do
-              it "works with many tags" do
+              it "works" do
                 Fabricate(:watched_word, action: WatchedWord.actions[:tag], word: "HELLO", replacement: "greetings , hey")
 
                 @post = creator.create
                 expect(@post.topic.tags.map(&:name)).to match_array(['greetings', 'hey'])
-              end
-
-              it "works with overlapping words" do
-                Fabricate(:watched_word, action: WatchedWord.actions[:tag], word: "art", replacement: "about-art")
-                Fabricate(:watched_word, action: WatchedWord.actions[:tag], word: "artist*", replacement: "about-artists")
-
-                post = PostCreator.new(user, title: "hello world topic", raw: "this is topic abour artists", archetype_id: 1).create
-                expect(post.topic.tags.map(&:name)).to match_array(['about-artists'])
               end
 
               it "does not treat as regular expressions" do
@@ -691,7 +675,7 @@ describe PostCreator do
         SiteSetting.unique_posts_mins = 10
       end
 
-      it "fails for dupe post across topic" do
+      it "fails for dupe post accross topic" do
         first = create_post(raw: "this is a test #{SecureRandom.hex}")
         second = create_post(raw: "this is a test #{SecureRandom.hex}")
 
@@ -786,13 +770,13 @@ describe PostCreator do
 
     context "when the user has bookmarks with auto_delete_preference on_owner_reply" do
       before do
-        Fabricate(:bookmark, user: user, post: Fabricate(:post, topic: topic), auto_delete_preference: Bookmark.auto_delete_preferences[:on_owner_reply])
-        Fabricate(:bookmark, user: user, post: Fabricate(:post, topic: topic), auto_delete_preference: Bookmark.auto_delete_preferences[:on_owner_reply])
+        Fabricate(:bookmark, topic: topic, user: user, auto_delete_preference: Bookmark.auto_delete_preferences[:on_owner_reply])
+        Fabricate(:bookmark, topic: topic, user: user, auto_delete_preference: Bookmark.auto_delete_preferences[:on_owner_reply])
         TopicUser.create!(topic: topic, user: user, bookmarked: true)
       end
 
       it "deletes the bookmarks, but not the ones without an auto_delete_preference" do
-        Fabricate(:bookmark, post: Fabricate(:post, topic: topic), user: user)
+        Fabricate(:bookmark, topic: topic, user: user)
         Fabricate(:bookmark, user: user)
         creator.create
         expect(Bookmark.where(user: user).count).to eq(2)
@@ -1134,26 +1118,6 @@ describe PostCreator do
 
       expect(target_user1.notifications.count).to eq(1)
       expect(target_user2.notifications.count).to eq(1)
-
-      GroupArchivedMessage.create!(group: group, topic: post.topic)
-
-      message = MessageBus.track_publish(
-        PrivateMessageTopicTrackingState.group_channel(group.id)
-      ) do
-        PostCreator.create!(user,
-          raw: "this is a reply to the group message",
-          topic_id: post.topic_id
-        )
-      end.first
-
-      expect(message.data["message_type"]).to eq(
-        PrivateMessageTopicTrackingState::GROUP_ARCHIVE_MESSAGE_TYPE
-      )
-
-      expect(message.data["payload"]["acting_user_id"]).to eq(user.id)
-
-      expect(GroupArchivedMessage.exists?(group: group, topic: post.topic))
-        .to eq(false)
     end
   end
 
@@ -1290,7 +1254,7 @@ describe PostCreator do
       DiscourseEvent.off(:topic_created, &@increase_topics)
     end
 
-    it "fires both event when creating a topic" do
+    it "fires boths event when creating a topic" do
       pc = PostCreator.new(user, raw: 'this is the new content for my topic', title: 'this is my new topic title')
       _post = pc.create
       expect(@posts_created).to eq(1)

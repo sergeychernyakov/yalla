@@ -1,9 +1,4 @@
-import {
-  acceptance,
-  count,
-  exists,
-  queryAll,
-} from "discourse/tests/helpers/qunit-helpers";
+import { acceptance, queryAll } from "discourse/tests/helpers/qunit-helpers";
 import { click, visit } from "@ember/test-helpers";
 import { action } from "@ember/object";
 import { extraConnectorClass } from "discourse/lib/plugin-connectors";
@@ -70,13 +65,12 @@ acceptance("Plugin Outlet - Connector Class", function (needs) {
 
   test("Renders a template into the outlet", async function (assert) {
     await visit("/u/eviltrout");
-    assert.equal(
-      count(".user-profile-primary-outlet.hello"),
-      1,
+    assert.ok(
+      queryAll(".user-profile-primary-outlet.hello").length === 1,
       "it has class names"
     );
     assert.ok(
-      !exists(".user-profile-primary-outlet.dont-render"),
+      !queryAll(".user-profile-primary-outlet.dont-render").length,
       "doesn't render"
     );
 

@@ -1,7 +1,6 @@
 import {
   acceptance,
   exists,
-  query,
   queryAll,
 } from "discourse/tests/helpers/qunit-helpers";
 import { fillIn, visit } from "@ember/test-helpers";
@@ -23,12 +22,7 @@ function setAuthenticationData(hooks, json) {
   });
 }
 
-function preloadInvite({
-  link = false,
-  email_verified_by_link = false,
-  different_external_email = false,
-  hidden_email = false,
-} = {}) {
+function preloadInvite({ link = false } = {}) {
   const info = {
     invited_by: {
       id: 123,
@@ -38,9 +32,6 @@ function preloadInvite({
       title: "team",
     },
     username: "invited",
-    email_verified_by_link: email_verified_by_link,
-    different_external_email: different_external_email,
-    hidden_email: hidden_email,
   };
 
   if (link) {
@@ -365,115 +356,6 @@ acceptance(
         queryAll("#new-account-name").val(),
         "barfoo",
         "name is prefilled"
-      );
-    });
-  }
-);
-
-acceptance(
-  "Email Invite link with different external email address",
-  function (needs) {
-    needs.settings({ enable_local_logins: false });
-
-    setAuthenticationData(needs.hooks, {
-      auth_provider: "facebook",
-      email: "foobar+different@example.com",
-      email_valid: true,
-      username: "foobar",
-      name: "barfoo",
-    });
-
-    test("display information that email is invalid", async function (assert) {
-      preloadInvite({ different_external_email: true, hidden_email: true });
-
-      await visit("/invites/myvalidinvitetoken");
-
-      assert.equal(
-        query(".bad").textContent.trim(),
-        "Your invitation email does not match the email authenticated by Facebook"
-      );
-    });
-  }
-);
-
-acceptance(
-  "Email Invite link with valid authentication data, valid email token, unverified authentication email",
-  function (needs) {
-    needs.settings({ enable_local_logins: false });
-
-    setAuthenticationData(needs.hooks, {
-      auth_provider: "facebook",
-      email: "foobar@example.com",
-      email_valid: false,
-      username: "foobar",
-      name: "barfoo",
-    });
-
-    test("confirm form and buttons", async function (assert) {
-      preloadInvite({ email_verified_by_link: true });
-
-      await visit("/invites/myvalidinvitetoken");
-
-      assert.ok(!exists("#new-account-email"), "does not show email field");
-
-      assert.equal(
-        queryAll("#account-email-validation").text().trim(),
-        I18n.t("user.email.authenticated_by_invite")
-      );
-    });
-  }
-);
-
-acceptance(
-  "Email Invite link with valid authentication data, no email token, unverified authentication email",
-  function (needs) {
-    needs.settings({ enable_local_logins: false });
-
-    setAuthenticationData(needs.hooks, {
-      auth_provider: "facebook",
-      email: "foobar@example.com",
-      email_valid: false,
-      username: "foobar",
-      name: "barfoo",
-    });
-
-    test("confirm form and buttons", async function (assert) {
-      preloadInvite({ email_verified_by_link: false });
-
-      await visit("/invites/myvalidinvitetoken");
-
-      assert.ok(!exists("#new-account-email"), "does not show email field");
-
-      assert.equal(
-        queryAll("#account-email-validation").text().trim(),
-        I18n.t("user.email.ok")
-      );
-    });
-  }
-);
-
-acceptance(
-  "Invite link with authentication data, and associate link",
-  function (needs) {
-    needs.settings({ enable_local_logins: false });
-
-    setAuthenticationData(needs.hooks, {
-      auth_provider: "facebook",
-      email: "blah@example.com",
-      email_valid: true,
-      username: "foobar",
-      name: "barfoo",
-      associate_url: "/associate/abcde",
-    });
-
-    test("shows the associate link", async function (assert) {
-      preloadInvite({ link: true });
-
-      await visit("/invites/myvalidinvitetoken");
-
-      assert.ok(
-        exists(".create-account-associate-link"),
-        "shows the associate account link"
       );
     });
   }

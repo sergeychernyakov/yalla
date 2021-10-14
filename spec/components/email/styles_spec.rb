@@ -185,15 +185,6 @@ describe Email::Styles do
       fragment = html_fragment('<aside class="quote"> <div class="title"> <div class="quote-controls"> <i class="fa fa-chevron-down" title="expand/collapse"></i><a href="/t/xyz/123" title="go to the quoted post" class="back"></a> </div> <img alt="" width="20" height="20" src="https://cdn-enterprise.discourse.org/boingboing/user_avatar/bbs.boingboing.net/techapj/40/54379_1.png" class="avatar">techAPJ: </div> <blockquote> <p>lorem ipsum</p> </blockquote> </aside>')
       expect(fragment.to_s.squish).to match(/^<blockquote.+<\/blockquote>$/)
     end
-
-    it "removes GitHub excerpts" do
-      stub_request(:head, "https://github.com/discourse/discourse/pull/1253").to_return(status: 200, body: "", headers: {})
-      stub_request(:get, "https://api.github.com/repos/discourse/discourse/pulls/1253").to_return(status: 200, body: onebox_response("githubpullrequest"))
-
-      onebox = Oneboxer.onebox("https://github.com/discourse/discourse/pull/1253")
-      fragment = html_fragment(onebox)
-      expect(fragment.css(".github-body-container .excerpt")).to be_empty
-    end
   end
 
   context "replace_secure_media_urls" do
@@ -252,9 +243,8 @@ describe Email::Styles do
       SiteSetting.secure_media = true
     end
 
+    let(:attachments) { { 'testimage.png' => stub(url: 'cid:email/test.png') } }
     fab!(:upload) { Fabricate(:upload, original_filename: 'testimage.png', secure: true, sha1: '123456') }
-    let(:attachments) { [stub(url: 'cid:email/test.png')] }
-    let(:attachments_index) { { upload.sha1 => 0 } }
     let(:html) { "<a href=\"#{Discourse.base_url}\/secure-media-uploads/original/1X/123456.png\"><img src=\"/secure-media-uploads/original/1X/123456.png\" width=\"20\" height=\"30\"></a>" }
 
     def strip_and_inline
@@ -266,7 +256,7 @@ describe Email::Styles do
 
       # pass in the attachments to match uploads based on sha + original filename
       styler = Email::Styles.new(html)
-      styler.inline_secure_images(attachments, attachments_index)
+      styler.inline_secure_images(attachments)
       @frag = Nokogiri::HTML5.fragment(styler.to_s)
     end
 
@@ -303,8 +293,12 @@ describe Email::Styles do
       end
 
       let(:siteicon) { Fabricate(:upload, original_filename: "siteicon.ico") }
-      let(:attachments) { [stub(url: 'cid:email/test.png'), stub(url: 'cid:email/test2.ico')] }
-      let(:attachments_index) { { upload.sha1 => 0, siteicon.sha1 => 1 } }
+      let(:attachments) do
+        {
+          'testimage.png' => stub(url: 'cid:email/test.png'),
+          'siteicon.ico' => stub(url: 'cid:email/test2.ico')
+        }
+      end
       let(:html) do
         <<~HTML
 <aside class="onebox allowlistedgeneric">
@@ -332,7 +326,7 @@ describe Email::Styles do
         strip_and_inline
         expect(@frag.to_s).to include("cid:email/test.png")
         expect(@frag.to_s).to include("cid:email/test2.ico")
-        expect(@frag.css('[data-stripped-secure-media]')).not_to be_present
+        expect(@frag.css('[data-sripped-secure-media]')).not_to be_present
         expect(@frag.css('[data-embedded-secure-image]')[0].attr('style')).to eq('width: 16px; height: 16px;')
         expect(@frag.css('[data-embedded-secure-image]')[1].attr('style')).to eq('width: 60px; max-height: 80%; max-width: 20%; height: auto; float: left; margin-right: 10px;')
       end
@@ -364,7 +358,7 @@ describe Email::Styles do
           strip_and_inline
           expect(@frag.to_s).to include("cid:email/test.png")
           expect(@frag.to_s).to include("cid:email/test2.ico")
-          expect(@frag.css('[data-stripped-secure-media]')).not_to be_present
+          expect(@frag.css('[data-sripped-secure-media]')).not_to be_present
           expect(@frag.css('[data-embedded-secure-image]')[1].attr('style')).to eq('width: 60px; max-height: 80%; max-width: 20%; height: auto; float: left; margin-right: 10px;')
         end
       end
@@ -416,7 +410,7 @@ describe Email::Styles do
         it "keeps the special onebox styles" do
           strip_and_inline
           expect(@frag.to_s).to include("cid:email/test.png")
-          expect(@frag.css('[data-stripped-secure-media]')).not_to be_present
+          expect(@frag.css('[data-sripped-secure-media]')).not_to be_present
           expect(@frag.css('[data-embedded-secure-image]')[0].attr('style')).to eq('width: 20px; height: 20px; float: none; vertical-align: middle; max-height: 80%; max-width: 20%; height: auto; float: left; margin-right: 10px;')
         end
       end

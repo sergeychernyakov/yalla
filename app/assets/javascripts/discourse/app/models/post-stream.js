@@ -15,23 +15,6 @@ import { isEmpty } from "@ember/utils";
 import { loadTopicView } from "discourse/models/topic";
 import { schedule } from "@ember/runloop";
 
-let _lastEditNotificationClick = null;
-export function setLastEditNotificationClick(
-  topicId,
-  postNumber,
-  revisionNumber
-) {
-  _lastEditNotificationClick = {
-    topicId,
-    postNumber,
-    revisionNumber,
-  };
-}
-
-export function resetLastEditNotificationClick() {
-  _lastEditNotificationClick = null;
-}
-
 export default RestModel.extend({
   _identityMap: null,
   posts: null,
@@ -341,7 +324,7 @@ export default RestModel.extend({
     } else {
       const postWeWant = this.posts.findBy("post_number", opts.nearPost);
       if (postWeWant) {
-        return Promise.resolve().then(() => this._checkIfShouldShowRevisions());
+        return Promise.resolve();
       }
     }
 
@@ -362,7 +345,6 @@ export default RestModel.extend({
           timelineLookup: json.timeline_lookup,
           loaded: true,
         });
-        this._checkIfShouldShowRevisions();
       })
       .catch((result) => {
         this.errorLoading(result);
@@ -1076,7 +1058,9 @@ export default RestModel.extend({
     const store = this.store;
 
     return ajax(url, { data }).then((result) => {
-      this._setSuggestedTopics(result);
+      if (result.suggested_topics) {
+        this.set("topic.suggested_topics", result.suggested_topics);
+      }
 
       const posts = get(result, "post_stream.posts");
 
@@ -1122,7 +1106,9 @@ export default RestModel.extend({
       data,
       headers,
     }).then((result) => {
-      this._setSuggestedTopics(result);
+      if (result.suggested_topics) {
+        this.set("topic.suggested_topics", result.suggested_topics);
+      }
 
       const posts = get(result, "post_stream.posts");
 
@@ -1219,41 +1205,6 @@ export default RestModel.extend({
     } else {
       topic.set("errorMessage", I18n.t("topic.server_error.description"));
       topic.set("noRetry", result.jqXHR.status === 403);
-    }
-  },
-
-  _checkIfShouldShowRevisions() {
-    if (_lastEditNotificationClick) {
-      const copy = _lastEditNotificationClick;
-      resetLastEditNotificationClick();
-      const postsNumbers = this.posts.mapBy("post_number");
-      if (
-        copy.topicId === this.topic.id &&
-        postsNumbers.includes(copy.postNumber)
-      ) {
-        schedule("afterRender", () => {
-          this.appEvents.trigger(
-            "post:show-revision",
-            copy.postNumber,
-            copy.revisionNumber
-          );
-        });
-      }
-    }
-  },
-
-  _setSuggestedTopics(result) {
-    if (!result.suggested_topics) {
-      return;
-    }
-
-    this.topic.setProperties({
-      suggested_topics: result.suggested_topics,
-      suggested_group_name: result.suggested_group_name,
-    });
-
-    if (this.topic.isPrivateMessage) {
-      this.pmTopicTrackingState.startTracking();
     }
   },
 });

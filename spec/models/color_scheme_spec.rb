@@ -20,14 +20,13 @@ describe ColorScheme do
     theme.set_field(name: :scss, target: :desktop, value: '.bob {color: $primary;}')
     theme.save!
 
-    manager = Stylesheet::Manager.new(theme_id: theme.id)
-    href = manager.stylesheet_data(:desktop_theme)[0][:new_href]
-    colors_href = manager.color_scheme_stylesheet_details(scheme.id, "all")
+    href = Stylesheet::Manager.stylesheet_data(:desktop_theme, theme.id)[0][:new_href]
+    colors_href = Stylesheet::Manager.color_scheme_stylesheet_details(scheme.id, "all", nil)
 
     ColorSchemeRevisor.revise(scheme, colors: [{ name: 'primary', hex: 'bbb' }])
 
-    href2 = manager.stylesheet_data(:desktop_theme)[0][:new_href]
-    colors_href2 = manager.color_scheme_stylesheet_details(scheme.id, "all")
+    href2 = Stylesheet::Manager.stylesheet_data(:desktop_theme, theme.id)[0][:new_href]
+    colors_href2 = Stylesheet::Manager.color_scheme_stylesheet_details(scheme.id, "all", nil)
 
     expect(href).not_to eq(href2)
     expect(colors_href).not_to eq(colors_href2)

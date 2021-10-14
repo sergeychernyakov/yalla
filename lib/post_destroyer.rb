@@ -55,7 +55,7 @@ class PostDestroyer
 
   def destroy
     payload = WebHook.generate_payload(:post, @post) if WebHook.active_web_hooks(:post).exists?
-    topic = Topic.with_deleted.find_by(id: @post.topic_id)
+    topic = @post.topic
     is_first_post = @post.is_first_post? && topic
     has_topic_web_hooks = is_first_post && WebHook.active_web_hooks(:topic).exists?
 
@@ -76,10 +76,9 @@ class PostDestroyer
 
     DiscourseEvent.trigger(:post_destroyed, @post, @opts, @user)
     WebHook.enqueue_post_hooks(:post_destroyed, @post, payload)
-    Jobs.enqueue(:sync_topic_user_bookmarked, topic_id: topic.id) if topic
 
     if is_first_post
-      UserProfile.remove_featured_topic_from_all_profiles(topic)
+      UserProfile.remove_featured_topic_from_all_profiles(@topic)
       UserActionManager.topic_destroyed(topic)
       DiscourseEvent.trigger(:topic_destroyed, topic, @user)
       WebHook.enqueue_topic_hooks(:topic_destroyed, topic, topic_payload) if has_topic_web_hooks
@@ -96,11 +95,8 @@ class PostDestroyer
     topic.update_column(:user_id, Discourse::SYSTEM_USER_ID) if !topic.user_id
     topic.recover!(@user) if @post.is_first_post?
     topic.update_statistics
-
     UserActionManager.post_created(@post)
     DiscourseEvent.trigger(:post_recovered, @post, @opts, @user)
-    Jobs.enqueue(:sync_topic_user_bookmarked, topic_id: topic.id) if topic
-
     if @post.is_first_post?
       UserActionManager.topic_created(topic)
       DiscourseEvent.trigger(:topic_recovered, topic, @user)
@@ -172,7 +168,6 @@ class PostDestroyer
         permanent? ? @post.topic.destroy! : @post.topic.trash!(@user)
         PublishedPage.unpublish!(@user, @post.topic) if @post.topic.published_page
       end
-      TopicLink.where(link_post_id: @post.id).destroy_all
       update_associated_category_latest_topic
       update_user_counts
       TopicUser.update_post_action_cache(post_id: @post.id)
@@ -201,9 +196,9 @@ class PostDestroyer
     I18n.with_locale(SiteSetting.default_locale) do
 
       # don't call revise from within transaction, high risk of deadlock
-      key = @post.is_first_post? ? 'js.topic.deleted_by_author_simple' : 'js.post.deleted_by_author_simple'
+      key = @post.is_first_post? ? 'js.topic.deleted_by_author' : 'js.post.deleted_by_author'
       @post.revise(@user,
-        { raw: I18n.t(key) },
+        { raw: I18n.t(key, count: delete_removed_posts_after) },
         force_new_version: true,
         deleting_post: true
       )

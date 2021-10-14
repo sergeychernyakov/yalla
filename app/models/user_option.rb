@@ -1,17 +1,11 @@
 # frozen_string_literal: true
 
 class UserOption < ActiveRecord::Base
-  self.ignored_columns = [
-    "disable_jump_reply", # Remove once 20210706091905 is promoted from post_deploy to regular migration
-  ]
-
   self.primary_key = :user_id
   belongs_to :user
   before_create :set_defaults
 
   after_save :update_tracked_topics
-
-  enum default_calendar: { none_selected: 0, ics: 1, google: 2 }
 
   def self.ensure_consistency!
     sql = <<~SQL
@@ -170,7 +164,6 @@ class UserOption < ActiveRecord::Base
     when 4 then "new"
     when 5 then "top"
     when 6 then "bookmarks"
-    when 7 then "unseen"
     else SiteSetting.homepage
     end
   end
@@ -196,20 +189,6 @@ class UserOption < ActiveRecord::Base
       !email_digests &&
       email_level == UserOption.email_level_types[:never] &&
       email_messages_level == UserOption.email_level_types[:never]
-  end
-
-  def self.user_tzinfo(user_id)
-    timezone = UserOption.where(user_id: user_id).pluck(:timezone).first || 'UTC'
-
-    tzinfo = nil
-    begin
-      tzinfo = ActiveSupport::TimeZone.find_tzinfo(timezone)
-    rescue TZInfo::InvalidTimezoneIdentifier
-      Rails.logger.warn("#{User.find_by(id: user_id)&.username} has the timezone #{timezone} set, we do not know how to parse it in Rails, fallback to UTC")
-      tzinfo = ActiveSupport::TimeZone.find_tzinfo('UTC')
-    end
-
-    tzinfo
   end
 
   private
@@ -258,10 +237,8 @@ end
 #  dark_scheme_id                   :integer
 #  skip_new_user_tips               :boolean          default(FALSE), not null
 #  color_scheme_id                  :integer
-#  default_calendar                 :integer          default("none_selected"), not null
 #
 # Indexes
 #
-#  index_user_options_on_user_id                       (user_id) UNIQUE
-#  index_user_options_on_user_id_and_default_calendar  (user_id,default_calendar)
+#  index_user_options_on_user_id  (user_id) UNIQUE
 #

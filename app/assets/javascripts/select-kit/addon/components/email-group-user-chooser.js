@@ -12,6 +12,7 @@ export default UserChooserComponent.extend({
   },
 
   selectKitOptions: {
+    headerComponent: "email-group-user-chooser-header",
     filterComponent: "email-group-user-chooser-filter",
     fullWidthWrap: false,
     autoWrap: false,

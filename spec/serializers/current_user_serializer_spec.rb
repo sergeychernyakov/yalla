@@ -135,9 +135,7 @@ RSpec.describe CurrentUserSerializer do
       public_group.save!
       payload = serializer.as_json
 
-      expect(payload[:groups]).to contain_exactly(
-        { id: public_group.id, name: public_group.name, has_messages: false }
-      )
+      expect(payload[:groups]).to eq([{ id: public_group.id, name: public_group.name }])
     end
   end
 

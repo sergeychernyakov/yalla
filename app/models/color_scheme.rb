@@ -133,10 +133,10 @@ class ColorScheme < ActiveRecord::Base
   LIGHT_THEME_ID = 'Light'
 
   def self.base_color_scheme_colors
-    base_with_hash = []
+    base_with_hash = {}
 
     base_colors.each do |name, color|
-      base_with_hash << { name: name, hex: "#{color}" }
+      base_with_hash[name] = "#{color}"
     end
 
     list = [
@@ -144,11 +144,7 @@ class ColorScheme < ActiveRecord::Base
     ]
 
     CUSTOM_SCHEMES.each do |k, v|
-      colors = []
-      v.each do |name, color|
-        colors << { name: name, hex: "#{color}" }
-      end
-      list.push(id: k.to_s, colors: colors)
+      list.push(id: k.to_s, colors: v)
     end
 
     list
@@ -209,7 +205,7 @@ class ColorScheme < ActiveRecord::Base
   def self.base_color_schemes
     base_color_scheme_colors.map do |hash|
       scheme = new(name: I18n.t("color_schemes.#{hash[:id].downcase.gsub(' ', '_')}"), base_scheme_id: hash[:id])
-      scheme.colors = hash[:colors].map { |k| { name: k[:name], hex: k[:hex] } }
+      scheme.colors = hash[:colors].map { |k, v| { name: k.to_s, hex: v.sub("#", "") } }
       scheme.is_base = true
       scheme
     end
@@ -324,7 +320,6 @@ class ColorScheme < ActiveRecord::Base
     end
     if theme_ids.present?
       Stylesheet::Manager.cache.clear
-
       Theme.notify_theme_change(
         theme_ids,
         with_scheme: true,

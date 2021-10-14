@@ -156,6 +156,7 @@ export default class {
 
     ajax("/topics/timings", {
       data,
+      cache: false,
       type: "POST",
       headers: {
         "X-SILENCE-LOGGER": "true",

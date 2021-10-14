@@ -24,7 +24,10 @@
         value=locale
         onChange=(action "updateLocale")
         class="locale-search"
-        options=(hash filterable=true)
+        options=(hash
+          filterable=true
+          none="user.locale.default"
+        )
       }}
     </div>
 

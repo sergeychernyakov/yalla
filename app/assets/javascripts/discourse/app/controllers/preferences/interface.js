@@ -1,5 +1,4 @@
-import Controller, { inject as controller } from "@ember/controller";
-import Session from "discourse/models/session";
+import Controller, { inject } from "@ember/controller";
 import {
   iOSWithVisualViewport,
   isiPad,
@@ -26,7 +25,6 @@ const USER_HOMES = {
   4: "new",
   5: "top",
   6: "bookmarks",
-  7: "unseen",
 };
 
 const TEXT_SIZES = ["smallest", "smaller", "normal", "larger", "largest"];
@@ -36,7 +34,7 @@ export default Controller.extend({
   currentThemeId: -1,
   previewingColorScheme: false,
   selectedDarkColorSchemeId: null,
-  preferencesController: controller("preferences"),
+  preferencesController: inject("preferences"),
   makeColorSchemeDefault: true,
 
   init() {
@@ -239,25 +237,7 @@ export default Controller.extend({
       return value;
     },
     get() {
-      if (!this.session.userColorSchemeId) {
-        return;
-      }
-
-      const theme = this.userSelectableThemes?.findBy("id", this.themeId);
-
-      // we don't want to display the numeric ID of a scheme
-      // when it is set by the theme but not marked as user selectable
-      if (
-        theme?.color_scheme_id === this.session.userColorSchemeId &&
-        !this.userSelectableColorSchemes.findBy(
-          "id",
-          this.session.userColorSchemeId
-        )
-      ) {
-        return;
-      } else {
-        return this.session.userColorSchemeId;
-      }
+      return this.session.userColorSchemeId;
     },
   }),
 
@@ -412,10 +392,8 @@ export default Controller.extend({
           this.themeId,
           true
         );
-        Session.currentProp("darkModeAvailable", false);
       } else {
         loadColorSchemeStylesheet(colorSchemeId, this.themeId, true);
-        Session.currentProp("darkModeAvailable", true);
       }
     },
 

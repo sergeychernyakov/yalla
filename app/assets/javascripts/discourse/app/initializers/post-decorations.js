@@ -4,7 +4,10 @@ import highlightSyntax from "discourse/lib/highlight-syntax";
 import lightbox from "discourse/lib/lightbox";
 import { iconHTML } from "discourse-common/lib/icon-library";
 import { setTextDirections } from "discourse/lib/text-direction";
-import { nativeLazyLoading } from "discourse/lib/lazy-load-images";
+import {
+  nativeLazyLoading,
+  setupLazyLoading,
+} from "discourse/lib/lazy-load-images";
 import { withPluginApi } from "discourse/lib/plugin-api";
 
 export default {
@@ -35,7 +38,11 @@ export default {
         });
       }
 
-      nativeLazyLoading(api);
+      if (siteSettings.disable_image_size_calculations) {
+        nativeLazyLoading(api);
+      } else {
+        setupLazyLoading(api);
+      }
 
       api.decorateCooked(
         ($elem) => {
@@ -81,7 +88,6 @@ export default {
 
       const oneboxTypes = {
         amazon: "discourse-amazon",
-        githubactions: "fab-github",
         githubblob: "fab-github",
         githubcommit: "fab-github",
         githubpullrequest: "fab-github",

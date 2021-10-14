@@ -3,6 +3,7 @@
 require 'rails_helper'
 
 describe UserAvatarsController do
+
   context 'show_proxy_letter' do
     it 'returns not found if external avatar is set somewhere else' do
       SiteSetting.external_system_avatars_url = "https://somewhere.else.com/avatar.png"
@@ -18,48 +19,52 @@ describe UserAvatarsController do
   end
 
   context 'show' do
-    context 'invalid' do
-      after do
-        FileUtils.rm(Discourse.store.path_for(upload))
-      end
 
-      let :upload do
-        File.open(file_from_fixtures("cropped.png")) do |f|
-          UploadCreator.new(
-            f,
-            "test.png"
-          ).create_for(-1)
+    # travis is not good here, no image magick
+    if !ENV["TRAVIS"]
+      context 'invalid' do
+        after do
+          FileUtils.rm(Discourse.store.path_for(upload))
         end
-      end
 
-      let(:user) do
-        user = Fabricate(:user)
-        user.user_avatar.update_columns(custom_upload_id: upload.id)
-        user.update_columns(uploaded_avatar_id: upload.id)
-        user
-      end
+        let :upload do
+          File.open(file_from_fixtures("cropped.png")) do |f|
+            UploadCreator.new(
+              f,
+              "test.png"
+            ).create_for(-1)
+          end
+        end
 
-      it 'automatically corrects bad avatar extensions' do
-        orig = Discourse.store.path_for(upload)
+        let :user do
+          user = Fabricate(:user)
+          user.user_avatar.update_columns(custom_upload_id: upload.id)
+          user.update_columns(uploaded_avatar_id: upload.id)
+          user
+        end
 
-        upload.update_columns(
-          original_filename: 'bob.jpg',
-          extension: 'jpg',
-          url: upload.url + '.jpg'
-        )
+        it 'automatically corrects bad avatar extensions' do
+          orig = Discourse.store.path_for(upload)
 
-        # at this point file is messed up
-        FileUtils.mv(orig, Discourse.store.path_for(upload))
+          upload.update_columns(
+            original_filename: 'bob.jpg',
+            extension: 'jpg',
+            url: upload.url + '.jpg'
+          )
 
-        SiteSetting.avatar_sizes = "50"
+          # at this point file is messed up
+          FileUtils.mv(orig, Discourse.store.path_for(upload))
 
-        get "/user_avatar/default/#{user.username}/50/#{upload.id}.png"
+          SiteSetting.avatar_sizes = "50"
 
-        expect(OptimizedImage.where(upload_id: upload.id).count).to eq(1)
-        expect(response.status).to eq(200)
+          get "/user_avatar/default/#{user.username}/50/#{upload.id}.png"
 
-        upload.reload
-        expect(upload.extension).to eq('png')
+          expect(OptimizedImage.where(upload_id: upload.id).count).to eq(1)
+          expect(response.status).to eq(200)
+
+          upload.reload
+          expect(upload.extension).to eq('png')
+        end
       end
     end
 

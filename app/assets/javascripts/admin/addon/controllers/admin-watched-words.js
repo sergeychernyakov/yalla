@@ -1,55 +1,71 @@
 import Controller from "@ember/controller";
-import EmberObject, { action } from "@ember/object";
+import EmberObject from "@ember/object";
 import { INPUT_DELAY } from "discourse-common/config/environment";
+import { alias } from "@ember/object/computed";
 import discourseDebounce from "discourse-common/lib/debounce";
 import { isEmpty } from "@ember/utils";
 import { observes } from "discourse-common/utils/decorators";
 
 export default Controller.extend({
   filter: null,
+  filtered: false,
   showWords: false,
+  disableShowWords: alias("filtered"),
+  regularExpressions: null,
 
-  _filterContent() {
-    if (isEmpty(this.allWatchedWords)) {
+  filterContentNow() {
+    if (!!isEmpty(this.allWatchedWords)) {
       return;
     }
 
-    if (!this.filter) {
+    let filter;
+    if (this.filter) {
+      filter = this.filter.toLowerCase();
+    }
+
+    if (filter === undefined || filter.length < 1) {
       this.set("model", this.allWatchedWords);
       return;
     }
 
-    const filter = this.filter.toLowerCase();
-    const model = [];
+    const matchesByAction = [];
 
     this.allWatchedWords.forEach((wordsForAction) => {
       const wordRecords = wordsForAction.words.filter((wordRecord) => {
         return wordRecord.word.indexOf(filter) > -1;
       });
-
-      model.pushObject(
+      matchesByAction.pushObject(
         EmberObject.create({
           nameKey: wordsForAction.nameKey,
           name: wordsForAction.name,
           words: wordRecords,
+          count: wordRecords.length,
         })
       );
     });
-    this.set("model", model);
+
+    this.set("model", matchesByAction);
   },
 
   @observes("filter")
   filterContent() {
-    discourseDebounce(this, this._filterContent, INPUT_DELAY);
+    discourseDebounce(
+      this,
+      function () {
+        this.filterContentNow();
+        this.set("filtered", !isEmpty(this.filter));
+      },
+      INPUT_DELAY
+    );
   },
 
-  @action
-  clearFilter() {
-    this.set("filter", "");
-  },
+  actions: {
+    clearFilter() {
+      this.setProperties({ filter: "" });
+    },
 
-  @action
-  toggleMenu() {
-    $(".admin-detail").toggleClass("mobile-closed mobile-open");
+    toggleMenu() {
+      $(".admin-detail").toggleClass("mobile-closed mobile-open");
+    },
   },
 });

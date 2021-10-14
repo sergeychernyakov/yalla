@@ -1,18 +1,31 @@
 import {
   acceptance,
-  chromeTest,
-  count,
   exists,
-  query,
   queryAll,
-  selectText,
   visible,
 } from "discourse/tests/helpers/qunit-helpers";
-import { click, fillIn, triggerKeyEvent, visit } from "@ember/test-helpers";
+import {
+  click,
+  fillIn,
+  settled,
+  triggerKeyEvent,
+  visit,
+} from "@ember/test-helpers";
 import I18n from "I18n";
 import selectKit from "discourse/tests/helpers/select-kit-helper";
 import { test } from "qunit";
 import { withPluginApi } from "discourse/lib/plugin-api";
+
+async function selectText(selector) {
+  const range = document.createRange();
+  const node = document.querySelector(selector);
+  range.selectNodeContents(node);
+
+  const selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
+  await settled();
+}
 
 acceptance("Topic", function (needs) {
   needs.user();
@@ -25,7 +38,7 @@ acceptance("Topic", function (needs) {
   test("Reply as new topic", async function (assert) {
     await visit("/t/internationalization-localization/280");
     await click("button.share:nth-of-type(1)");
-    await click("button.new-topic");
+    await click(".reply-as-new-topic a");
 
     assert.ok(exists(".d-editor-input"), "the composer input is visible");
 
@@ -44,7 +57,7 @@ acceptance("Topic", function (needs) {
   test("Reply as new message", async function (assert) {
     await visit("/t/pm-for-testing/12");
     await click("button.share:nth-of-type(1)");
-    await click("button.new-topic");
+    await click(".reply-as-new-topic a");
 
     assert.ok(exists(".d-editor-input"), "the composer input is visible");
 
@@ -54,11 +67,27 @@ acceptance("Topic", function (needs) {
       "it fills composer with the ring string"
     );
 
-    const privateMessageUsers = selectKit("#private-message-users");
+    const targets = queryAll(
+      "#private-message-users .selected-name",
+      ".composer-fields"
+    );
+
     assert.equal(
-      privateMessageUsers.header().value(),
-      "someguy,test,Group",
-      "it fills up the composer correctly"
+      $(targets[0]).text().trim(),
+      "someguy",
+      "it fills up the composer with the right user to start the PM to"
+    );
+
+    assert.equal(
+      $(targets[1]).text().trim(),
+      "test",
+      "it fills up the composer with the right user to start the PM to"
+    );
+
+    assert.equal(
+      $(targets[2]).text().trim(),
+      "Group",
+      "it fills up the composer with the right group to start the PM to"
     );
   });
 
@@ -111,13 +140,16 @@ acceptance("Topic", function (needs) {
   test("Marking a topic as wiki", async function (assert) {
     await visit("/t/internationalization-localization/280");
 
-    assert.ok(!exists("a.wiki"), "it does not show the wiki icon");
+    assert.ok(
+      queryAll("a.wiki").length === 0,
+      "it does not show the wiki icon"
+    );
 
     await click(".topic-post:nth-of-type(1) button.show-more-actions");
     await click(".topic-post:nth-of-type(1) button.show-post-admin-menu");
     await click(".btn.wiki");
 
-    assert.equal(count("button.wiki"), 1, "it shows the wiki icon");
+    assert.ok(queryAll("button.wiki").length === 1, "it shows the wiki icon");
   });
 
   test("Visit topic routes", async function (assert) {
@@ -228,45 +260,6 @@ acceptance("Topic", function (needs) {
     assert.ok(exists(".category-moderator"), "it has a class applied");
     assert.ok(exists(".d-icon-shield-alt"), "it shows an icon");
   });
-});
-
-acceptance("Topic featured links", function (needs) {
-  needs.user();
-  needs.settings({
-    topic_featured_link_enabled: true,
-    max_topic_title_length: 80,
-    exclude_rel_nofollow_domains: "example.com",
-  });
-
-  test("remove nofollow attribute", async function (assert) {
-    await visit("/t/-/299/1");
-
-    const link = queryAll(".title-wrapper .topic-featured-link");
-    assert.equal(link.text(), " example.com");
-    assert.equal(link.attr("rel"), "ugc");
-  });
-
-  test("remove featured link", async function (assert) {
-    await visit("/t/-/299/1");
-    assert.ok(
-      exists(".title-wrapper .topic-featured-link"),
-      "link is shown with topic title"
-    );
-
-    await click(".title-wrapper .edit-topic");
-    assert.ok(
-      exists(".title-wrapper .remove-featured-link"),
-      "link to remove featured link"
-    );
-
-    // TODO: decide if we want to test this, test is flaky so it
-    // was commented out.
-    // If not fixed by May 2021, delete this code block
-    //
-    //await click(".title-wrapper .remove-featured-link");
-    //await click(".title-wrapper .submit-edit");
-    //assert.ok(!exists(".title-wrapper .topic-featured-link"), "link is gone");
-  });
 
   test("Converting to a public topic", async function (assert) {
     await visit("/t/test-pm/34");
@@ -344,7 +337,7 @@ acceptance("Topic featured links", function (needs) {
     await visit("/t/internationalization-localization/280");
     await click(".gap");
 
-    assert.ok(!exists(".gap"), "it hides gap");
+    assert.equal(queryAll(".gap").length, 0, "it hides gap");
   });
 
   test("Quoting a quote keeps the original poster name", async function (assert) {
@@ -385,22 +378,18 @@ acceptance("Topic featured links", function (needs) {
     );
   });
 
-  // Using J/K on Firefox clean the text selection, so this won't work there
-  chromeTest(
-    "Quoting a quote with replyAsNewTopic keeps the original poster name",
-    async function (assert) {
-      await visit("/t/internationalization-localization/280");
-      await selectText("#post_5 blockquote");
-      await triggerKeyEvent(document, "keypress", "j".charCodeAt(0));
-      await triggerKeyEvent(document, "keypress", "t".charCodeAt(0));
+  test("Quoting a quote with replyAsNewTopic keeps the original poster name", async function (assert) {
+    await visit("/t/internationalization-localization/280");
+    await selectText("#post_5 blockquote");
+    await triggerKeyEvent(document, "keypress", "j".charCodeAt(0));
+    await triggerKeyEvent(document, "keypress", "t".charCodeAt(0));
 
-      assert.ok(
-        queryAll(".d-editor-input")
-          .val()
-          .indexOf('quote="codinghorror said, post:3, topic:280"') !== -1
-      );
-    }
-  );
+    assert.ok(
+      queryAll(".d-editor-input")
+        .val()
+        .indexOf('quote="codinghorror said, post:3, topic:280"') !== -1
+    );
+  });
 
   test("Quoting by selecting text can mark the quote as full", async function (assert) {
     await visit("/t/internationalization-localization/280");
@@ -434,6 +423,14 @@ acceptance("Topic featured links", function (needs) {
       exists(".title-wrapper .remove-featured-link"),
       "link to remove featured link"
     );
+
+    // TODO: decide if we want to test this, test is flaky so it
+    // was commented out.
+    // If not fixed by May 2021, delete this code block
+    //
+    //await click(".title-wrapper .remove-featured-link");
+    //await click(".title-wrapper .submit-edit");
+    //assert.ok(!exists(".title-wrapper .topic-featured-link"), "link is gone");
   });
 });
 
@@ -451,12 +448,12 @@ acceptance("Topic with title decorated", function (needs) {
     await visit("/t/internationalization-localization/280");
 
     assert.ok(
-      query(".fancy-title").innerText.endsWith("-280-topic-title"),
+      queryAll(".fancy-title")[0].innerText.endsWith("-280-topic-title"),
       "it decorates topic title"
     );
 
     assert.ok(
-      query(".raw-topic-link:nth-child(1)").innerText.endsWith(
+      queryAll(".raw-topic-link:nth-child(1)")[0].innerText.endsWith(
         "-27331-topic-list-item-title"
       ),
       "it decorates topic list item title"
@@ -523,26 +520,6 @@ acceptance("Topic pinning/unpinning as a group moderator", function (needs) {
     assert.ok(
       !exists(".make-banner"),
       "it should not show the 'Banner Topic' button"
-    );
-  });
-});
-
-acceptance("Topic last visit line", function (needs) {
-  needs.user({ moderator: false, admin: false, trust_level: 1 });
-
-  test("visit topic", async function (assert) {
-    await visit("/t/-/280");
-
-    assert.ok(
-      exists(".topic-post-visited-line.post-10"),
-      "shows the last visited line on the right post"
-    );
-
-    await visit("/t/-/9");
-
-    assert.ok(
-      !exists(".topic-post-visited-line"),
-      "does not show last visited line if post is the last post"
     );
   });
 });

@@ -7,7 +7,7 @@
 fi:
   js:
     details:
-      title: Piilota tiedot
+      title: Piilota yksityiskohtia
     composer:
       details_title: Yhteenveto
-      details_text: "Tämä teksti piilotetaan"
+      details_text: "Tämä teksti piilotetaan otsikon alle."

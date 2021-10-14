@@ -1602,7 +1602,7 @@ var bar = 'bar';
     assert.cookedOptions(" -->asd", enabledTypographer, "<p>–&gt;asd</p>");
   });
 
-  test("default typographic replacements", function (assert) {
+  test("default typhographic replacements", function (assert) {
     const enabledTypographer = {
       siteSettings: { enable_markdown_typographer: true },
     };
@@ -1628,7 +1628,7 @@ var bar = 'bar';
     assert.cookedOptions("(pa) (PA)", enabledTypographer, "<p>¶ ¶</p>");
   });
 
-  test("default typographic replacements - dashes", function (assert) {
+  test("default typhographic replacements - dashes", function (assert) {
     const enabledTypographer = {
       siteSettings: { enable_markdown_typographer: true },
     };
@@ -1663,7 +1663,7 @@ var bar = 'bar';
     );
   });
 
-  test("disabled typographic replacements", function (assert) {
+  test("disabled typhographic replacements", function (assert) {
     const enabledTypographer = {
       siteSettings: { enable_markdown_typographer: true },
     };
@@ -1675,29 +1675,17 @@ var bar = 'bar';
 
   test("watched words replace", function (assert) {
     const opts = {
-      watchedWordsReplace: { "(?:\\W|^)(fun)(?=\\W|$)": "times" },
+      watchedWordsReplacements: { fun: "times" },
     };
 
-    assert.cookedOptions("test fun funny", opts, "<p>test times funny</p>");
-  });
-
-  test("watched words link", function (assert) {
-    const opts = {
-      watchedWordsLink: { "(?:\\W|^)(fun)(?=\\W|$)": "https://discourse.org" },
-    };
-
-    assert.cookedOptions(
-      "test fun funny",
-      opts,
-      '<p>test <a href="https://discourse.org">fun</a> funny</p>'
-    );
+    assert.cookedOptions("test fun", opts, "<p>test times</p>");
   });
 
   test("watched words replace with bad regex", function (assert) {
     const maxMatches = 100; // same limit as MD watched-words-replace plugin
     const opts = {
       siteSettings: { watched_words_regular_expressions: true },
-      watchedWordsReplace: { "(\\bu?\\b)": "you" },
+      watchedWordsReplacements: { "\\bu?\\b": "you" },
     };
 
     assert.cookedOptions(

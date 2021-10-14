@@ -9,12 +9,6 @@
   }
 }
 
-.topic-post-visited {
-  + .topic-post article {
-    border-top: none;
-  }
-}
-
 .topic-post article {
   border-top: 1px solid var(--primary-low);
   padding: 15px 0 8px 0;
@@ -87,7 +81,11 @@ span.badge-posts {
         &.expand-post {
           margin: 10px 0 10px 0;
         }
-
+        &.reply {
+          .d-icon {
+            color: var(--primary-high);
+          }
+        }
         &.has-like {
           .d-icon {
             color: var(--love);
@@ -120,10 +118,6 @@ span.badge-posts {
       }
     }
   }
-}
-
-nav.post-controls button.reply .d-icon {
-  color: var(--primary-high);
 }
 
 .post-admin-menu {
@@ -301,8 +295,8 @@ span.post-count {
 
 #topic-title {
   z-index: z("base") + 1;
-  margin: 0;
-  padding: 0 0 1em;
+  margin: 0 0 0 0 !important;
+  padding: 15px 0;
 }
 
 .quote-button.visible {
@@ -335,6 +329,12 @@ iframe {
 // unhide the simple "select just this post" button
 button.select-post {
   display: inline-block;
+}
+
+.deleted {
+  .topic-body {
+    background-color: var(--danger-low-mid);
+  }
 }
 
 .deleted-user-avatar {

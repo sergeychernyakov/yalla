@@ -477,14 +477,10 @@
   }
   .modal-body {
     overflow-y: visible;
-    #post-jump {
-      margin: 0;
-      width: 100px;
-    }
-
+    #post-jump,
     .date-picker {
       margin: 0;
-      width: 180px;
+      width: 100px;
     }
 
     .input-hint-text {
@@ -495,13 +491,8 @@
       color: var(--primary-medium);
     }
 
-    .jump-to-date-control {
-      display: flex;
-      align-items: center;
-      .input-hint-text {
-        margin-left: 0;
-        margin-right: 0.5em;
-      }
+    .jump-to-date-control .input-hint-text {
+      margin-left: 0;
     }
 
     .separator {
@@ -631,9 +622,7 @@
           &.single-tab {
             background: none;
             color: var(--primary);
-            padding: 0;
-            font-size: var(--font-up-3);
-            font-weight: bold;
+            padding: 4px 0;
           }
         }
       }
@@ -840,16 +829,117 @@
   }
 }
 
-.group-add-members-modal {
+.create-invite-modal,
+.share-topic-modal {
   .input-group {
-    margin-bottom: 0.5em;
+    margin-bottom: 1em;
 
     &:last-child {
       margin-bottom: 0;
     }
+
+    input[type="text"] {
+      width: 100%;
+    }
   }
 
-  .user-chooser {
-    width: calc(100%);
+  .invite-type {
+    input[type="checkbox"] {
+      display: inline;
+      vertical-align: middle;
+      margin-top: -1px;
+    }
+
+    label {
+      display: inline-block;
+    }
+  }
+
+  .group-chooser,
+  .user-chooser,
+  .future-date-input-selector {
+    width: 100%;
+  }
+
+  .input-group input[type="text"],
+  .input-group .btn,
+  .user-chooser .select-kit-header,
+  .future-date-input .select-kit-header {
+    height: 34px;
+  }
+
+  .input-group .btn {
+    vertical-align: top;
+  }
+
+  .invite-input-with-button {
+    display: flex;
+
+    .btn {
+      margin-left: 3px;
+    }
+  }
+
+  .future-date-input {
+    .date-picker-wrapper {
+      input {
+        margin: 0;
+      }
+    }
+
+    .control-group:nth-child(2),
+    .control-group:nth-child(3) {
+      display: inline-block;
+      margin-bottom: 0;
+      width: 49%;
+
+      input {
+        margin-bottom: 0;
+        width: 150px;
+      }
+    }
+  }
+
+  .invite-max-redemptions {
+    label {
+      display: inline;
+    }
+
+    input {
+      width: 80px;
+    }
+  }
+
+  .show-advanced {
+    margin-left: auto;
+    margin-right: 0;
+  }
+}
+
+.share-topic-modal {
+  .sources {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    margin-bottom: 1em;
+
+    .social-link {
+      font-size: $font-up-6;
+      margin-right: 8px;
+    }
+
+    .btn-primary {
+      border-radius: 4px;
+      height: calc(#{$font-up-6} - 4px);
+      margin-bottom: 2px;
+      margin-right: 8px;
+      padding-left: 8px;
+      padding-right: 8px;
+
+      .d-icon {
+        font-size: $font-up-3;
+      }
+    }
   }
 }

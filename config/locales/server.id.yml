@@ -94,7 +94,8 @@ id:
       odd: harus ganjil
       record_invalid: ! "Validasi gagal: %{errors}"
       restrict_dependent_destroy:
-        other: "Tidak bisa menghapus catatan karena ada catatan yang berkaitan: %{record}"
+        one: "Tidak bisa menghapus catatan karena ada catatan yang berkaitan: %{record}"
+        many: "Tidak bisa menghapus catatan karena ada catatan yang berkaitan: %{record}"
       too_long:
         other: terlalu panjang (panjang maksimum adalah %{count} karakter)
       too_short:
@@ -250,8 +251,16 @@ id:
       topic_exists_no_oldest: "Tidak dapat menghapus kategori ini karena terdapat %{count} topik."
     uncategorized_description: "Topik yang tidak membutuhkan kategori, atau tidak masuk dalam kategori yang ada."
   trust_levels:
-    admin: "Admin"
-    staff: "Staf"
+    newuser:
+      title: "pengguna baru"
+    basic:
+      title: "pengguna standar"
+    member:
+      title: "anggota"
+    regular:
+      title: "umum"
+    leader:
+      title: "pemimpin"
   rate_limiter:
     hours:
       other: "%{count} jam"
@@ -384,7 +393,6 @@ id:
     post_edits:
       labels:
         edited_at: Tanggal
-        post: Postingan
         edit_reason: Alasan
     user_flagging_ratio:
       labels:
@@ -409,7 +417,6 @@ id:
     consolidated_page_views:
       yaxis: "Hari"
       labels:
-        post: Postingan
         edit_reason: Alasan
     dau_by_mau:
       xaxis: "Hari"
@@ -549,7 +556,6 @@ id:
     host_names_warning: "Berkas config/database.yml Anda menggunakan nama host default localhost. Ubahlah untuk menggunakan nama host dari situs Anda."
     memory_warning: "Server Anda berjalan dengan total memori kurang dari 1 GB. Total memori minimum yang direkomendasikan adalah 1 GB."
   site_settings:
-    disabled: "dinonaktifkan"
     allow_user_locale: "Perbolehkan pengguna untuk memilih bahasa sendiri"
     allow_duplicate_topic_titles: "Perbolehkan topik dengan judul yang sama."
     send_welcome_message: "Kirim semua pengguna ucapan selamat datang dengan panduan awal singkat."
@@ -623,10 +629,6 @@ id:
   skipped_email_log:
     user_email_no_user: "Tidak dapat menemukan pengguna dengan id %{user_id}"
     user_email_post_not_found: "Tidak dapat menemukan post dengan id %{post_id}"
-    sender_post_deleted: "postingan telah dihapus"
-    sender_topic_deleted: "topik telah dihapus"
-    group_smtp_post_deleted: "postingan telah dihapus"
-    group_smtp_topic_deleted: "topik telah dihapus"
   color_schemes:
     default_theme_name: "Asal"
   csv_export:
@@ -671,7 +673,7 @@ id:
                 label: "Pribadi"
       corporate:
         title: "Organisasi"
-      styling:
+      homepage:
         fields:
           homepage_style:
             choices:
@@ -703,7 +705,8 @@ id:
           title: "Hapus Pengguna"
       reject:
         title: "Tolak"
-  fallback_username: "pengguna"
+      delete_user:
+        title: "Hapus Pengguna"
   time:
     <<: *datetime_formats
   activemodel:

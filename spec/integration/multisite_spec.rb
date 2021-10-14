@@ -49,6 +49,7 @@ describe 'multisite', type: :multisite do
   end
 
   it "should hit correct site elsewise" do
+
     headers = {
       "HTTP_HOST" => "test2.localhost",
       "REQUEST_METHOD" => "GET",
@@ -60,4 +61,5 @@ describe 'multisite', type: :multisite do
     expect(code).to eq(200)
     expect(body.join).to eq("test2.localhost")
   end
+
 end

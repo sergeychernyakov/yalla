@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-#mixin for all guardian methods dealing with category permissions
+#mixin for all guardian methods dealing with category permisions
 module CategoryGuardian
 
   # Creating Method
@@ -22,15 +22,6 @@ module CategoryGuardian
     )
   end
 
-  def can_edit_serialized_category?(category_id:, read_restricted:)
-    is_admin? ||
-    (
-      SiteSetting.moderators_manage_categories_and_groups &&
-      is_moderator? &&
-      can_see_serialized_category?(category_id: category_id, read_restricted: read_restricted)
-    )
-  end
-
   def can_delete_category?(category)
     can_edit_category?(category) &&
     category.topic_count <= 0 &&
@@ -38,12 +29,21 @@ module CategoryGuardian
     !category.has_children?
   end
 
-  def can_see_serialized_category?(category_id:, read_restricted: true)
-    # Guard to ensure only a boolean is passed in
-    read_restricted = true unless !!read_restricted == read_restricted
+  def cannot_delete_category_reason(category)
+    return I18n.t('category.cannot_delete.uncategorized') if category.uncategorized?
+    return I18n.t('category.cannot_delete.has_subcategories') if category.has_children?
 
-    return true if !read_restricted
-    secure_category_ids.include?(category_id)
+    if category.topic_count != 0
+      oldest_topic = category.topics.where.not(id: category.topic_id).order('created_at ASC').limit(1).first
+      if oldest_topic
+        return I18n.t('category.cannot_delete.topic_exists', count: category.topic_count, topic_link: "<a href=\"#{oldest_topic.url}\">#{CGI.escapeHTML(oldest_topic.title)}</a>")
+      else
+        # This is a weird case, probably indicating a bug.
+        return I18n.t('category.cannot_delete.topic_exists_no_oldest', count: category.topic_count)
+      end
+    end
+
+    nil
   end
 
   def can_see_category?(category)

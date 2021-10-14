@@ -37,9 +37,9 @@ class DiscourseRedis
   end
 
   # prefix the key with the namespace
-  def method_missing(meth, *args, **kwargs, &block)
+  def method_missing(meth, *args, &block)
     if @redis.respond_to?(meth)
-      DiscourseRedis.ignore_readonly { @redis.public_send(meth, *args, **kwargs, &block) }
+      DiscourseRedis.ignore_readonly { @redis.public_send(meth, *args, &block) }
     else
       super
     end
@@ -54,9 +54,9 @@ class DiscourseRedis
    :sdiff, :set, :setbit, :setex, :setnx, :setrange, :sinter, :sismember, :smembers, :sort, :spop, :srandmember, :srem, :strlen,
    :sunion, :ttl, :type, :watch, :zadd, :zcard, :zcount, :zincrby, :zrange, :zrangebyscore, :zrank, :zrem, :zremrangebyrank,
    :zremrangebyscore, :zrevrange, :zrevrangebyscore, :zrevrank, :zrangebyscore ].each do |m|
-    define_method m do |*args, **kwargs|
+    define_method m do |*args|
       args[0] = "#{namespace}:#{args[0]}" if @namespace
-      DiscourseRedis.ignore_readonly { @redis.public_send(m, *args, **kwargs) }
+      DiscourseRedis.ignore_readonly { @redis.public_send(m, *args) }
     end
   end
 
@@ -94,12 +94,12 @@ class DiscourseRedis
         end
 
       if block
-        @redis.scan_each(**options) do |key|
+        @redis.scan_each(options) do |key|
           key = remove_namespace(key) if @namespace
           block.call(key)
         end
       else
-        @redis.scan_each(**options).map do |key|
+        @redis.scan_each(options).map do |key|
           key = remove_namespace(key) if @namespace
           key
         end

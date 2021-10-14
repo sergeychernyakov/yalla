@@ -67,7 +67,7 @@ Eyeline.prototype.update = function () {
     }
 
     // It's seen if...
-    // ...the element is vertically within the top and bottom
+    // ...the element is vertically within the top and botom
     if (elemTop <= docViewBottom && elemTop >= docViewTop) {
       markSeen = true;
     }

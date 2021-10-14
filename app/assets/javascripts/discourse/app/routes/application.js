@@ -94,7 +94,13 @@ const ApplicationRoute = DiscourseRoute.extend(OpenComposer, {
     },
 
     error(err, transition) {
-      const xhrOrErr = err.jqXHR ? err.jqXHR : err;
+      let xhr = {};
+      if (err.jqXHR) {
+        xhr = err.jqXHR;
+      }
+
+      const xhrOrErr = err.jqXHR ? xhr : err;
+
       const exceptionController = this.controllerFor("exception");
 
       const c = window.console;
@@ -137,8 +143,11 @@ const ApplicationRoute = DiscourseRoute.extend(OpenComposer, {
       showModal("not-activated", { title: "log_in" }).setProperties(props);
     },
 
-    showUploadSelector() {
-      document.getElementById("file-uploader").click();
+    showUploadSelector(toolbarEvent) {
+      showModal("uploadSelector").setProperties({
+        toolbarEvent,
+        imageUrl: null,
+      });
     },
 
     showKeyboardShortcutsHelp() {
@@ -170,19 +179,11 @@ const ApplicationRoute = DiscourseRoute.extend(OpenComposer, {
         const controller = getOwner(this).lookup(
           `controller:${controllerName}`
         );
-
-        if (controller) {
-          this.appEvents.trigger("modal:closed", {
-            name: controllerName,
-            controller: controller,
+        if (controller && controller.onClose) {
+          controller.onClose({
+            initiatedByCloseButton: initiatedBy === "initiatedByCloseButton",
+            initiatedByClickOut: initiatedBy === "initiatedByClickOut",
           });
-
-          if (controller.onClose) {
-            controller.onClose({
-              initiatedByCloseButton: initiatedBy === "initiatedByCloseButton",
-              initiatedByClickOut: initiatedBy === "initiatedByClickOut",
-            });
-          }
         }
         modalController.set("name", null);
       }
@@ -267,18 +268,11 @@ const ApplicationRoute = DiscourseRoute.extend(OpenComposer, {
       const returnPath = encodeURIComponent(window.location.pathname);
       window.location = getURL("/session/sso?return_path=" + returnPath);
     } else {
-      this._autoLogin("createAccount", "create-account", {
-        signup: true,
-        titleAriaElementId: "create-account-title",
-      });
+      this._autoLogin("createAccount", "create-account", { signup: true });
     }
   },
 
-  _autoLogin(
-    modal,
-    modalClass,
-    { notAuto = null, signup = false, titleAriaElementId = null } = {}
-  ) {
+  _autoLogin(modal, modalClass, { notAuto = null, signup = false } = {}) {
     const methods = findAll();
 
     if (!this.siteSettings.enable_local_logins && methods.length === 1) {
@@ -286,7 +280,7 @@ const ApplicationRoute = DiscourseRoute.extend(OpenComposer, {
         signup: signup,
       });
     } else {
-      showModal(modal, { titleAriaElementId });
+      showModal(modal);
       this.controllerFor("modal").set("modalClass", modalClass);
       if (notAuto) {
         notAuto();

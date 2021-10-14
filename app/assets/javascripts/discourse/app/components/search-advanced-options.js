@@ -80,9 +80,7 @@ export function addAdvancedSearchOptions(options) {
 }
 
 export default Component.extend({
-  tagName: "details",
-  attributeBindings: ["expandFilters:open"],
-  classNames: ["advanced-filters"],
+  classNames: ["search-advanced-options"],
   category: null,
 
   init() {
@@ -118,7 +116,6 @@ export default Component.extend({
         : inOptionsForAll(),
       statusOptions: statusOptions(),
       postTimeOptions: postTimeOptions(),
-      showAllTagsCheckbox: false,
     });
   },
 
@@ -266,32 +263,33 @@ export default Component.extend({
       const subcategories = match[0]
         .replace(REGEXP_CATEGORY_PREFIX, "")
         .split(":");
-
-      let userInput;
       if (subcategories.length > 1) {
-        userInput = Category.list().find(
-          (category) =>
-            category.get("parentCategory.slug") === subcategories[0] &&
-            category.slug === subcategories[1]
+        const userInput = Category.findBySlug(
+          subcategories[1],
+          subcategories[0]
         );
-      } else {
-        userInput = Category.list().find(
-          (category) =>
-            !category.parentCategory && category.slug === subcategories[0]
-        );
-
-        if (!userInput) {
-          userInput = Category.list().find(
-            (category) => category.slug === subcategories[0]
-          );
+        if (
+          (!existingInput && userInput) ||
+          (existingInput && userInput && existingInput.id !== userInput.id)
+        ) {
+          this.set("searchedTerms.category", userInput);
         }
-      }
-
-      if (
-        (!existingInput && userInput) ||
-        (existingInput && userInput && existingInput.id !== userInput.id)
-      ) {
-        this.set("searchedTerms.category", userInput);
+      } else if (isNaN(subcategories)) {
+        const userInput = Category.findSingleBySlug(subcategories[0]);
+        if (
+          (!existingInput && userInput) ||
+          (existingInput && userInput && existingInput.id !== userInput.id)
+        ) {
+          this.set("searchedTerms.category", userInput);
+        }
+      } else {
+        const userInput = Category.findById(subcategories[0]);
+        if (
+          (!existingInput && userInput) ||
+          (existingInput && userInput && existingInput.id !== userInput.id)
+        ) {
+          this.set("searchedTerms.category", userInput);
+        }
       }
     } else {
       this.set("searchedTerms.category", null);
@@ -316,10 +314,10 @@ export default Component.extend({
       const userInput = match[0].replace(REGEXP_TAGS_REPLACE, "");
 
       if (existingInput !== userInput) {
-        const updatedTags = userInput?.split(joinChar);
-
-        this.set("searchedTerms.tags", updatedTags);
-        this.set("showAllTagsCheckbox", !!(updatedTags.length > 1));
+        this.set(
+          "searchedTerms.tags",
+          userInput.length !== 0 ? userInput.split(joinChar) : null
+        );
       }
     } else if (!tags) {
       this.set("searchedTerms.tags", null);
@@ -499,9 +497,6 @@ export default Component.extend({
         searchTerm += ` tags:${tags}`;
       }
 
-      if (tagFilter.length > 1) {
-        this.set("showAllTagsCheckbox", true);
-      }
       this._updateSearchTerm(searchTerm);
     } else if (match.length !== 0) {
       searchTerm = searchTerm.replace(match[0], "");
@@ -533,10 +528,8 @@ export default Component.extend({
             idCategoryMatches[0],
             `category:${id}`
           );
-        } else if (slug) {
-          searchTerm += ` #${parentSlug}:${slug}`;
         } else {
-          searchTerm += ` category:${id}`;
+          searchTerm += ` #${parentSlug}:${slug}`;
         }
 
         this._updateSearchTerm(searchTerm);
@@ -548,10 +541,8 @@ export default Component.extend({
             idCategoryMatches[0],
             `category:${id}`
           );
-        } else if (slug) {
-          searchTerm += ` #${slug}`;
         } else {
-          searchTerm += ` category:${id}`;
+          searchTerm += ` #${slug}`;
         }
 
         this._updateSearchTerm(searchTerm);

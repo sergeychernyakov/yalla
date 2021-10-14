@@ -1,4 +1,3 @@
-import Report from "admin/models/report";
 import Component from "@ember/component";
 import discourseDebounce from "discourse-common/lib/debounce";
 import loadScript from "discourse/lib/load-script";
@@ -64,7 +63,7 @@ export default Component.extend({
         return {
           label: cd.label,
           stack: "pageviews-stack",
-          data: Report.collapse(model, cd.data),
+          data: cd.data.map((d) => Math.round(parseFloat(d.y))),
           backgroundColor: cd.color,
         };
       }),
@@ -89,24 +88,21 @@ export default Component.extend({
         animation: {
           duration: 0,
         },
-        plugins: {
-          tooltip: {
-            mode: "index",
-            intersect: false,
-            callbacks: {
-              beforeFooter: (tooltipItem) => {
-                let total = 0;
-                tooltipItem.forEach(
-                  (item) => (total += parseInt(item.parsed.y || 0, 10))
-                );
-                return `= ${total}`;
-              },
-              title: (tooltipItem) =>
-                moment(tooltipItem[0].label, "YYYY-MM-DD").format("LL"),
+        tooltips: {
+          mode: "index",
+          intersect: false,
+          callbacks: {
+            beforeFooter: (tooltipItem) => {
+              let total = 0;
+              tooltipItem.forEach(
+                (item) => (total += parseInt(item.yLabel || 0, 10))
+              );
+              return `= ${total}`;
             },
+            title: (tooltipItem) =>
+              moment(tooltipItem[0].xLabel, "YYYY-MM-DD").format("LL"),
           },
         },
-
         layout: {
           padding: {
             left: 0,
@@ -116,11 +112,16 @@ export default Component.extend({
           },
         },
         scales: {
-          y: [
+          yAxes: [
             {
               stacked: true,
               display: true,
               ticks: {
+                userCallback: (label) => {
+                  if (Math.floor(label) === label) {
+                    return label;
+                  }
+                },
                 callback: (label) => number(label),
                 sampleSize: 5,
                 maxRotation: 25,
@@ -128,13 +129,15 @@ export default Component.extend({
               },
             },
           ],
-          x: [
+          xAxes: [
             {
               display: true,
               gridLines: { display: false },
               type: "time",
+              offset: true,
               time: {
-                unit: Report.unitForDatapoints(data.labels.length),
+                parser: "YYYY-MM-DD",
+                minUnit: "day",
               },
               ticks: {
                 sampleSize: 5,

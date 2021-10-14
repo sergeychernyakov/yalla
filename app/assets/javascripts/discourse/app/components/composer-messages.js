@@ -4,7 +4,6 @@ import I18n from "I18n";
 import LinkLookup from "discourse/lib/link-lookup";
 import { not } from "@ember/object/computed";
 import { scheduleOnce } from "@ember/runloop";
-import showModal from "discourse/lib/show-modal";
 
 let _messagesCache = {};
 
@@ -73,25 +72,6 @@ export default Component.extend({
         messagesByTemplate[templateName] = message;
       }
     },
-
-    shareModal() {
-      const { topic } = this.composer;
-      const controller = showModal("share-topic");
-      controller.setProperties({
-        allowInvites:
-          topic.details.can_invite_to &&
-          !topic.archived &&
-          !topic.closed &&
-          !topic.deleted,
-        topic: topic,
-      });
-    },
-
-    switchPM(message) {
-      this.composer.set("action", "privateMessage");
-      this.composer.set("targetRecipients", message.reply_username);
-      this._removeMessage(message);
-    },
   },
 
   // Resets all active messages.
@@ -136,12 +116,7 @@ export default Component.extend({
       }
     }
 
-    this.queuedForTyping.forEach((msg) => {
-      if (composer.whisper && msg.hide_if_whisper) {
-        return;
-      }
-      this.send("popup", msg);
-    });
+    this.queuedForTyping.forEach((msg) => this.send("popup", msg));
   },
 
   _create(info) {

@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class WordWatcher
-  REPLACEMENT_LETTER ||= CGI.unescape_html("&#9632;")
 
   def initialize(raw)
     @raw = raw
@@ -9,7 +8,7 @@ class WordWatcher
 
   def self.words_for_action(action)
     words = WatchedWord.where(action: WatchedWord.actions[action.to_sym]).limit(1000)
-    if WatchedWord.has_replacement?(action.to_sym)
+    if action.to_sym == :replace || action.to_sym == :tag
       words.pluck(:word, :replacement).to_h
     else
       words.pluck(:word)
@@ -32,7 +31,7 @@ class WordWatcher
   def self.word_matcher_regexp(action, raise_errors: false)
     words = get_cached_words(action)
     if words
-      if WatchedWord.has_replacement?(action.to_sym)
+      if action.to_sym == :replace || action.to_sym == :tag
         words = words.keys
       end
       words = words.map do |w|
@@ -54,51 +53,21 @@ class WordWatcher
 
   def self.word_matcher_regexps(action)
     if words = get_cached_words(action)
-      words.map { |w, r| [word_to_regexp(w, whole: true), r] }.to_h
+      words.map { |w, r| [word_to_regexp(w), r] }.to_h
     end
   end
 
-  def self.word_to_regexp(word, whole: false)
+  def self.word_to_regexp(word)
     if SiteSetting.watched_words_regular_expressions?
       # Strip ruby regexp format if present, we're going to make the whole thing
       # case insensitive anyway
-      regexp = word.start_with?("(?-mix:") ? word[7..-2] : word
-      regexp = "(#{regexp})" if whole
-      return regexp
+      return word.start_with?("(?-mix:") ? word[7..-2] : word
     end
-
-    regexp = Regexp.escape(word).gsub("\\*", '\S*')
-
-    if whole && !SiteSetting.watched_words_regular_expressions?
-      regexp = "(?:\\W|^)(#{regexp})(?=\\W|$)"
-    end
-
-    regexp
+    Regexp.escape(word).gsub("\\*", '\S*')
   end
 
   def self.word_matcher_regexp_key(action)
     "watched-words-list:#{action}"
-  end
-
-  def self.censor(html)
-    regexp = WordWatcher.word_matcher_regexp(:censor)
-    return html if regexp.blank?
-
-    doc = Nokogiri::HTML5::fragment(html)
-    doc.traverse do |node|
-      if node.text?
-        node.content = node.content.gsub(regexp) do |match|
-          # the regex captures leading whitespaces
-          padding = match.size - match.lstrip.size
-          if padding > 0
-            match[0..padding - 1] + REPLACEMENT_LETTER * (match.size - padding)
-          else
-            REPLACEMENT_LETTER * match.size
-          end
-        end
-      end
-    end
-    doc.to_s
   end
 
   def self.clear_cache!
@@ -117,10 +86,6 @@ class WordWatcher
 
   def should_block?
     word_matches_for_action?(:block, all_matches: true)
-  end
-
-  def should_silence?
-    word_matches_for_action?(:silence)
   end
 
   def word_matches_for_action?(action, all_matches: false)
@@ -153,6 +118,6 @@ class WordWatcher
   end
 
   def word_matches?(word)
-    Regexp.new(WordWatcher.word_to_regexp(word, whole: true), Regexp::IGNORECASE).match?(@raw)
+    Regexp.new(WordWatcher.word_to_regexp(word), Regexp::IGNORECASE).match?(@raw)
   end
 end

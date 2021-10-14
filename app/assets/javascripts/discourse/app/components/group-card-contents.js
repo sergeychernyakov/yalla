@@ -11,7 +11,7 @@ const maxMembersToDisplay = 10;
 
 export default Component.extend(CardContentsBase, CleansUp, {
   elementId: "group-card",
-  mentionSelector: "a.mention-group",
+  triggeringLinkClass: "mention-group",
   classNames: ["no-bg", "group-card"],
   classNameBindings: [
     "visible:show",
@@ -51,7 +51,7 @@ export default Component.extend(CardContentsBase, CleansUp, {
         }
         return group.can_see_members &&
           group.members.length < maxMembersToDisplay
-          ? group.reloadMembers({ limit: maxMembersToDisplay }, true)
+          ? group.findMembers({ limit: maxMembersToDisplay }, true)
           : Promise.resolve();
       })
       .catch(() => this._close())

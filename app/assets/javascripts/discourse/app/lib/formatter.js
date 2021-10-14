@@ -108,10 +108,6 @@ function wrapAgo(dateStr) {
   return I18n.t("dates.wrap_ago", { date: dateStr });
 }
 
-function wrapOn(dateStr) {
-  return I18n.t("dates.wrap_on", { date: dateStr });
-}
-
 export function durationTiny(distance, ageOpts) {
   if (typeof distance !== "number") {
     return "&mdash;";
@@ -292,9 +288,6 @@ function relativeAgeMedium(date, options) {
     displayDate = I18n.t("now");
   } else if (distance > fiveDaysAgo) {
     displayDate = smartShortDate(date, shortDate);
-    if (options.wrapOn) {
-      displayDate = wrapOn(displayDate);
-    }
   } else {
     displayDate = relativeAgeMediumSpan(distance, leaveAgo);
   }
@@ -324,11 +317,6 @@ export function relativeAge(date, options) {
     return relativeAgeMedium(
       date,
       Object.assign(options, { format: "medium", leaveAgo: true })
-    );
-  } else if (format === "medium-with-ago-and-on") {
-    return relativeAgeMedium(
-      date,
-      Object.assign(options, { format: "medium", leaveAgo: true, wrapOn: true })
     );
   }
 

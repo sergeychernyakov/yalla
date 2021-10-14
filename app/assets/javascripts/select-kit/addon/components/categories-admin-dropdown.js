@@ -9,7 +9,7 @@ export default DropdownSelectBoxComponent.extend({
   fixedCateoryPositions: setting("fixed_category_positions"),
 
   selectKitOptions: {
-    icons: ["wrench", "caret-down"],
+    icon: "bars",
     showFullTitle: false,
     autoFilterable: false,
     filterable: false,

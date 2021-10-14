@@ -2,7 +2,6 @@ import componentTest, {
   setupRenderingTest,
 } from "discourse/tests/helpers/component-test";
 import {
-  count,
   discourseModule,
   queryAll,
 } from "discourse/tests/helpers/qunit-helpers";
@@ -73,8 +72,8 @@ discourseModule(
       },
 
       test(assert) {
-        assert.equal(count(".post-stream"), 1);
-        assert.equal(count(".topic-post"), 6, "renders all posts");
+        assert.equal(queryAll(".post-stream").length, 1);
+        assert.equal(queryAll(".topic-post").length, 6, "renders all posts");
 
         // look for special class bindings
         assert.equal(
@@ -114,11 +113,11 @@ discourseModule(
         );
 
         // it renders an article for the body with appropriate attributes
-        assert.equal(count("article#post_2"), 1);
-        assert.equal(count('article[data-user-id="123"]'), 1);
-        assert.equal(count('article[data-post-id="3"]'), 1);
-        assert.equal(count("article#post_5.via-email"), 1);
-        assert.equal(count("article#post_6.is-auto-generated"), 1);
+        assert.equal(queryAll("article#post_2").length, 1);
+        assert.equal(queryAll('article[data-user-id="123"]').length, 1);
+        assert.equal(queryAll('article[data-post-id="3"]').length, 1);
+        assert.equal(queryAll("article#post_5.via-email").length, 1);
+        assert.equal(queryAll("article#post_6.is-auto-generated").length, 1);
 
         assert.equal(
           queryAll("article:nth-of-type(1) .main-avatar").length,
@@ -144,12 +143,12 @@ discourseModule(
 
       test(assert) {
         assert.equal(
-          count(".topic-post.deleted"),
+          queryAll(".topic-post.deleted").length,
           1,
           "it applies the deleted class"
         );
         assert.equal(
-          count(".deleted-user-avatar"),
+          queryAll(".deleted-user-avatar").length,
           1,
           "it has the trash avatar"
         );

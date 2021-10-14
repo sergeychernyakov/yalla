@@ -2,7 +2,7 @@
 
 class WizardFieldSerializer < ApplicationSerializer
 
-  attributes :id, :type, :required, :value, :label, :placeholder, :description, :extra_description, :show_in_sidebar
+  attributes :id, :type, :required, :value, :label, :placeholder, :description, :extra_description
   has_many :choices, serializer: WizardFieldChoiceSerializer, embed: :objects
 
   def id
@@ -66,14 +66,6 @@ class WizardFieldSerializer < ApplicationSerializer
 
   def include_extra_description?
     extra_description.present?
-  end
-
-  def show_in_sidebar
-    object.show_in_sidebar
-  end
-
-  def include_show_in_sidebar?
-    object.show_in_sidebar.present?
   end
 
 end

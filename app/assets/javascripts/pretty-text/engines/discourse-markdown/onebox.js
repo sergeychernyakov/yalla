@@ -62,7 +62,7 @@ function applyOnebox(state, silent) {
 
           let href = attrs[0][1];
 
-          // edge case ... what if this is not http or protocolless?
+          // edge case ... what if this is not http or protocoless?
           if (!/^http|^\/\//i.test(href)) {
             continue;
           }

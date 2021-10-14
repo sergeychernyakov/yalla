@@ -10,7 +10,7 @@ class ApplicationController < ActionController::Base
   include Hijack
   include ReadOnlyHeader
 
-  attr_reader :theme_id
+  attr_reader :theme_ids
 
   serialization_scope :guardian
 
@@ -299,7 +299,7 @@ class ApplicationController < ActionController::Base
       with_resolved_locale(check_current_user: false) do
         # Include error in HTML format for topics#show.
         if (request.params[:controller] == 'topics' && request.params[:action] == 'show') || (request.params[:controller] == 'categories' && request.params[:action] == 'find_by_slug')
-          opts[:extras] = { html: build_not_found_page(error_page_opts), group: error_page_opts[:group] }
+          opts[:extras] = { html: build_not_found_page(error_page_opts) }
         end
       end
 
@@ -322,13 +322,11 @@ class ApplicationController < ActionController::Base
   end
 
   def send_ember_cli_bootstrap
-    response.headers['X-Discourse-Bootstrap-Required'] = true
-    response.headers['Content-Type'] = "application/json"
-    render json: { preloaded: @preloaded }
+    head 200, content_type: "text/html", "X-Discourse-Bootstrap-Required": true
   end
 
   # If a controller requires a plugin, it will raise an exception if that plugin is
-  # disabled. This allows plugins to be disabled programmatically.
+  # disabled. This allows plugins to be disabled programatically.
   def self.requires_plugin(plugin_name)
     before_action do
       raise PluginDisabled.new if Discourse.disabled_plugin_names.include?(plugin_name)
@@ -401,7 +399,7 @@ class ApplicationController < ActionController::Base
     @preloaded ||= {}
     # I dislike that there is a gsub as opposed to a gsub!
     #  but we can not be mucking with user input, I wonder if there is a way
-    #  to inject this safety deeper in the library or even in AM serializer
+    #  to inject this safty deeper in the library or even in AM serializer
     @preloaded[key] = json.gsub("</", "<\\/")
   end
 
@@ -448,34 +446,35 @@ class ApplicationController < ActionController::Base
     resolve_safe_mode
     return if request.env[NO_CUSTOM]
 
-    theme_id = nil
+    theme_ids = []
 
-    if (preview_theme_id = request[:preview_theme_id]&.to_i) &&
-      guardian.allow_themes?([preview_theme_id], include_preview: true)
-
-      theme_id = preview_theme_id
+    if preview_theme_id = request[:preview_theme_id]&.to_i
+      ids = [preview_theme_id]
+      theme_ids = ids if guardian.allow_themes?(ids, include_preview: true)
     end
 
     user_option = current_user&.user_option
 
-    if theme_id.blank?
+    if theme_ids.blank?
       ids, seq = cookies[:theme_ids]&.split("|")
-      id = ids&.split(",")&.map(&:to_i)&.first
-      if id.present? && seq && seq.to_i == user_option&.theme_key_seq.to_i
-        theme_id = id if guardian.allow_themes?([id])
+      ids = ids&.split(",")&.map(&:to_i)
+      if ids.present? && seq && seq.to_i == user_option&.theme_key_seq.to_i
+        theme_ids = ids if guardian.allow_themes?(ids)
       end
     end
 
-    if theme_id.blank?
+    if theme_ids.blank?
       ids = user_option&.theme_ids || []
-      theme_id = ids.first if guardian.allow_themes?(ids)
+      theme_ids = ids if guardian.allow_themes?(ids)
     end
 
-    if theme_id.blank? && SiteSetting.default_theme_id != -1 && guardian.allow_themes?([SiteSetting.default_theme_id])
-      theme_id = SiteSetting.default_theme_id
+    if theme_ids.blank? && SiteSetting.default_theme_id != -1
+      if guardian.allow_themes?([SiteSetting.default_theme_id])
+        theme_ids << SiteSetting.default_theme_id
+      end
     end
 
-    @theme_id = request.env[:resolved_theme_id] = theme_id
+    @theme_ids = request.env[:resolved_theme_ids] = theme_ids
   end
 
   def guardian
@@ -534,16 +533,11 @@ class ApplicationController < ActionController::Base
     opts ||= {}
     user = if params[:username]
       username_lower = params[:username].downcase.chomp('.json')
-
-      if current_user && current_user.username_lower == username_lower
-        current_user
-      else
-        find_opts = { username_lower: username_lower }
-        find_opts[:active] = true unless opts[:include_inactive] || current_user.try(:staff?)
-        result = User
-        (result = result.includes(*eager_load)) if !eager_load.empty?
-        result.find_by(find_opts)
-      end
+      find_opts = { username_lower: username_lower }
+      find_opts[:active] = true unless opts[:include_inactive] || current_user.try(:staff?)
+      result = User
+      (result = result.includes(*eager_load)) if !eager_load.empty?
+      result.find_by(find_opts)
     elsif params[:external_id]
       external_id = params[:external_id].chomp('.json')
       if provider_name = params[:external_provider]
@@ -614,9 +608,7 @@ class ApplicationController < ActionController::Base
   def preload_current_user_data
     store_preloaded("currentUser", MultiJson.dump(CurrentUserSerializer.new(current_user, scope: guardian, root: false)))
     report = TopicTrackingState.report(current_user)
-    serializer = ActiveModel::ArraySerializer.new(
-      report, each_serializer: TopicTrackingStateSerializer, scope: guardian
-    )
+    serializer = ActiveModel::ArraySerializer.new(report, each_serializer: TopicTrackingStateSerializer)
     store_preloaded("topicTrackingStates", MultiJson.dump(serializer))
   end
 
@@ -624,10 +616,10 @@ class ApplicationController < ActionController::Base
     target = view_context.mobile_view? ? :mobile : :desktop
 
     data =
-      if @theme_id.present?
+      if @theme_ids.present?
         {
-         top: Theme.lookup_field(@theme_id, target, "after_header"),
-         footer: Theme.lookup_field(@theme_id, target, "footer")
+         top: Theme.lookup_field(@theme_ids, target, "after_header"),
+         footer: Theme.lookup_field(@theme_ids, target, "footer")
         }
       else
         {}
@@ -932,9 +924,9 @@ class ApplicationController < ActionController::Base
   end
 
   def activated_themes_json
-    id = @theme_id
-    return "{}" if id.blank?
-    ids = Theme.transform_ids(id)
+    ids = @theme_ids&.compact
+    return "{}" if ids.blank?
+    ids = Theme.transform_ids(ids)
     Theme.where(id: ids).pluck(:id, :name).to_h.to_json
   end
 end

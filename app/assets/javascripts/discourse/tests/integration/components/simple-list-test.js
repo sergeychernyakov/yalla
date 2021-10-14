@@ -3,10 +3,8 @@ import componentTest, {
   setupRenderingTest,
 } from "discourse/tests/helpers/component-test";
 import {
-  count,
   discourseModule,
-  exists,
-  query,
+  queryAll,
 } from "discourse/tests/helpers/qunit-helpers";
 import hbs from "htmlbars-inline-precompile";
 
@@ -22,30 +20,29 @@ discourseModule("Integration | Component | simple-list", function (hooks) {
 
     async test(assert) {
       assert.ok(
-        exists(".add-value-btn[disabled]"),
+        queryAll(".add-value-btn[disabled]").length,
         "while loading the + button is disabled"
       );
 
       await fillIn(".add-value-input", "penar");
       await click(".add-value-btn");
 
-      assert.equal(
-        count(".values .value"),
-        3,
+      assert.ok(
+        queryAll(".values .value").length === 3,
         "it adds the value to the list of values"
       );
 
       assert.ok(
-        query(".values .value[data-index='2'] .value-input").value === "penar",
+        queryAll(".values .value[data-index='2'] .value-input")[0].value ===
+          "penar",
         "it sets the correct value for added item"
       );
 
       await fillIn(".add-value-input", "eviltrout");
       await triggerKeyEvent(".add-value-input", "keydown", 13); // enter
 
-      assert.equal(
-        count(".values .value"),
-        4,
+      assert.ok(
+        queryAll(".values .value").length === 4,
         "it adds the value when keying Enter"
       );
     },
@@ -61,14 +58,14 @@ discourseModule("Integration | Component | simple-list", function (hooks) {
     async test(assert) {
       await click(".values .value[data-index='0'] .remove-value-btn");
 
-      assert.equal(
-        count(".values .value"),
-        1,
+      assert.ok(
+        queryAll(".values .value").length === 1,
         "it removes the value from the list of values"
       );
 
       assert.ok(
-        query(".values .value[data-index='0'] .value-input").value === "osama",
+        queryAll(".values .value[data-index='0'] .value-input")[0].value ===
+          "osama",
         "it removes the correct value"
       );
     },
@@ -85,14 +82,13 @@ discourseModule("Integration | Component | simple-list", function (hooks) {
       await fillIn(".add-value-input", "eviltrout");
       await click(".add-value-btn");
 
-      assert.equal(
-        count(".values .value"),
-        3,
+      assert.ok(
+        queryAll(".values .value").length === 3,
         "it adds the value to the list of values"
       );
 
       assert.ok(
-        query(".values .value[data-index='2'] .value-input").value ===
+        queryAll(".values .value[data-index='2'] .value-input")[0].value ===
           "eviltrout",
         "it adds the correct value"
       );

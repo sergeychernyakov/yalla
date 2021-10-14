@@ -3,7 +3,6 @@ const Yaml = require("js-yaml");
 const fs = require("fs");
 const concat = require("broccoli-concat");
 const mergeTrees = require("broccoli-merge-trees");
-const MessageFormat = require("messageformat");
 
 let built = false;
 
@@ -17,24 +16,9 @@ class TranslationPlugin extends Plugin {
     this.inputFile = inputFile;
   }
 
-  replaceMF(formats, input, path = []) {
-    Object.keys(input).forEach((key) => {
-      let value = input[key];
-
-      let subpath = path.concat(key);
-      if (typeof value === "object") {
-        this.replaceMF(formats, value, subpath);
-      } else if (key.endsWith("_MF")) {
-        // omit locale.js
-        let mfPath = subpath.slice(2).join(".");
-        formats[mfPath] = this.mf.precompile(this.mf.parse(value));
-      }
-    });
-  }
-
   build() {
     // We could get fancy eventually and do this based on whether the yaml
-    // or vendor files change but in practice we shouldn't need exact up to date
+    // or vendor files change but in practice we should't need exact up to date
     // translations in admin.
     if (built) {
       return;
@@ -54,19 +38,11 @@ class TranslationPlugin extends Plugin {
     delete parsed.en.admin_js;
     delete parsed.en.wizard_js;
 
-    let formats = {};
-    this.mf = new MessageFormat("en");
-    this.replaceMF(formats, parsed);
-    this.replaceMF(formats, extras);
-
-    formats = Object.keys(formats).map((k) => `"${k}": ${formats[k]}`);
-
     let contents = `
       I18n.locale = 'en';
       I18n.translations = ${JSON.stringify(parsed)};
       I18n.extras = ${JSON.stringify(extras)};
-      MessageFormat = { locale: {} };
-      I18n._compiledMFs = { ${formats.join(",\n")} };
+      I18n._compiledMFs = {};
     `;
 
     fs.writeFileSync(
@@ -100,7 +76,6 @@ module.exports.createI18nTree = function (discourseRoot, vendorJs) {
         "moment.js",
         "moment-timezone-with-data.js",
         "messageformat-lookup.js",
-        "locale/en.js",
         "client.en.js",
       ],
       headerFiles: [
@@ -109,7 +84,7 @@ module.exports.createI18nTree = function (discourseRoot, vendorJs) {
         "moment-timezone-with-data.js",
         "messageformat-lookup.js",
       ],
-      footerFiles: ["client.en.js", "locale/en.js"],
+      footerFiles: ["client.en.js"],
       outputFile: `assets/test-i18n.js`,
     }
   );

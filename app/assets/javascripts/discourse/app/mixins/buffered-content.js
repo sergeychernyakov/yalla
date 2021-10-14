@@ -1,11 +1,13 @@
+import BufferedMixin from "ember-buffered-proxy/mixin";
 import BufferedProxy from "ember-buffered-proxy/proxy";
+import EmberObjectProxy from "@ember/object/proxy";
 import Mixin from "@ember/object/mixin";
 import { computed } from "@ember/object";
 
 export function bufferedProperty(property) {
   const mixin = {
     buffered: computed(property, function () {
-      return BufferedProxy.create({
+      return EmberObjectProxy.extend(BufferedMixin || BufferedProxy).create({
         content: this.get(property),
       });
     }),

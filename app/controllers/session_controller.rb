@@ -156,7 +156,7 @@ class SessionController < ApplicationController
 
     if !sso.nonce_valid?
       if SiteSetting.verbose_discourse_connect_logging
-        Rails.logger.warn("Verbose SSO log: #{sso.nonce_error}\n\n#{sso.diagnostics}")
+        Rails.logger.warn("Verbose SSO log: Nonce has already expired\n\n#{sso.diagnostics}")
       end
       return render_sso_error(text: I18n.t("discourse_connect.timeout_expired"), status: 419)
     end
@@ -589,8 +589,13 @@ class SessionController < ApplicationController
   end
 
   def failed_to_login(user)
+    message = user.suspend_reason ? "login.suspended_with_reason" : "login.suspended"
+
     {
-      error: user.suspended_message,
+      error: I18n.t(message,
+        date: I18n.l(user.suspended_till, format: :date_only),
+        reason: Rack::Utils.escape_html(user.suspend_reason)
+      ),
       reason: 'suspended'
     }
   end

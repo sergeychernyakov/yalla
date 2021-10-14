@@ -37,12 +37,16 @@ export function laterThisWeek(timezone) {
   return startOfDay(now(timezone).add(2, "days"));
 }
 
+export function nextWeek(timezone) {
+  return startOfDay(now(timezone).add(7, "days"));
+}
+
 export function nextMonth(timezone) {
-  return startOfDay(now(timezone).add(1, "month").startOf("month"));
+  return startOfDay(now(timezone).add(1, "month"));
 }
 
 export function nextBusinessWeekStart(timezone) {
-  return startOfDay(now(timezone).add(7, "days")).day(MOMENT_MONDAY);
+  return nextWeek(timezone).day(MOMENT_MONDAY);
 }
 
 export function parseCustomDatetime(

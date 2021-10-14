@@ -1,7 +1,10 @@
 import componentTest, {
   setupRenderingTest,
 } from "discourse/tests/helpers/component-test";
-import { discourseModule, exists } from "discourse/tests/helpers/qunit-helpers";
+import {
+  discourseModule,
+  queryAll,
+} from "discourse/tests/helpers/qunit-helpers";
 import TopicStatusIcons from "discourse/helpers/topic-status-icons";
 import hbs from "htmlbars-inline-precompile";
 
@@ -19,7 +22,7 @@ discourseModule(
         });
       },
       test(assert) {
-        assert.ok(exists(".topic-status .d-icon-lock"));
+        assert.ok(queryAll(".topic-status .d-icon-lock").length);
       },
     });
 
@@ -39,7 +42,7 @@ discourseModule(
         });
       },
       test(assert) {
-        assert.ok(exists(".topic-status .d-icon-far-check-square"));
+        assert.ok(queryAll(".topic-status .d-icon-far-check-square").length);
       },
     });
   }

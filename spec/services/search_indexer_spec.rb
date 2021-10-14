@@ -145,7 +145,7 @@ describe SearchIndexer do
     end
 
     it 'should work with invalid HTML' do
-      post.update!(cooked: "<FD>" * Nokogiri::Gumbo::DEFAULT_MAX_TREE_DEPTH)
+      post.update!(cooked: "<FD>" * Nokogumbo::DEFAULT_MAX_TREE_DEPTH)
 
       SearchIndexer.update_posts_index(
         post_id: post.id,
@@ -202,7 +202,7 @@ describe SearchIndexer do
 
       post = Fabricate(:post, topic: topic, raw: <<~RAW)
       a https://abc.com?bob=1, http://efg.com.au?bill=1 b hij.net/xyz=1
-      www.klm.net/?IGNORE=1 <a href="http://abc.de.nop.co.uk?IGNORE=1&ignore2=2">test</a>
+      www.klm.net/?IGNORE=1 <a href="http://abc.de.nop.co.uk?IGNORE=1&ingore2=2">test</a>
       RAW
 
       post.rebake!

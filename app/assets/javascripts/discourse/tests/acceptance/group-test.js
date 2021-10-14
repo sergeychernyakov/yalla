@@ -1,8 +1,6 @@
 import {
   acceptance,
   count,
-  exists,
-  query,
   queryAll,
 } from "discourse/tests/helpers/qunit-helpers";
 import { click, visit } from "@ember/test-helpers";
@@ -29,14 +27,15 @@ acceptance("Group - Anonymous", function (needs) {
   test("Anonymous Viewing Group", async function (assert) {
     await visit("/g/discourse");
 
-    assert.ok(
-      !exists(".nav-pills li a[title='Messages']"),
+    assert.equal(
+      count(".nav-pills li a[title='Messages']"),
+      0,
       "it does not show group messages navigation link"
     );
 
     await click(".nav-pills li a[title='Activity']");
 
-    assert.ok(exists(".user-stream-item"), "it lists stream items");
+    assert.ok(count(".user-stream-item") > 0, "it lists stream items");
 
     await click(".activity-nav li a[href='/g/discourse/activity/topics']");
 
@@ -45,16 +44,16 @@ acceptance("Group - Anonymous", function (needs) {
 
     await click(".activity-nav li a[href='/g/discourse/activity/mentions']");
 
-    assert.ok(exists(".user-stream-item"), "it lists stream items");
+    assert.ok(count(".user-stream-item") > 0, "it lists stream items");
     assert.ok(
-      !exists(".nav-pills li a[title='Edit Group']"),
+      queryAll(".nav-pills li a[title='Edit Group']").length === 0,
       "it should not show messages tab if user is not admin"
     );
     assert.ok(
-      !exists(".nav-pills li a[title='Logs']"),
+      queryAll(".nav-pills li a[title='Logs']").length === 0,
       "it should not show Logs tab if user is not admin"
     );
-    assert.ok(exists(".user-stream-item"), "it lists stream items");
+    assert.ok(count(".user-stream-item") > 0, "it lists stream items");
 
     const groupDropdown = selectKit(".group-dropdown");
     await groupDropdown.expand();
@@ -63,7 +62,7 @@ acceptance("Group - Anonymous", function (needs) {
 
     assert.equal(
       groupDropdown.rowByIndex(0).name(),
-      I18n.t("groups.index.all")
+      I18n.t("groups.index.all").toLowerCase()
     );
 
     this.siteSettings.enable_group_directory = false;
@@ -73,8 +72,9 @@ acceptance("Group - Anonymous", function (needs) {
 
     await groupDropdown.expand();
 
-    assert.ok(
-      !exists(".group-dropdown-filter"),
+    assert.equal(
+      queryAll(".group-dropdown-filter").length,
+      0,
       "it should not display the default header"
     );
   });
@@ -82,8 +82,9 @@ acceptance("Group - Anonymous", function (needs) {
   test("Anonymous Viewing Automatic Group", async function (assert) {
     await visit("/g/moderators");
 
-    assert.ok(
-      !exists(".nav-pills li a[title='Manage']"),
+    assert.equal(
+      count(".nav-pills li a[title='Manage']"),
+      0,
       "it does not show group messages navigation link"
     );
   });
@@ -192,7 +193,7 @@ acceptance("Group - Authenticated", function (needs) {
     await click(".group-index-request");
 
     assert.equal(
-      queryAll(".modal-header .title").text().trim(),
+      queryAll(".modal-header").text().trim(),
       I18n.t("groups.membership_request.title", { group_name: "Macdonald" })
     );
 
@@ -212,10 +213,9 @@ acceptance("Group - Authenticated", function (needs) {
 
     await click(".group-message-button");
 
-    assert.equal(count("#reply-control"), 1, "it opens the composer");
-    const privateMessageUsers = selectKit("#private-message-users");
+    assert.ok(count("#reply-control") === 1, "it opens the composer");
     assert.equal(
-      privateMessageUsers.header().value(),
+      queryAll("#private-message-users .selected-name").text().trim(),
       "discourse",
       "it prefills the group name"
     );
@@ -228,9 +228,9 @@ acceptance("Group - Authenticated", function (needs) {
     await click(".nav-pills li a[title='Messages']");
 
     assert.equal(
-      query("span.empty-state-title").innerText.trim(),
-      I18n.t("no_group_messages_title"),
-      "it should display the right text"
+      queryAll(".alert").text().trim(),
+      I18n.t("choose_topic.none_found"),
+      "it should display the right alert"
     );
   });
 
@@ -243,25 +243,13 @@ acceptance("Group - Authenticated", function (needs) {
       "This is a private message 1",
       "it should display the list of group topics"
     );
-
-    await click("#search-button");
-    await fillIn("#search-term", "smth");
-
-    assert.equal(
-      query(
-        ".search-menu .results .search-menu-assistant-item:first-child"
-      ).innerText.trim(),
-      "smth in:personal",
-      "contextual search is available as first option"
-    );
   });
 
   test("Admin Viewing Group", async function (assert) {
     await visit("/g/discourse");
 
-    assert.equal(
-      count(".nav-pills li a[title='Manage']"),
-      1,
+    assert.ok(
+      queryAll(".nav-pills li a[title='Manage']").length === 1,
       "it should show manage group tab if user is admin"
     );
 
@@ -292,16 +280,15 @@ acceptance("Group - Authenticated", function (needs) {
   test("Moderator Viewing Group", async function (assert) {
     await visit("/g/alternative-group");
 
-    assert.equal(
-      count(".nav-pills li a[title='Manage']"),
-      1,
+    assert.ok(
+      queryAll(".nav-pills li a[title='Manage']").length === 1,
       "it should show manage group tab if user can_admin_group"
     );
 
     await click(".group-members-add.btn");
 
     assert.ok(
-      exists(".group-add-members-modal #set-owner"),
+      queryAll(".group-add-members-modal .group-add-members-make-owner"),
       "it allows moderators to set group owners"
     );
 

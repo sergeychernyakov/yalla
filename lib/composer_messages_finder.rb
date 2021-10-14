@@ -78,7 +78,7 @@ class ComposerMessagesFinder
     # - "disable avatar education message" is enabled
     # - "sso overrides avatar" is enabled
     # - "allow uploaded avatars" is disabled
-    return if SiteSetting.disable_avatar_education_message || SiteSetting.discourse_connect_overrides_avatar || !TrustLevelAndStaffAndDisabledSetting.matches?(SiteSetting.allow_uploaded_avatars, @user)
+    return if SiteSetting.disable_avatar_education_message || SiteSetting.discourse_connect_overrides_avatar || !SiteSetting.allow_uploaded_avatars
 
     # If we got this far, log that we've nagged them about the avatar
     UserHistory.create!(action: UserHistory.actions[:notified_about_avatar], target_user_id: @user.id)
@@ -117,7 +117,6 @@ class ComposerMessagesFinder
       templateName: 'education',
       wait_for_typing: true,
       extraClass: 'education-message',
-      hide_if_whisper: true,
       body: PrettyText.cook(I18n.t('education.sequential_replies'))
     }
   end
@@ -142,9 +141,9 @@ class ComposerMessagesFinder
 
     {
       id: 'dominating_topic',
-      templateName: 'dominating-topic',
+      templateName: 'education',
       wait_for_typing: true,
-      extraClass: 'education-message dominating-topic-message',
+      extraClass: 'education-message',
       body: PrettyText.cook(I18n.t('education.dominating_topic', percent: (ratio * 100).round))
     }
   end
@@ -176,10 +175,9 @@ class ComposerMessagesFinder
 
     {
       id: 'get_a_room',
-      templateName: 'get-a-room',
+      templateName: 'education',
       wait_for_typing: true,
-      reply_username: reply_username,
-      extraClass: 'education-message get-a-room',
+      extraClass: 'education-message',
       body: PrettyText.cook(
         I18n.t(
           'education.get_a_room',

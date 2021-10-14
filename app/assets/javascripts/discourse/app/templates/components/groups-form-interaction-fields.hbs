@@ -29,11 +29,9 @@
       onChange=(action (mut model.members_visibility_level))
     }}
 
-    {{#if membersVisibilityPrivate}}
-      <div class="control-instructions">
-        {{i18n "admin.groups.manage.interaction.members_visibility_levels.description"}}
-      </div>
-    {{/if}}
+    <div class="control-instructions">
+      {{i18n "admin.groups.manage.interaction.members_visibility_levels.description"}}
+    </div>
   </div>
 {{/if}}
 
@@ -104,5 +102,3 @@
     onChange=(action (mut model.default_notification_level))
   }}
 </div>
-
-{{plugin-outlet name="groups-interaction-custom-options" args=(hash model=model)}}

@@ -1,6 +1,6 @@
 import RestModel from "discourse/models/rest";
 import { ajax } from "discourse/lib/ajax";
-import { getProperties } from "@ember/object";
+const { getProperties } = Ember;
 
 export default RestModel.extend({
   revert() {

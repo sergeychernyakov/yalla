@@ -9,6 +9,7 @@ export default ComboBoxComponent.extend({
   pluginApiIdentifiers: ["group-dropdown"],
   classNames: ["group-dropdown"],
   content: reads("groupsWithShortcut"),
+  tagName: "li",
   valueProperty: null,
   nameProperty: null,
   hasManyGroups: gte("content.length", 10),
@@ -24,7 +25,7 @@ export default ComboBoxComponent.extend({
     const shortcuts = [];
 
     if (this.enableGroupDirectory || this.get("currentUser.staff")) {
-      shortcuts.push(I18n.t("groups.index.all"));
+      shortcuts.push(I18n.t("groups.index.all").toLowerCase());
     }
 
     return shortcuts.concat(this.groups);

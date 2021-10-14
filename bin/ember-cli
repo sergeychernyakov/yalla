@@ -30,49 +30,17 @@ end
 
 if ARGV.include?("-h") || ARGV.include?("--help")
   puts "ember-cli OPTIONS"
-  puts "#{"--try".cyan} To proxy try.discourse.org"
-  puts "#{"--test".cyan} To run the test suite"
-  puts "#{"--unicorn, -u".cyan} To run a unicorn server as well"
+  puts "#{"--try".cyan} To proxy try.discourse.org", ""
+  puts "#{"--test".cyan} To run the test suite", ""
   puts "The rest of the arguments are passed to ember server per:", ""
-  exec "yarn -s --cwd #{yarn_dir} run ember #{command} --help"
+  exec "yarn --cwd #{yarn_dir} run ember #{command} --help"
 end
 
-args = ["-s", "--cwd", yarn_dir, "run", "ember", command] + ARGV.reject do |a|
-  ["--try", "--test", "--unicorn", "-u"].include?(a)
-end
+args = ["--cwd", yarn_dir, "run", "ember", command] + ARGV.reject { |a| a == "--try" || a == "--test" }
 
-if !args.include?("test") && !args.include?("--proxy")
+if !args.include?("--proxy")
   args << "--proxy"
   args << PROXY
 end
 
-system "yarn -s install --cwd #{yarn_dir}"
-
-if ARGV.include?("-u") || ARGV.include?("--unicorn")
-  unicorn_env = { "DISCOURSE_PORT" => ENV["DISCOURSE_PORT"] || "4200" }
-  unicorn_pid = spawn(unicorn_env, __dir__ + "/unicorn")
-
-  Thread.new do
-    require 'open3'
-    Open3.popen2e("yarn", *args.to_a.flatten) do |i, oe, t|
-      puts "Ember CLI running on PID: #{t.pid}"
-      oe.each do |line|
-        if line.include?("\e[32m200\e") || line.include?("\e[36m304\e[0m") || line.include?("POST /message-bus")
-          # skip 200s and 304s and message bus
-        else
-          puts line
-        end
-      end
-    end
-  end
-
-  trap("SIGINT") do
-    # we got to swallow sigint to give time for
-    # children to handle it
-  end
-
-  Process.wait(unicorn_pid)
-
-else
-  exec "yarn", *args.to_a.flatten
-end
+exec "yarn", *args.to_a.flatten

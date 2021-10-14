@@ -18,12 +18,12 @@ acceptance("Groups", function () {
 
     assert.equal(count(".group-box"), 2, "it displays visible groups");
     assert.equal(
-      count(".group-index-join"),
+      queryAll(".group-index-join").length,
       1,
       "it shows button to join group"
     );
     assert.equal(
-      count(".group-index-request"),
+      queryAll(".group-index-request").length,
       1,
       "it shows button to request for group membership"
     );

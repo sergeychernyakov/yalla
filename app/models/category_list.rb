@@ -100,8 +100,6 @@ class CategoryList
 
     @categories = @categories.to_a
 
-    include_subcategories = @options[:include_subcategories] == true
-
     notification_levels = CategoryUser.notification_levels_for(@guardian.user)
     default_notification_level = CategoryUser.default_notification_level
 
@@ -113,26 +111,16 @@ class CategoryList
     end
 
     if @options[:parent_category_id].blank?
-      subcategory_ids = {}
-      subcategory_list = {}
+      subcategories = {}
       to_delete = Set.new
       @categories.each do |c|
         if c.parent_category_id.present?
-          subcategory_ids[c.parent_category_id] ||= []
-          subcategory_ids[c.parent_category_id] << c.id
-          if include_subcategories
-            subcategory_list[c.parent_category_id] ||= []
-            subcategory_list[c.parent_category_id] << c
-          end
+          subcategories[c.parent_category_id] ||= []
+          subcategories[c.parent_category_id] << c.id
           to_delete << c
         end
       end
-      @categories.each do |c|
-        c.subcategory_ids = subcategory_ids[c.id] || []
-        if include_subcategories
-          c.subcategory_list = subcategory_list[c.id] || []
-        end
-      end
+      @categories.each { |c| c.subcategory_ids = subcategories[c.id] || [] }
       @categories.delete_if { |c| to_delete.include?(c) }
     end
 

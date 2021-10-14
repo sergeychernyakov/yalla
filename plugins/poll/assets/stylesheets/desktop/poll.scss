@@ -37,19 +37,17 @@ div.poll {
   .poll-buttons {
     border-top: 1px solid var(--primary-low);
     padding: 1em;
-    display: flex;
-    flex-direction: row;
 
     .info-text {
       line-height: 2em;
     }
 
-    button:not(:first-child) {
-      margin-left: 0.5em;
+    :not(:first-child):not(:last-child) {
+      margin-left: 1em;
     }
 
-    .btn-danger.toggle-status {
-      margin-left: auto;
+    .toggle-status {
+      float: right;
     }
   }
 }

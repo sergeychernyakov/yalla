@@ -221,7 +221,7 @@ describe AdminDashboardData do
   end
 
   describe 'stats cache' do
-    include_examples 'stats cacheable'
+    include_examples 'stats cachable'
   end
 
   describe '#problem_message_check' do

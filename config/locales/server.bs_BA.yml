@@ -93,6 +93,7 @@ bs_BA:
       maximum_staged_user_per_email_reached: "Dosegnut je maksimalni broj stupnjevanih korisnika kreiranih po e-pošti."
       no_subject: "(nema naslova)"
       no_body: "(nema teksta)"
+      missing_attachment: "(Nedostaje prilog %{filename})"
       errors:
         empty_email_error: "Dešava se kada je sirova pošta koju smo primili bila prazna."
         no_message_id_error: "Dešava se kada pošta nema zaglavlje 'Message-Id'."
@@ -241,8 +242,16 @@ bs_BA:
       has_subcategories: "Can't delete this category because it has sub-categories."
       topic_exists_no_oldest: "Can't delete this category because topic count is %{count}."
   trust_levels:
-    admin: "Admin"
-    staff: "Staff"
+    newuser:
+      title: "novi korisnik"
+    basic:
+      title: "korisnik"
+    member:
+      title: "član"
+    regular:
+      title: "pokretač"
+    leader:
+      title: "vođa"
     change_failed_explanation: "You attempted to demote %{user_name} to '%{new_trust_level}'. However their trust level is already '%{current_trust_level}'. %{user_name} will remain at '%{current_trust_level}' - if you wish to demote user lock trust level first"
   rate_limiter:
     hours:
@@ -359,6 +368,8 @@ bs_BA:
   user_activity:
     no_bookmarks:
       self: "Nemate zabilježene postove; zabilješke omogućuju brzo pozivanje na određene postove."
+    no_replies:
+      others: "Nema odgovora."
   topic_flag_types:
     spam:
       title: "Spam"
@@ -593,7 +604,6 @@ bs_BA:
     sidekiq_warning: 'Sidekiq is not running. Many tasks, like sending emails, are executed asynchronously by sidekiq. Please ensure at least one sidekiq process is running. <a href="https://github.com/mperham/sidekiq" target="_blank">Learn about Sidekiq here</a>.'
     memory_warning: "Your server is running with less than 1 GB of total memory. At least 1 GB of memory is recommended."
   site_settings:
-    disabled: "deaktiviran"
     censored_words: "Words that will be automatically replaced with &#9632;&#9632;&#9632;&#9632;"
     delete_old_hidden_posts: "Auto-delete any hidden posts that stay hidden for more than 30 days."
     allow_user_locale: "Allow users to choose their own language interface preference"
@@ -658,6 +668,7 @@ bs_BA:
     allow_new_registrations: "Allow new user registrations. Uncheck this to prevent anyone from creating a new account."
     google_oauth2_client_id: "Client ID of your Google application."
     google_oauth2_client_secret: "Client secret of your Google application."
+    allow_restore: "Allow restore, which can replace ALL site data! Leave false unless you plan to restore a backup"
     maximum_backups: "The maximum amount of backups to keep on disk. Older backups are automatically deleted"
     s3_backup_bucket: "The remote bucket to hold backups. WARNING: Make sure it is a private bucket."
     active_user_rate_limit_secs: "How frequently we update the 'last_seen_at' field, in seconds"
@@ -787,6 +798,7 @@ bs_BA:
       user: "Korisnici"
     results_page: "Pretraži za termin '%{term}'"
   original_poster: "Originalni Autor"
+  most_posts: "Najviše postova"
   most_recent_poster: "Posljednji Autor"
   frequent_poster: "Čest Autor"
   redirected_to_top_reasons:
@@ -1059,20 +1071,24 @@ bs_BA:
             placeholder: "https://www.example.com/contact-us"
       corporate:
         title: "Organizacija"
-      styling:
+      colors:
+        title: "Colors"
+      fonts:
         fields:
-          styling_preview:
+          font_preview:
             label: "Pregled"
+      homepage:
+        fields:
           homepage_style:
             choices:
               categories_only:
                 label: "Samo kategorije"
               categories_with_featured_topics:
-                label: "Kategorije s istaknutim temama"
+                label: "Kategorije sa Izdvojenim temama"
               categories_and_latest_topics:
-                label: "Kategorije i zadnje teme"
+                label: "Kategorije i Novije teme"
               categories_and_top_topics:
-                label: "Kategorije i top teme"
+                label: "Kategorije i Top teme"
   joined: "Registrovan"
   discourse_push_notifications:
     popup:
@@ -1105,6 +1121,8 @@ bs_BA:
       agree_and_silence:
         title: "Stišaj korisnika"
         description: "Složij se sa prijavom i utišaj prijavljenog korisnika (silence)"
+      delete_spammer:
+        title: "Obriši Spamera"
       delete_single:
         title: "Delete"
       disagree:
@@ -1118,7 +1136,8 @@ bs_BA:
           title: "Delete User"
       reject:
         title: "Odbij"
-  fallback_username: "user"
+      delete_user:
+        title: "Delete User"
   activemodel:
     errors:
       <<: *errors

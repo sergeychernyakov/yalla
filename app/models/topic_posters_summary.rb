@@ -33,7 +33,6 @@ class TopicPostersSummary
     topic_poster.user = user
     topic_poster.description = descriptions_for(user)
     topic_poster.primary_group = user_lookup.primary_groups[user.id]
-    topic_poster.flair_group = user_lookup.flair_groups[user.id]
     if topic.last_post_user_id == user.id
       topic_poster.extras = +'latest'
       topic_poster.extras << ' single' if user_ids.uniq.size == 1
@@ -41,10 +40,10 @@ class TopicPostersSummary
     topic_poster
   end
 
-  def descriptions_by_id(ids: nil)
+  def descriptions_by_id
     @descriptions_by_id ||= begin
       result = {}
-      ids = ids || user_ids
+      ids = user_ids
 
       if id = ids.shift
         result[id] ||= []

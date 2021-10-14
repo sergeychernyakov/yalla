@@ -14,7 +14,7 @@ describe Middleware::AnonymousCache do
       Middleware::AnonymousCache::Helper.new(env(opts))
     end
 
-    context "cacheable?" do
+    context "cachable?" do
       it "true by default" do
         expect(new_helper.cacheable?).to eq(true)
       end
@@ -178,6 +178,10 @@ describe Middleware::AnonymousCache do
       RateLimiter.enable
     end
 
+    after do
+      RateLimiter.disable
+    end
+
     it 'will revert to anonymous once we reach the limit' do
 
       RateLimiter.clear_all!
@@ -186,7 +190,7 @@ describe Middleware::AnonymousCache do
 
       app = Middleware::AnonymousCache.new(
         lambda do |env|
-          is_anon = env["HTTP_COOKIE"].nil? && env["HTTP_DISCOURSE_LOGGED_IN"].nil?
+          is_anon = env["HTTP_COOKIE"].nil?
           [200, {}, ["ok"]]
         end
       )
@@ -196,7 +200,6 @@ describe Middleware::AnonymousCache do
 
       env = {
         "HTTP_COOKIE" => "_t=#{SecureRandom.hex}",
-        "HTTP_DISCOURSE_LOGGED_IN" => "true",
         "HOST" => "site.com",
         "REQUEST_METHOD" => "GET",
         "REQUEST_URI" => "/somewhere/rainbow",

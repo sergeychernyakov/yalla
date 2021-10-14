@@ -9,17 +9,13 @@ export default SelectedNameComponent.extend({
     this._super(...arguments);
 
     schedule("afterRender", () => {
-      const element = document.querySelector(
-        `#${this.selectKit.uniqueID} #${this.id}`
-      );
+      const color = escapeExpression(this.name),
+        el = document.querySelector(`[data-value="${color}"]`);
 
-      if (!element) {
-        return;
+      if (el) {
+        el.style.borderBottom = "2px solid transparent";
+        el.style.borderBottomColor = `#${color}`;
       }
-
-      element.style.borderBottom = "2px solid transparent";
-      const color = escapeExpression(this.name);
-      element.style.borderBottomColor = `#${color}`;
     });
   },
 });

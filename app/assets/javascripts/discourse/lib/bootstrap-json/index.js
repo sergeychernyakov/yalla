@@ -29,27 +29,14 @@ function htmlTag(buffer, bootstrap) {
   buffer.push(`<html lang="${bootstrap.html_lang}"${classList}>`);
 }
 
-function head(buffer, bootstrap, headers, baseURL) {
+function head(buffer, bootstrap) {
   if (bootstrap.csrf_token) {
     buffer.push(`<meta name="csrf-param" content="authenticity_token">`);
     buffer.push(`<meta name="csrf-token" content="${bootstrap.csrf_token}">`);
   }
-
-  if (bootstrap.theme_id) {
+  if (bootstrap.theme_ids) {
     buffer.push(
-      `<meta name="discourse_theme_id" content="${bootstrap.theme_id}">`
-    );
-  }
-
-  if (bootstrap.theme_color) {
-    buffer.push(`<meta name="theme-color" content="${bootstrap.theme_color}">`);
-  }
-
-  if (bootstrap.authentication_data) {
-    buffer.push(
-      `<meta id="data-authentication" data-authentication-data="${encode(
-        bootstrap.authentication_data
-      )}">`
+      `<meta name="discourse_theme_ids" content="${bootstrap.theme_ids}">`
     );
   }
 
@@ -78,21 +65,11 @@ function head(buffer, bootstrap, headers, baseURL) {
     if (s.theme_id) {
       attrs.push(`data-theme-id="${s.theme_id}"`);
     }
-    if (s.class) {
-      attrs.push(`class="${s.class}"`);
-    }
     let link = `<link rel="stylesheet" type="text/css" href="${
       s.href
-    }" ${attrs.join(" ")}>`;
+    }" ${attrs.join(" ")}></script>\n`;
     buffer.push(link);
   });
-
-  if (bootstrap.preloaded.currentUser) {
-    let staff = JSON.parse(bootstrap.preloaded.currentUser).staff;
-    if (staff) {
-      buffer.push(`<script src="${baseURL}assets/admin.js"></script>`);
-    }
-  }
 
   bootstrap.plugin_js.forEach((src) =>
     buffer.push(`<script src="${src}"></script>`)
@@ -155,36 +132,30 @@ function preloaded(buffer, bootstrap) {
 const BUILDERS = {
   "html-tag": htmlTag,
   "before-script-load": beforeScriptLoad,
-  head,
-  body,
+  head: head,
+  body: body,
   "hidden-login-form": hiddenLoginForm,
-  preloaded,
+  preloaded: preloaded,
   "body-footer": bodyFooter,
   "locale-script": localeScript,
 };
 
-function replaceIn(bootstrap, template, id, headers, baseURL) {
+function replaceIn(bootstrap, template, id, headers) {
   let buffer = [];
-  BUILDERS[id](buffer, bootstrap, headers, baseURL);
+  BUILDERS[id](buffer, bootstrap, headers);
   let contents = buffer.filter((b) => b && b.length > 0).join("\n");
 
   return template.replace(`<bootstrap-content key="${id}">`, contents);
 }
 
-async function applyBootstrap(bootstrap, template, response, baseURL) {
-  // If our initial page added some preload data let's not lose that.
-  let json = await response.json();
-  if (json && json.preloaded) {
-    bootstrap.preloaded = Object.assign(json.preloaded, bootstrap.preloaded);
-  }
-
+function applyBootstrap(bootstrap, template, headers) {
   Object.keys(BUILDERS).forEach((id) => {
-    template = replaceIn(bootstrap, template, id, response, baseURL);
+    template = replaceIn(bootstrap, template, id, headers);
   });
   return template;
 }
 
-function buildFromBootstrap(assetPath, proxy, baseURL, req, response) {
+function buildFromBootstrap(assetPath, proxy, baseURL, req, headers) {
   // eslint-disable-next-line
   return new Promise((resolve, reject) => {
     fs.readFile(
@@ -199,9 +170,8 @@ function buildFromBootstrap(assetPath, proxy, baseURL, req, response) {
 
         getJSON(url, null, req.headers)
           .then((json) => {
-            return applyBootstrap(json.bootstrap, template, response, baseURL);
+            resolve(applyBootstrap(json.bootstrap, template, headers));
           })
-          .then(resolve)
           .catch((e) => {
             reject(
               `Could not get ${proxy}${baseURL}bootstrap.json\n\n${e.toString()}`
@@ -233,17 +203,16 @@ async function handleRequest(assetPath, proxy, baseURL, req, res) {
         let get = bent("GET", [200, 301, 302, 303, 307, 308, 404, 403, 500]);
         let response = await get(url, null, req.headers);
         res.set(response.headers);
-        res.set("content-type", "text/html");
         if (response.headers["x-discourse-bootstrap-required"] === "true") {
           req.headers["X-Discourse-Asset-Path"] = req.path;
-          let html = await buildFromBootstrap(
+          let json = await buildFromBootstrap(
             assetPath,
             proxy,
             baseURL,
             req,
-            response
+            response.headers
           );
-          return res.send(html);
+          return res.send(json);
         }
         res.status(response.status);
         res.send(await response.text());

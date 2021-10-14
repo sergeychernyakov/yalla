@@ -1,5 +1,5 @@
 import Composer, { SAVE_ICONS, SAVE_LABELS } from "discourse/models/composer";
-import Controller, { inject as controller } from "@ember/controller";
+import Controller, { inject } from "@ember/controller";
 import EmberObject, { action, computed } from "@ember/object";
 import { alias, and, or, reads } from "@ember/object/computed";
 import {
@@ -93,7 +93,7 @@ export function addPopupMenuOptionsCallback(callback) {
 }
 
 export default Controller.extend({
-  topicController: controller("topic"),
+  topicController: inject("topic"),
   router: service(),
 
   checkedMessages: false,
@@ -101,10 +101,8 @@ export default Controller.extend({
   showEditReason: false,
   editReason: null,
   scopedCategoryId: null,
-  prioritizedCategoryId: null,
   lastValidatedAt: null,
   isUploading: false,
-  isProcessingUpload: false,
   topic: null,
   linkLookup: null,
   showPreview: true,
@@ -240,22 +238,13 @@ export default Controller.extend({
     return SAVE_ICONS[modelAction];
   },
 
-  // Note we update when some other attributes like tag/category change to allow
-  // text customizations to use those.
   @discourseComputed(
     "model.action",
     "isWhispering",
     "model.editConflict",
-    "model.privateMessage",
-    "model.tags",
-    "model.category"
+    "model.privateMessage"
   )
   saveLabel(modelAction, isWhispering, editConflict, privateMessage) {
-    let result = this.model.customizationFor("saveLabel");
-    if (result) {
-      return result;
-    }
-
     if (editConflict) {
       return "composer.overwrite_edit";
     } else if (isWhispering) {
@@ -291,15 +280,6 @@ export default Controller.extend({
     }
 
     return option;
-  },
-
-  @discourseComputed()
-  composerComponent() {
-    const defaultComposer = "composer-editor";
-    if (this.siteSettings.enable_experimental_composer_uploader) {
-      return "composer-editor-uppy";
-    }
-    return defaultComposer;
   },
 
   @discourseComputed("model.composeState", "model.creatingTopic", "model.post")
@@ -475,7 +455,7 @@ export default Controller.extend({
       $links.each((idx, l) => {
         const href = l.href;
         if (href && href.length) {
-          // skip links in quotes and oneboxes
+          // skip links in quotes
           for (let element = l; element; element = element.parentElement) {
             if (
               element.tagName === "DIV" &&
@@ -490,24 +470,16 @@ export default Controller.extend({
             ) {
               return true;
             }
-
-            if (
-              element.tagName === "ASIDE" &&
-              element.classList.contains("onebox") &&
-              href !== element.dataset["onebox-src"]
-            ) {
-              return true;
-            }
           }
 
-          const [linkWarn, linkInfo] = linkLookup.check(post, href);
+          const [warn, info] = linkLookup.check(post, href);
 
-          if (linkWarn && !this.get("isWhispering")) {
+          if (warn) {
             const body = I18n.t("composer.duplicate_link", {
-              domain: linkInfo.domain,
-              username: linkInfo.username,
-              post_url: topic.urlForPostNumber(linkInfo.post_number),
-              ago: shortDate(linkInfo.posted_at),
+              domain: info.domain,
+              username: info.username,
+              post_url: topic.urlForPostNumber(info.post_number),
+              ago: shortDate(info.posted_at),
             });
             this.appEvents.trigger("composer-messages:create", {
               extraClass: "custom-body",
@@ -681,7 +653,7 @@ export default Controller.extend({
     },
   },
 
-  disableSubmit: or("model.loading", "isUploading", "isProcessingUpload"),
+  disableSubmit: or("model.loading", "isUploading"),
 
   save(force, options = {}) {
     if (this.disableSubmit) {
@@ -738,10 +710,7 @@ export default Controller.extend({
     composer.set("disableDrafts", true);
 
     // for now handle a very narrow use case
-    // if we are replying to a topic
-    // AND are on on a different topic
-    // AND topic is open (or we are staff)
-    // --> pop the window up
+    // if we are replying to a topic AND not on the topic pop the window up
     if (!force && composer.replyingToTopic) {
       const currentTopic = this.topicModel;
 
@@ -750,10 +719,7 @@ export default Controller.extend({
         return;
       }
 
-      if (
-        currentTopic.id !== composer.get("topic.id") &&
-        (this.isStaffUser || !currentTopic.closed)
-      ) {
+      if (currentTopic.id !== composer.get("topic.id")) {
         const message =
           "<h1>" + I18n.t("composer.posting_not_on_topic") + "</h1>";
 
@@ -797,15 +763,14 @@ export default Controller.extend({
 
     // TODO: This should not happen in model
     const imageSizes = {};
-    document
-      .querySelectorAll("#reply-control .d-editor-preview img")
-      .forEach((e) => {
-        const src = e.src;
+    $("#reply-control .d-editor-preview img").each((i, e) => {
+      const $img = $(e);
+      const src = $img.prop("src");
 
-        if (src && src.length) {
-          imageSizes[src] = { width: e.naturalWidth, height: e.naturalHeight };
-        }
-      });
+      if (src && src.length) {
+        imageSizes[src] = { width: $img.width(), height: $img.height() };
+      }
+    });
 
     const promise = composer
       .save({ imageSizes, editReason: this.editReason })
@@ -903,22 +868,15 @@ export default Controller.extend({
   },
 
   /**
-    Open the composer view
+   Open the composer view
 
-    @method open
-    @param {Object} opts Options for creating a post
-      @param {String} opts.action The action we're performing: edit, reply, createTopic, createSharedDraft, privateMessage
-      @param {String} opts.draftKey
-      @param {Post} [opts.post] The post we're replying to
-      @param {Topic} [opts.topic] The topic we're replying to
-      @param {String} [opts.quote] If we're opening a reply from a quote, the quote we're making
-      @param {Boolean} [opts.ignoreIfChanged]
-      @param {Boolean} [opts.disableScopedCategory]
-      @param {Number} [opts.categoryId] Sets `scopedCategoryId` and `categoryId` on the Composer model
-      @param {Number} [opts.prioritizedCategoryId]
-      @param {String} [opts.draftSequence]
-      @param {Boolean} [opts.skipDraftCheck]
-  **/
+   @method open
+   @param {Object} opts Options for creating a post
+   @param {String} opts.action The action we're performing: edit, reply or createTopic
+   @param {Post} [opts.post] The post we're replying to
+   @param {Topic} [opts.topic] The topic we're replying to
+   @param {String} [opts.quote] If we're opening a reply from a quote, the quote we're making
+   **/
   open(opts) {
     opts = opts || {};
 
@@ -940,7 +898,6 @@ export default Controller.extend({
       showEditReason: false,
       editReason: null,
       scopedCategoryId: null,
-      prioritizedCategoryId: null,
       skipAutoSave: true,
     });
 
@@ -949,16 +906,6 @@ export default Controller.extend({
       const category = this.site.categories.findBy("id", opts.categoryId);
       if (category) {
         this.set("scopedCategoryId", opts.categoryId);
-      }
-    }
-
-    if (opts.prioritizedCategoryId) {
-      const category = this.site.categories.findBy(
-        "id",
-        opts.prioritizedCategoryId
-      );
-      if (category) {
-        this.set("prioritizedCategoryId", opts.prioritizedCategoryId);
       }
     }
 
@@ -1190,11 +1137,11 @@ export default Controller.extend({
 
     let promise = new Promise((resolve, reject) => {
       if (this.get("model.hasMetaData") || this.get("model.replyDirty")) {
-        const modal = showModal("discard-draft", {
+        const controller = showModal("discard-draft", {
           model: this.model,
           modalClass: "discard-draft-modal",
         });
-        modal.setProperties({
+        controller.setProperties({
           onDestroyDraft: () => {
             this.destroyDraft()
               .then(() => {
@@ -1207,6 +1154,9 @@ export default Controller.extend({
           },
           onSaveDraft: () => {
             this._saveDraft();
+            if (this.model.draftKey === Composer.NEW_TOPIC_KEY) {
+              this.currentUser.set("has_topic_draft", true);
+            }
             this.model.clearState();
             this.close();
             resolve();
@@ -1257,12 +1207,10 @@ export default Controller.extend({
           );
         }
       } else {
-        this._saveDraftPromise = model
-          .saveDraft(this.currentUser)
-          .finally(() => {
-            this._lastDraftSaved = Date.now();
-            this._saveDraftPromise = null;
-          });
+        this._saveDraftPromise = model.saveDraft().finally(() => {
+          this._lastDraftSaved = Date.now();
+          this._saveDraftPromise = null;
+        });
       }
     }
   },

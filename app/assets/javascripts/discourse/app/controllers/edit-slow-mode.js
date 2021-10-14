@@ -14,6 +14,7 @@ export default Controller.extend(ModalFunctionality, {
   minutes: null,
   seconds: null,
   saveDisabled: false,
+  enabledUntil: null,
   showCustomSelect: equal("selectedSlowMode", "custom"),
   durationIsSet: or("hours", "minutes", "seconds"),
 
@@ -86,25 +87,9 @@ export default Controller.extend(ModalFunctionality, {
     }
   },
 
-  @discourseComputed(
-    "saveDisabled",
-    "durationIsSet",
-    "model.slow_mode_enabled_until"
-  )
+  @discourseComputed("saveDisabled", "durationIsSet", "enabledUntil")
   submitDisabled(saveDisabled, durationIsSet, enabledUntil) {
     return saveDisabled || !durationIsSet || !enabledUntil;
-  },
-
-  @discourseComputed("model.slow_mode_seconds")
-  slowModeEnabled(slowModeSeconds) {
-    return slowModeSeconds && slowModeSeconds !== 0;
-  },
-
-  @discourseComputed("slowModeEnabled")
-  saveButtonLabel(slowModeEnabled) {
-    return slowModeEnabled
-      ? "topic.slow_mode_update.update"
-      : "topic.slow_mode_update.enable";
   },
 
   _setFromSeconds(seconds) {
@@ -136,11 +121,7 @@ export default Controller.extend(ModalFunctionality, {
       this._parseValue(this.seconds)
     );
 
-    Topic.setSlowMode(
-      this.model.id,
-      seconds,
-      this.model.slow_mode_enabled_until
-    )
+    Topic.setSlowMode(this.model.id, seconds, this.enabledUntil)
       .catch(popupAjaxError)
       .then(() => {
         this.set("model.slow_mode_seconds", seconds);

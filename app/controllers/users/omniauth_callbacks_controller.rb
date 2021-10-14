@@ -28,13 +28,15 @@ class Users::OmniauthCallbacksController < ApplicationController
     authenticator = self.class.find_authenticator(params[:provider])
 
     if session.delete(:auth_reconnect) && authenticator.can_connect_existing_user? && current_user
-      path = persist_auth_token(auth)
-      return redirect_to path
+      # Save to redis, with a secret token, then redirect to confirmation screen
+      token = SecureRandom.hex
+      Discourse.redis.setex "#{Users::AssociateAccountsController::REDIS_PREFIX}_#{current_user.id}_#{token}", 10.minutes, auth.to_json
+      return redirect_to "#{Discourse.base_path}/associate/#{token}"
     else
-      DiscourseEvent.trigger(:before_auth, authenticator, auth, session, cookies, request)
+      DiscourseEvent.trigger(:before_auth, authenticator, auth)
       @auth_result = authenticator.after_authenticate(auth)
       @auth_result.user = nil if @auth_result&.user&.staged # Treat staged users the same as unregistered users
-      DiscourseEvent.trigger(:after_auth, authenticator, @auth_result, session, cookies, request)
+      DiscourseEvent.trigger(:after_auth, authenticator, @auth_result)
     end
 
     preferred_origin = request.env['omniauth.origin']
@@ -74,16 +76,9 @@ class Users::OmniauthCallbacksController < ApplicationController
 
     return render_auth_result_failure if @auth_result.failed?
 
-    client_hash = @auth_result.to_client_hash
-    if authenticator.can_connect_existing_user? &&
-      (SiteSetting.enable_local_logins || Discourse.enabled_authenticators.count > 1)
-      # There is more than one login method, and users are allowed to manage associations themselves
-      client_hash[:associate_url] = persist_auth_token(auth)
-    end
-
     cookies['_bypass_cache'] = true
     cookies[:authentication_data] = {
-      value: client_hash.to_json,
+      value: @auth_result.to_client_hash.to_json,
       path: Discourse.base_path("/")
     }
     redirect_to @origin
@@ -185,9 +180,4 @@ class Users::OmniauthCallbacksController < ApplicationController
     end
   end
 
-  def persist_auth_token(auth)
-    secret = SecureRandom.hex
-    secure_session.set "#{Users::AssociateAccountsController.key(secret)}", auth.to_json, expires: 10.minutes
-    "#{Discourse.base_path}/associate/#{secret}"
-  end
 end

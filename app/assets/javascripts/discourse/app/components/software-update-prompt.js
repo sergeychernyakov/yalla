@@ -9,7 +9,6 @@ export default Component.extend({
   tagName: "",
 
   showPrompt: false,
-  animatePrompt: false,
   _timeoutHandler: null,
 
   @discourseComputed
@@ -30,32 +29,16 @@ export default Component.extend({
 
       if (!this._timeoutHandler && this.session.requiresRefresh) {
         if (isTesting()) {
-          this.updatePromptState(true);
+          this.set("showPrompt", true);
         } else {
           // Since we can do this transparently for people browsing the forum
           // hold back the message 24 hours.
           this._timeoutHandler = later(() => {
-            this.updatePromptState(true);
+            this.set("showPrompt", true);
           }, 1000 * 60 * 24 * 60);
         }
       }
     });
-  },
-
-  updatePromptState(value) {
-    // when adding the message, we inject the HTML then add the animation
-    // when dismissing, things need to happen in the opposite order
-    const firstProp = value ? "showPrompt" : "animatePrompt",
-      secondProp = value ? "animatePrompt" : "showPrompt";
-
-    this.set(firstProp, value);
-    if (isTesting()) {
-      this.set(secondProp, value);
-    } else {
-      later(() => {
-        this.set(secondProp, value);
-      }, 500);
-    }
   },
 
   @action
@@ -65,7 +48,7 @@ export default Component.extend({
 
   @action
   dismiss() {
-    this.updatePromptState(false);
+    this.set("showPrompt", false);
   },
 
   @on("willDestroyElement")

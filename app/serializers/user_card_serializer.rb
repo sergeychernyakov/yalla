@@ -59,11 +59,9 @@ class UserCardSerializer < BasicUserSerializer
              :recent_time_read,
              :primary_group_id,
              :primary_group_name,
-             :flair_group_id,
-             :flair_name,
-             :flair_url,
-             :flair_bg_color,
-             :flair_color,
+             :primary_group_flair_url,
+             :primary_group_flair_bg_color,
+             :primary_group_flair_color,
              :featured_topic,
              :timezone
 
@@ -105,6 +103,10 @@ class UserCardSerializer < BasicUserSerializer
 
     return if uri.nil? || uri.host.nil?
     uri.host.sub(/^www\./, '') + uri.path
+  end
+
+  def include_website_name
+    website.present?
   end
 
   def ignored
@@ -179,23 +181,19 @@ class UserCardSerializer < BasicUserSerializer
   end
 
   def primary_group_name
-    object.primary_group&.name
+    object.primary_group.try(:name)
   end
 
-  def flair_name
-    object.flair_group&.name
+  def primary_group_flair_url
+    object.try(:primary_group).try(:flair_url)
   end
 
-  def flair_url
-    object.flair_group&.flair_url
+  def primary_group_flair_bg_color
+    object.try(:primary_group).try(:flair_bg_color)
   end
 
-  def flair_bg_color
-    object.flair_group&.flair_bg_color
-  end
-
-  def flair_color
-    object.flair_group&.flair_color
+  def primary_group_flair_color
+    object.try(:primary_group).try(:flair_color)
   end
 
   def featured_topic

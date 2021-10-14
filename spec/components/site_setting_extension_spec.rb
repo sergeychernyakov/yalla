@@ -5,11 +5,11 @@ require 'rails_helper'
 describe SiteSettingExtension do
 
   # We disable message bus here to avoid a large amount
-  # of unneeded messaging, tests are careful to call refresh
+  # of uneeded messaging, tests are careful to call refresh
   # when they need to.
   #
   # DistributedCache used by locale handler can under certain
-  # cases take a tiny bit to stabilize.
+  # cases take a tiny bit to stabalize.
   #
   # TODO: refactor SiteSettingExtension not to rely on statics in
   # DefaultsProvider
@@ -159,6 +159,17 @@ describe SiteSettingExtension do
       expect(settings.client_settings_json).to eq(
         %Q|{"default_locale":"#{SiteSetting.default_locale}","upload_type":"a_new_url","string_type":"changed"}|
       )
+    end
+  end
+
+  describe "multisite" do
+    it "has no db cross talk", type: :multisite do
+      settings.setting(:hello, 1)
+      settings.hello = 100
+
+      test_multisite_connection("second") do
+        expect(settings.hello).to eq(1)
+      end
     end
   end
 
@@ -831,6 +842,23 @@ describe SiteSettingExtension do
         expect(setting[:default]).to eq(system_upload.url)
       end
     end
+
+    it 'should sanitize html in the site settings' do
+      settings.setting(:with_html, '<script></script>rest')
+      settings.refresh!
+
+      setting = settings.all_settings(sanitize_plain_text_settings: true).last
+
+      expect(setting[:value]).to eq('rest')
+    end
+
+    it 'settings with html type are not sanitized' do
+      settings.setting(:with_html, '<script></script>rest', type: :html)
+
+      setting = settings.all_settings(sanitize_plain_text_settings: true).last
+
+      expect(setting[:value]).to eq('<script></script>rest')
+    end
   end
 
   describe '.client_settings_json_uncached' do
@@ -843,6 +871,19 @@ describe SiteSettingExtension do
       expect(settings.client_settings_json_uncached).to eq(
         %Q|{"default_locale":"#{SiteSetting.default_locale}","upload_type":"#{upload.url}","string_type":"haha"}|
       )
+    end
+
+    it 'should sanitize html in the site settings' do
+      settings.setting(:with_html, '<script></script>rest', client: true)
+      settings.setting(:with_symbols, '<>rest', client: true)
+      settings.setting(:with_unknown_tag, '<rest>rest', client: true)
+      settings.refresh!
+
+      client_settings = JSON.parse settings.client_settings_json_uncached
+
+      expect(client_settings['with_html']).to eq('rest')
+      expect(client_settings['with_symbols']).to eq('<>rest')
+      expect(client_settings['with_unknown_tag']).to eq('rest')
     end
 
     it 'settings with html type are not sanitized' do

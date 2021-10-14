@@ -29,7 +29,6 @@ class TopicTimestampChanger
         end
       end
 
-      @topic.reset_bumped_at
       update_topic(last_posted_at)
 
       yield(@topic) if block_given?
@@ -49,6 +48,7 @@ class TopicTimestampChanger
     @topic.update(
       created_at: @timestamp,
       updated_at: @timestamp,
+      bumped_at: @timestamp,
       last_posted_at: last_posted_at
     )
   end

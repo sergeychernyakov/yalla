@@ -42,13 +42,5 @@ export default DiscoveryController.extend({
     refresh() {
       this.send("triggerRefresh");
     },
-    showInserted() {
-      const tracker = this.topicTrackingState;
-
-      // Move inserted into topics
-      this.model.loadBefore(tracker.get("newIncoming"), true);
-      tracker.resetTracking();
-      return false;
-    },
   },
 });

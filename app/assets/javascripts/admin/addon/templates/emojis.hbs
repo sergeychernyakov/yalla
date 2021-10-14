@@ -16,7 +16,7 @@
         <tr>
           <th>{{i18n "admin.emoji.image"}}</th>
           <th>{{i18n "admin.emoji.name"}}</th>
-          <th colspan="2">
+          <th>
             {{combo-box
               value=filter
               content=sortingGroups
@@ -25,21 +25,22 @@
               onChange=(action "filterGroups")
             }}
           </th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
         {{#each sortedEmojis as |e|}}
           <tr>
-            <td><img class="emoji emoji-custom" src={{e.url}} title={{e.name}} alt={{i18n "admin.emoji.alt"}}></td>
-            <td>:{{e.name}}:</td>
-            <td>{{e.group}}</td>
-            <td class="action">
+            <th><img class="emoji emoji-custom" src={{e.url}} title={{e.name}} alt={{i18n "admin.emoji.alt"}}></th>
+            <th>:{{e.name}}:</th>
+            <th>{{e.group}}</th>
+            <th>
               {{d-button
                 action=(action "destroyEmoji" e)
                 class="btn-danger"
                 icon="far-trash-alt"
               }}
-            </td>
+            </th>
           </tr>
         {{/each}}
       </tbody>

@@ -523,6 +523,12 @@ video {
   position: relative;
 }
 
+.deleted {
+  .topic-body {
+    background-color: var(--danger-low-mid);
+  }
+}
+
 .post-select {
   float: right;
   margin-right: 20px;
@@ -567,15 +573,6 @@ blockquote {
     aside.quote > blockquote,
     aside.quote > .title {
       border-left: 0;
-    }
-  }
-}
-
-.topic-post-visited {
-  + .topic-post {
-    .topic-avatar,
-    .topic-body {
-      border-top: none;
     }
   }
 }

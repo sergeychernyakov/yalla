@@ -44,11 +44,9 @@ class CurrentUserSerializer < BasicUserSerializer
              :read_faq,
              :automatically_unpin_topics,
              :mailing_list_mode,
-             :treat_as_new_topic_start_date,
              :previous_visit_at,
              :seen_notification_id,
              :primary_group_id,
-             :flair_group_id,
              :can_create_topic,
              :can_create_group,
              :link_posting_access,
@@ -65,13 +63,11 @@ class CurrentUserSerializer < BasicUserSerializer
              :do_not_disturb_until,
              :has_topic_draft,
              :can_review,
-             :draft_count,
-             :default_calendar,
 
   def groups
     owned_group_ids = GroupUser.where(user_id: id, owner: true).pluck(:group_id).to_set
-    object.visible_groups.pluck(:id, :name, :has_messages).map do |id, name, has_messages|
-      group = { id: id, name: name, has_messages: has_messages }
+    object.visible_groups.pluck(:id, :name).map do |id, name|
+      group = { id: id, name: name }
       group[:owner] = true if owned_group_ids.include?(id)
       group
     end
@@ -139,10 +135,6 @@ class CurrentUserSerializer < BasicUserSerializer
 
   def timezone
     object.user_option.timezone
-  end
-
-  def default_calendar
-    object.user_option.default_calendar
   end
 
   def can_send_private_email_messages
@@ -286,10 +278,6 @@ class CurrentUserSerializer < BasicUserSerializer
     object.user_option.mailing_list_mode
   end
 
-  def treat_as_new_topic_start_date
-    object.user_option.treat_as_new_topic_start_date
-  end
-
   def skip_new_user_tips
     object.user_option.skip_new_user_tips
   end
@@ -320,9 +308,5 @@ class CurrentUserSerializer < BasicUserSerializer
 
   def include_has_topic_draft?
     Draft.has_topic_draft(object)
-  end
-
-  def draft_count
-    object.user_stat.draft_count
   end
 end

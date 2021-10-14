@@ -14,7 +14,6 @@ describe BootstrapController do
 
   after do
     DiscoursePluginRegistry.reset!
-    ExtraLocalesController.clear_cache!
   end
 
   it "returns data as anonymous" do
@@ -27,7 +26,7 @@ describe BootstrapController do
     bootstrap = json['bootstrap']
     expect(bootstrap).to be_present
     expect(bootstrap['title']).to be_present
-    expect(bootstrap['theme_id']).to eq(theme.id)
+    expect(bootstrap['theme_ids']).to eq([theme.id])
     expect(bootstrap['setup_data']['base_url']).to eq(Discourse.base_url)
     expect(bootstrap['stylesheets']).to be_present
 
@@ -73,24 +72,5 @@ describe BootstrapController do
 
     bootstrap = json['bootstrap']
     expect(bootstrap['extra_locales']).to be_present
-  end
-
-  it "returns data when login_required is enabled" do
-    SiteSetting.login_required = true
-    get "/bootstrap.json"
-    expect(response.status).to eq(200)
-    expect(response.parsed_body).to be_present
-  end
-
-  context "authentication data is present" do
-    it "returns authentication data" do
-      cookie_data = 'someauthenticationdata'
-      cookies['authentication_data'] = cookie_data
-
-      get "/bootstrap.json"
-
-      bootstrap = response.parsed_body['bootstrap']
-      expect(bootstrap['authentication_data']).to eq(cookie_data)
-    end
   end
 end

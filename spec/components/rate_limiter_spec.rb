@@ -34,6 +34,10 @@ describe RateLimiter do
       rate_limiter.clear!
     end
 
+    after do
+      RateLimiter.disable
+    end
+
     context 'aggressive rate limiter' do
 
       it 'can operate correctly and totally stop limiting' do

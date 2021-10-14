@@ -100,9 +100,8 @@ module PostGuardian
     is_staff? &&
     user &&
     !user.admin? &&
-    (is_admin? ||
-      ((user.first_post_created_at.nil? || user.first_post_created_at >= SiteSetting.delete_user_max_post_age.days.ago) &&
-      user.post_count <= SiteSetting.delete_all_posts_max.to_i))
+    (user.first_post_created_at.nil? || user.first_post_created_at >= SiteSetting.delete_user_max_post_age.days.ago) &&
+    user.post_count <= SiteSetting.delete_all_posts_max.to_i
   end
 
   def can_create_post?(parent)
@@ -205,16 +204,6 @@ module PostGuardian
     false
   end
 
-  def can_permanently_delete_post?(post)
-    return false if !SiteSetting.can_permanently_delete
-    return false if !post
-    return false if post.is_first_post?
-    return false if !is_admin? || !can_edit_post?(post)
-    return false if !post.deleted_at
-    return false if post.deleted_by_id == @user.id && post.deleted_at >= Post::PERMANENT_DELETE_TIMER.ago
-    true
-  end
-
   def can_recover_post?(post)
     return false unless post
 
@@ -244,9 +233,9 @@ module PostGuardian
     return true if is_admin?
     return false unless can_see_topic?(post.topic)
     return false unless post.user == @user || Topic.visible_post_types(@user).include?(post.post_type)
-    return true if is_moderator? || is_category_group_moderator?(post.topic.category)
-    return true if post.deleted_at.blank? || (post.deleted_by_id == @user.id && @user.has_trust_level?(TrustLevel[4]))
-    false
+    return false if !(is_moderator? || is_category_group_moderator?(post.topic.category)) && post.deleted_at.present?
+
+    true
   end
 
   def can_view_edit_history?(post)
@@ -262,9 +251,7 @@ module PostGuardian
   end
 
   def can_change_post_owner?
-    return true if is_admin?
-
-    SiteSetting.moderators_change_post_ownership && is_staff?
+    is_admin?
   end
 
   def can_change_post_timestamps?

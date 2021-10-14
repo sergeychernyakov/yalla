@@ -4,8 +4,6 @@ import componentTest, {
 } from "discourse/tests/helpers/component-test";
 import {
   discourseModule,
-  exists,
-  query,
   queryAll,
 } from "discourse/tests/helpers/qunit-helpers";
 import {
@@ -26,26 +24,13 @@ discourseModule("Integration | Component | d-editor", function (hooks) {
     template: hbs`{{d-editor value=value}}`,
 
     async test(assert) {
-      assert.ok(exists(".d-editor-button-bar"));
+      assert.ok(queryAll(".d-editor-button-bar").length);
       await fillIn(".d-editor-input", "hello **world**");
 
       assert.equal(this.value, "hello **world**");
       assert.equal(
         queryAll(".d-editor-preview").html().trim(),
         "<p>hello <strong>world</strong></p>"
-      );
-    },
-  });
-
-  componentTest("links in preview are not tabbable", {
-    template: hbs`{{d-editor value=value}}`,
-
-    async test(assert) {
-      await fillIn(".d-editor-input", "[discourse](https://www.discourse.org)");
-
-      assert.equal(
-        queryAll(".d-editor-preview").html().trim(),
-        '<p><a href="https://www.discourse.org" tabindex="-1">discourse</a></p>'
       );
     },
   });
@@ -95,10 +80,9 @@ discourseModule("Integration | Component | d-editor", function (hooks) {
         this.set("value", "hello world.");
       },
       test(assert) {
-        const textarea = jumpEnd(query("textarea.d-editor-input"));
+        const textarea = jumpEnd(queryAll("textarea.d-editor-input")[0]);
         testFunc.call(this, assert, textarea);
       },
-      skip: !navigator.userAgent.includes("Chrome"),
     });
   }
 
@@ -110,7 +94,7 @@ discourseModule("Integration | Component | d-editor", function (hooks) {
       },
 
       test(assert) {
-        const textarea = jumpEnd(query("textarea.d-editor-input"));
+        const textarea = jumpEnd(queryAll("textarea.d-editor-input")[0]);
         testFunc.call(this, assert, textarea);
       },
     });
@@ -252,7 +236,7 @@ discourseModule("Integration | Component | d-editor", function (hooks) {
     },
 
     async test(assert) {
-      const textarea = query("textarea.d-editor-input");
+      const textarea = queryAll("textarea.d-editor-input")[0];
       textarea.selectionStart = 0;
       textarea.selectionEnd = textarea.value.length;
 
@@ -277,7 +261,7 @@ discourseModule("Integration | Component | d-editor", function (hooks) {
     },
 
     async test(assert) {
-      const textarea = jumpEnd(query("textarea.d-editor-input"));
+      const textarea = jumpEnd(queryAll("textarea.d-editor-input")[0]);
 
       await click("button.code");
       assert.equal(this.value, `    ${I18n.t("composer.code_text")}`);
@@ -362,7 +346,7 @@ third line`
     },
 
     async test(assert) {
-      const textarea = jumpEnd(query("textarea.d-editor-input"));
+      const textarea = jumpEnd(queryAll("textarea.d-editor-input")[0]);
 
       await click("button.code");
       assert.equal(
@@ -474,7 +458,7 @@ third line`
       this.set("value", "one\n\ntwo\n\nthree");
     },
     async test(assert) {
-      const textarea = jumpEnd(query("textarea.d-editor-input"));
+      const textarea = jumpEnd(queryAll("textarea.d-editor-input")[0]);
 
       textarea.selectionStart = 0;
 
@@ -495,7 +479,7 @@ third line`
       this.set("value", "one\n\n\n\ntwo");
     },
     async test(assert) {
-      const textarea = jumpEnd(query("textarea.d-editor-input"));
+      const textarea = jumpEnd(queryAll("textarea.d-editor-input")[0]);
 
       textarea.selectionStart = 6;
       textarea.selectionEnd = 10;
@@ -692,7 +676,7 @@ third line`
     },
 
     async test(assert) {
-      jumpEnd(query("textarea.d-editor-input"));
+      jumpEnd(queryAll("textarea.d-editor-input")[0]);
       await click("button.emoji");
 
       await click(
@@ -737,7 +721,7 @@ third line`
     },
 
     async test(assert) {
-      let element = query(".d-editor");
+      let element = queryAll(".d-editor")[0];
       await paste(element, "\ta\tb\n1\t2\t3");
       assert.equal(this.value, "||a|b|\n|---|---|---|\n|1|2|3|\n");
     },
@@ -751,7 +735,7 @@ third line`
     },
 
     async test(assert) {
-      let element = query(".d-editor");
+      let element = queryAll(".d-editor")[0];
       await paste(element, '\ta\tb\n1\t"2\n2.5"\t3');
       assert.equal(this.value, "||a|b|\n|---|---|---|\n|1|2<br>2.5|3|\n");
     },

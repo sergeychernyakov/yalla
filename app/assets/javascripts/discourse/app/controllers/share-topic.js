@@ -40,6 +40,14 @@ export default Controller.extend(
     },
 
     @action
+    copied() {
+      return this.appEvents.trigger("modal-body:flash", {
+        text: I18n.t("topic.share.copied"),
+        messageClass: "success",
+      });
+    },
+
+    @action
     onChangeUsers(usernames) {
       this.set("users", usernames.uniq());
     },

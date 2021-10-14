@@ -9,9 +9,4 @@ export default Route.extend({
       );
     }
   },
-
-  setupController(controller) {
-    this._super(...arguments);
-    controller.resetState();
-  },
 });

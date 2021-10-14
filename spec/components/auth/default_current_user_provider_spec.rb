@@ -195,11 +195,14 @@ describe Auth::DefaultCurrentUserProvider do
         RateLimiter.enable
       end
 
-      it "rate limits admin api requests" do
-        global_setting :max_admin_api_reqs_per_minute, 3
+      after do
+        RateLimiter.disable
+      end
+
+      it "rate limits api requests per api key" do
+        global_setting :max_admin_api_reqs_per_key_per_minute, 3
 
         freeze_time
-        RateLimiter.new(nil, "admin_api_min", 3, 60).clear!
 
         api_key = ApiKey.create!(created_by_id: -1)
         params = { "HTTP_API_KEY" => api_key.key, "HTTP_API_USERNAME" => user.username.downcase }
@@ -421,6 +424,10 @@ describe Auth::DefaultCurrentUserProvider do
       RateLimiter.enable
     end
 
+    after do
+      RateLimiter.disable
+    end
+
     it "can only try 10 bad cookies a minute" do
       token = UserAuthToken.generate!(user_id: user.id)
 
@@ -618,6 +625,10 @@ describe Auth::DefaultCurrentUserProvider do
 
       before do
         RateLimiter.enable
+      end
+
+      after do
+        RateLimiter.disable
       end
 
       it "rate limits api usage" do

@@ -67,7 +67,9 @@ acceptance("Admin - Badges - Show", function (needs) {
     assert.ok(!exists(".icon-picker"), "icon picker is not visible");
     assert.ok(exists(".image-uploader"), "image uploader is visible");
     assert.ok(
-      query(".image-uploader a.lightbox").href.endsWith("/images/avatar.png?2"),
+      query(".image-uploader a.lightbox").href.endsWith(
+        "/assets/some-image.png"
+      ),
       "image uploader shows the right image"
     );
   });
@@ -85,13 +87,15 @@ acceptance("Admin - Badges - Show", function (needs) {
     assert.ok(!exists(".icon-picker"), "icon picker is not visible");
     assert.ok(exists(".image-uploader"), "image uploader is visible");
     assert.ok(
-      query(".image-uploader a.lightbox").href.endsWith("/images/avatar.png?3"),
+      query(".image-uploader a.lightbox").href.endsWith(
+        "/assets/some-image.png"
+      ),
       "image uploader shows the right image"
     );
 
     await click("input#badge-icon");
     assert.ok(exists(".icon-picker"), "icon picker is becomes visible");
-    assert.ok(!exists(".image-uploader"), "image uploader becomes hidden");
+    assert.ok(!exists(".image-uploader"), "image uploader bcomes hidden");
     assert.equal(query(".icon-picker").textContent.trim(), "fa-rocket");
   });
 });

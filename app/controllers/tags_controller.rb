@@ -89,11 +89,7 @@ class TagsController < ::ApplicationController
       @list = nil
 
       if filter == :top
-        period = params[:period] || SiteSetting.top_page_default_timeframe.to_sym
-        TopTopic.validate_period(period)
-
-        @list = TopicQuery.new(current_user, list_opts).public_send("list_top_for", period)
-        @list.for_period = period
+        @list = TopicQuery.new(current_user, list_opts).public_send("list_top_for", SiteSetting.top_page_default_timeframe.to_sym)
       else
         @list = TopicQuery.new(current_user, list_opts).public_send("list_#{filter}")
       end

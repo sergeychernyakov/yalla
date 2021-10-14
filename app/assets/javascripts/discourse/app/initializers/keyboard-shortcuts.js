@@ -1,11 +1,15 @@
 import KeyboardShortcuts from "discourse/lib/keyboard-shortcuts";
-import ItsATrap from "@discourse/itsatrap";
+import Mousetrap from "mousetrap";
+import bindGlobal from "mousetrap-global-bind";
 
 export default {
   name: "keyboard-shortcuts",
 
   initialize(container) {
-    KeyboardShortcuts.init(ItsATrap, container);
+    // Ensure mousetrap-global-bind is executed
+    void bindGlobal;
+
+    KeyboardShortcuts.init(Mousetrap, container);
     KeyboardShortcuts.bindEvents();
   },
 

@@ -46,8 +46,7 @@ class UserUpdater
     :text_size,
     :title_count_mode,
     :timezone,
-    :skip_new_user_tips,
-    :default_calendar
+    :skip_new_user_tips
   ]
 
   NOTIFICATION_SCHEDULE_ATTRS = -> {
@@ -98,10 +97,7 @@ class UserUpdater
     end
 
     old_user_name = user.name.present? ? user.name : ""
-
-    if guardian.can_edit_name?(user)
-      user.name = attributes.fetch(:name) { user.name }
-    end
+    user.name = attributes.fetch(:name) { user.name }
 
     user.locale = attributes.fetch(:locale) { user.locale }
     user.date_of_birth = attributes.fetch(:date_of_birth) { user.date_of_birth }
@@ -125,25 +121,15 @@ class UserUpdater
       user.primary_group_id = nil
     end
 
-    if attributes[:flair_group_id] &&
-      attributes[:flair_group_id] != user.flair_group_id &&
-      (attributes[:flair_group_id].blank? ||
-        guardian.can_use_flair_group?(user, attributes[:flair_group_id]))
-
-      user.flair_group_id = attributes[:flair_group_id]
+    CATEGORY_IDS.each do |attribute, level|
+      if ids = attributes[attribute]
+        CategoryUser.batch_set(user, level, ids)
+      end
     end
 
-    if @guardian.can_change_tracking_preferences?(user)
-      CATEGORY_IDS.each do |attribute, level|
-        if ids = attributes[attribute]
-          CategoryUser.batch_set(user, level, ids)
-        end
-      end
-
-      TAG_NAMES.each do |attribute, level|
-        if attributes.has_key?(attribute)
-          TagUser.batch_set(user, level, attributes[attribute]&.split(',') || [])
-        end
+    TAG_NAMES.each do |attribute, level|
+      if attributes.has_key?(attribute)
+        TagUser.batch_set(user, level, attributes[attribute]&.split(',') || [])
       end
     end
 

@@ -8,9 +8,13 @@
 
 .dashboard,
 .dashboard-next {
+  .section-top {
+    margin-bottom: 0.5em;
+  }
+
   .navigation {
     display: flex;
-    margin: 0 0 1em 0;
+    margin: 0 0 2.5em 0;
     border-bottom: 1px solid var(--primary-low-mid);
 
     .navigation-item {
@@ -97,16 +101,6 @@
 
   .section {
     .section-title {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--primary-low);
-      padding-bottom: 0.5em;
-
-      @media screen and (max-width: 400px) {
-        flex-wrap: wrap;
-      }
-
       h2 {
         margin: 0 0.5em 0 0;
 
@@ -114,11 +108,20 @@
           color: var(--primary);
         }
       }
+
+      display: flex;
+      @media screen and (max-width: 400px) {
+        flex-wrap: wrap;
+      }
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--primary-low);
+      margin-bottom: 0.5em;
+      padding-bottom: 0.5em;
     }
 
     .section-body {
-      margin-top: 1em;
-
+      padding: 1em 0 0;
       > p {
         margin-top: 0;
       }
@@ -220,7 +223,7 @@
   }
 
   .top-referred-topics {
-    margin-bottom: 2em;
+    margin-bottom: 1.5em;
   }
 
   .top-referred-topics,
@@ -230,16 +233,21 @@
     }
   }
 
-  .period-chooser .period-chooser-header {
-    font-size: var(--font-down-2);
+  .section {
+    .period-chooser .period-chooser-header {
+      .selected-name,
+      .d-icon {
+        font-size: $font-up-1;
+      }
+
+      .d-icon {
+        margin: 0;
+      }
+    }
   }
 
   .dashboard-problems {
-    margin-bottom: 2em;
-
-    .problem-messages ul {
-      margin: 0 0 0 1.25em;
-    }
+    margin-bottom: 2.5em;
 
     .d-icon-exclamation-triangle {
       color: var(--danger);
@@ -333,7 +341,7 @@
 }
 
 .activity-metrics {
-  margin-bottom: 2em;
+  margin-bottom: 1.5em;
 }
 
 .user-metrics {
@@ -432,17 +440,17 @@
 
 .users-by-trust-level,
 .users-by-type {
-  margin-bottom: 2em;
+  margin-bottom: 1.5em;
 }
 
 .community-health.section {
-  margin-bottom: 2em;
+  margin-bottom: 1.5em;
 }
 
 .dashboard-moderation,
 .dashboard-security {
   .section-body {
-    margin-bottom: 2em;
+    margin-bottom: 1em;
   }
 
   .main-section {
@@ -511,15 +519,10 @@
 .version-checks {
   display: flex;
   flex-wrap: wrap;
-
   .section-title {
     flex: 1 1 100%;
     border-bottom: 1px solid var(--primary-low);
-    padding-bottom: 0.5em;
-  }
-
-  h2 {
-    margin: 0;
+    margin-bottom: 0.5em;
   }
 }
 
@@ -530,56 +533,44 @@
   align-items: flex-start;
   align-self: flex-start;
   justify-content: space-between;
-  padding-top: 1em;
-
+  padding: 10px 0 10px 0;
   .upgrade-header {
     flex: 1 1 100%;
-
     @media screen and (max-width: 650px) {
       margin: 0;
     }
-
     tr {
       border: none;
     }
-
     th {
       background: transparent;
       padding: 0;
     }
   }
-
   h2 {
     flex: 1 1 100%;
   }
-
   .version-number {
     font-size: $font-up-2;
-    line-height: $line-height-small;
+    line-height: $line-height-medium;
     box-sizing: border-box;
     font-weight: bold;
-    margin-bottom: 2em;
-    margin-right: 1em;
+    margin: 0 0 1em 0;
+    padding-right: 20px;
     flex: 1 1 27%;
-
     h3 {
       flex: 1 0 auto;
-      margin: 0;
       white-space: nowrap;
     }
-
-    h4 {
-      font-size: $font-down-2;
-      margin-bottom: 0.5em;
-    }
-
+    h4,
     .sha-link {
-      display: inline-flex;
       font-size: $font-down-2;
+      margin-bottom: 0;
+    }
+    .sha-link {
       font-weight: normal;
     }
   }
-
   .version-status {
     display: flex;
     align-items: center;
@@ -626,7 +617,6 @@
   display: flex;
   flex-direction: column;
 }
-
 .dashboard-new-features {
   &.ordered-first {
     order: -1;

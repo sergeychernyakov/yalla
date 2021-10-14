@@ -1,4 +1,4 @@
-import Controller, { inject as controller } from "@ember/controller";
+import Controller, { inject } from "@ember/controller";
 
 // Just add query params here to have them automatically passed to topic list filters.
 export const queryParams = {
@@ -9,15 +9,15 @@ export const queryParams = {
   search: { replace: true, refreshModel: true },
   max_posts: { replace: true, refreshModel: true },
   q: { replace: true, refreshModel: true },
+  tags: { replace: true },
   before: { replace: true, refreshModel: true },
   bumped_before: { replace: true, refreshModel: true },
   f: { replace: true, refreshModel: true },
-  period: { replace: true, refreshModel: true },
 };
 
 // Basic controller options
 const controllerOpts = {
-  discoveryTopics: controller("discovery/topics"),
+  discoveryTopics: inject("discovery/topics"),
   queryParams: Object.keys(queryParams),
 };
 
@@ -27,21 +27,22 @@ controllerOpts.queryParams.forEach((p) => {
 });
 
 export function changeSort(sortBy) {
+  let { controller } = this;
   let model = this.controllerFor("discovery.topics").model;
-
-  if (sortBy === this.controller.order) {
-    this.controller.toggleProperty("ascending");
-    model.updateSortParams(sortBy, this.controller.ascending);
+  if (sortBy === controller.order) {
+    controller.toggleProperty("ascending");
+    model.updateSortParams(sortBy, controller.ascending);
   } else {
-    this.controller.setProperties({ order: sortBy, ascending: false });
+    controller.setProperties({ order: sortBy, ascending: false });
     model.updateSortParams(sortBy, false);
   }
 }
 
 export function resetParams(skipParams = []) {
+  let { controller } = this;
   controllerOpts.queryParams.forEach((p) => {
     if (!skipParams.includes(p)) {
-      this.controller.set(p, queryParams[p].default);
+      controller.set(p, queryParams[p].default);
     }
   });
 }

@@ -4,7 +4,6 @@ import componentTest, {
 import {
   discourseModule,
   exists,
-  query,
   queryAll,
 } from "discourse/tests/helpers/qunit-helpers";
 import I18n from "I18n";
@@ -18,7 +17,6 @@ const DEFAULT_CONTENT = {
     "separator",
     { id: 3, translatedLabel: "With icon", icon: "times" },
     { id: 4, html: "<b>baz</b>" },
-    { id: 5, translatedLabel: "Disabled", disabled: true },
   ],
   label: "foo",
 };
@@ -28,7 +26,7 @@ async function clickRowById(id) {
 }
 
 function rowById(id) {
-  return query(`#my-dropdown .widget-dropdown-item.item-${id}`);
+  return queryAll(`#my-dropdown .widget-dropdown-item.item-${id}`)[0];
 }
 
 async function toggle() {
@@ -42,11 +40,11 @@ function headerLabel() {
 }
 
 function header() {
-  return query("#my-dropdown .widget-dropdown-header");
+  return queryAll("#my-dropdown .widget-dropdown-header")[0];
 }
 
 function body() {
-  return query("#my-dropdown .widget-dropdown-body");
+  return queryAll("#my-dropdown .widget-dropdown-body")[0];
 }
 
 const TEMPLATE = hbs`
@@ -151,7 +149,10 @@ discourseModule(
       beforeEach() {
         this.setProperties(DEFAULT_CONTENT);
 
-        this.set("onChange", (item) => (query("#test").innerText = item.id));
+        this.set(
+          "onChange",
+          (item) => (queryAll("#test")[0].innerText = item.id)
+        );
       },
 
       async test(assert) {
@@ -343,37 +344,6 @@ discourseModule(
         assert.ok(
           exists("#my-dropdown .widget-dropdown-header .d-icon-caret-down")
         );
-      },
-    });
-
-    componentTest("disabled widget", {
-      template: TEMPLATE,
-
-      beforeEach() {
-        this.setProperties(DEFAULT_CONTENT);
-        this.set("options", { disabled: true });
-      },
-
-      test(assert) {
-        assert.ok(exists("#my-dropdown.disabled"));
-      },
-
-      async test(assert) {
-        await toggle();
-        assert.equal(rowById(1), undefined, "it does not display options");
-      },
-    });
-
-    componentTest("disabled item", {
-      template: TEMPLATE,
-
-      beforeEach() {
-        this.setProperties(DEFAULT_CONTENT);
-      },
-
-      async test(assert) {
-        await toggle();
-        assert.ok(exists(".widget-dropdown-item.item-5.disabled"));
       },
     });
   }

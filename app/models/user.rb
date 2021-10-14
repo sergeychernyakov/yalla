@@ -73,11 +73,9 @@ class User < ActiveRecord::Base
   }, class_name: "UserSecurityKey"
 
   has_many :badges, through: :user_badges
-  has_many :default_featured_user_badges, -> {
-    max_featured_rank = SiteSetting.max_favorite_badges > 0 ? SiteSetting.max_favorite_badges + 1
-                                                            : DEFAULT_FEATURED_BADGE_COUNT
-    for_enabled_badges.grouped_with_count.where("featured_rank <= ?", max_featured_rank)
-  }, class_name: "UserBadge"
+  has_many :default_featured_user_badges,
+            -> { for_enabled_badges.grouped_with_count.where("featured_rank <= ?", DEFAULT_FEATURED_BADGE_COUNT) },
+            class_name: "UserBadge"
 
   has_many :topics_allowed, through: :topic_allowed_users, source: :topic
   has_many :groups, through: :group_users
@@ -95,7 +93,6 @@ class User < ActiveRecord::Base
   has_one :card_background_upload, through: :user_profile
   belongs_to :approved_by, class_name: 'User'
   belongs_to :primary_group, class_name: 'Group'
-  belongs_to :flair_group, class_name: 'Group'
 
   has_many :muted_users, through: :muted_user_records
   has_many :ignored_users, through: :ignored_user_records
@@ -134,7 +131,7 @@ class User < ActiveRecord::Base
 
   before_save :update_usernames
   before_save :ensure_password_is_hashed
-  before_save :match_primary_group_changes
+  before_save :match_title_to_primary_group_changes
   before_save :check_if_title_is_badged_granted
 
   after_save :expire_tokens_if_password_changed
@@ -192,10 +189,6 @@ class User < ActiveRecord::Base
 
   scope :with_email, ->(email) do
     joins(:user_emails).where("lower(user_emails.email) IN (?)", email)
-  end
-
-  scope :with_primary_email, ->(email) do
-    joins(:user_emails).where("lower(user_emails.email) IN (?) AND user_emails.primary", email)
   end
 
   scope :human_users, -> { where('users.id > 0') }
@@ -298,6 +291,21 @@ class User < ActiveRecord::Base
     fields.uniq
   end
 
+  def self.register_plugin_editable_user_custom_field(custom_field_name, plugin, staff_only: false)
+    Discourse.deprecate("Editable user custom fields should be registered using the plugin API", since: "v2.4.0.beta4", drop_from: "v2.5.0")
+    DiscoursePluginRegistry.register_editable_user_custom_field(custom_field_name, plugin, staff_only: staff_only)
+  end
+
+  def self.register_plugin_staff_custom_field(custom_field_name, plugin)
+    Discourse.deprecate("Staff user custom fields should be registered using the plugin API",  since: "v2.4.0.beta4", drop_from: "v2.5.0")
+    DiscoursePluginRegistry.register_staff_user_custom_field(custom_field_name, plugin)
+  end
+
+  def self.register_plugin_public_custom_field(custom_field_name, plugin)
+    Discourse.deprecate("Public user custom fields should be registered using the plugin API", since: "v2.4.0.beta4", drop_from: "v2.5.0")
+    DiscoursePluginRegistry.register_public_user_custom_field(custom_field_name, plugin)
+  end
+
   def self.allowed_user_custom_fields(guardian)
     fields = []
 
@@ -376,12 +384,8 @@ class User < ActiveRecord::Base
     end
   end
 
-  def self.find_by_email(email, primary: false)
-    if primary
-      self.with_primary_email(Email.downcase(email)).first
-    else
-      self.with_email(Email.downcase(email)).first
-    end
+  def self.find_by_email(email)
+    self.with_email(Email.downcase(email)).first
   end
 
   def self.find_by_username(username)
@@ -433,6 +437,7 @@ class User < ActiveRecord::Base
   end
 
   def created_topic_count
+    stat = user_stat || create_user_stat
     stat.topic_count
   end
 
@@ -893,15 +898,8 @@ class User < ActiveRecord::Base
   end
 
   def post_count
+    stat = user_stat || create_user_stat
     stat.post_count
-  end
-
-  def post_edits_count
-    stat.post_edits_count
-  end
-
-  def increment_post_edits_count
-    stat.increment!(:post_edits_count)
   end
 
   def flags_given_count
@@ -964,10 +962,6 @@ class User < ActiveRecord::Base
     silenced_record.try(:created_at) if silenced?
   end
 
-  def silenced_forever?
-    silenced_till > 100.years.from_now
-  end
-
   def suspend_record
     UserHistory.for(self, :suspend_user).order('id DESC').first
   end
@@ -982,27 +976,6 @@ class User < ActiveRecord::Base
     end
 
     nil
-  end
-
-  def suspended_message
-    return nil unless suspended?
-
-    message = "login.suspended"
-    if suspend_reason
-      if suspended_forever?
-        message = "login.suspended_with_reason_forever"
-      else
-        message = "login.suspended_with_reason"
-      end
-    end
-
-    I18n.t(message,
-           date: I18n.l(suspended_till, format: :date_only),
-           reason: Rack::Utils.escape_html(suspend_reason))
-  end
-
-  def suspended_forever?
-    suspended_till > 100.years.from_now
   end
 
   # Use this helper to determine if the user has a particular trust level.
@@ -1046,7 +1019,7 @@ class User < ActiveRecord::Base
     self.update!(active: false)
 
     if reviewable = ReviewableUser.pending.find_by(target: self)
-      reviewable.perform(performed_by, :delete_user)
+      reviewable.perform(performed_by, :reject_user_delete)
     end
   end
 
@@ -1062,8 +1035,8 @@ class User < ActiveRecord::Base
     user_stat&.distinct_badge_count
   end
 
-  def featured_user_badges(limit = nil)
-    if limit.nil?
+  def featured_user_badges(limit = DEFAULT_FEATURED_BADGE_COUNT)
+    if limit == DEFAULT_FEATURED_BADGE_COUNT
       default_featured_user_badges
     else
       user_badges.grouped_with_count.where("featured_rank <= ?", limit)
@@ -1220,7 +1193,12 @@ class User < ActiveRecord::Base
   end
 
   def number_of_flagged_posts
-    ReviewableFlaggedPost.where(target_created_by: self.id).count
+    Post.with_deleted
+      .where(user_id: self.id)
+      .where(id: PostAction.where(post_action_type_id: PostActionType.notify_flag_type_ids)
+                             .where(disagreed_at: nil)
+                             .select(:post_id))
+      .count
   end
 
   def number_of_rejected_posts
@@ -1469,7 +1447,9 @@ class User < ActiveRecord::Base
   end
 
   def create_user_stat
-    UserStat.create!(new_since: Time.zone.now, user_id: id)
+    stat = UserStat.new(new_since: Time.now)
+    stat.user_id = id
+    stat.save!
   end
 
   def create_user_option
@@ -1644,23 +1624,15 @@ class User < ActiveRecord::Base
     end
   end
 
-  def match_primary_group_changes
+  def match_title_to_primary_group_changes
     return unless primary_group_id_changed?
 
     if title == Group.where(id: primary_group_id_was).pluck_first(:title)
       self.title = primary_group&.title
     end
-
-    if flair_group_id == primary_group_id_was
-      self.flair_group_id = primary_group&.id
-    end
   end
 
   private
-
-  def stat
-    user_stat || create_user_stat
-  end
 
   def trigger_user_automatic_group_refresh
     if !staged
@@ -1778,7 +1750,6 @@ end
 #  group_locked_trust_level  :integer
 #  manual_locked_trust_level :integer
 #  secure_identifier         :string
-#  flair_group_id            :integer
 #
 # Indexes
 #

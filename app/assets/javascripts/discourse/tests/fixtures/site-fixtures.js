@@ -4,6 +4,7 @@ export default {
   "site.json": {
     site: {
       default_archetype: "regular",
+      disabled_plugins: [],
       shared_drafts_category_id: 24,
       notification_types: NOTIFICATION_TYPES,
       post_types: {
@@ -11,13 +12,6 @@ export default {
         moderator_action: 2,
         small_action: 3,
         whisper: 4,
-      },
-      trust_levels: {
-        newuser: 0,
-        basic: 1,
-        member: 2,
-        regular: 3,
-        leader: 4,
       },
       groups: [
         { id: 0, name: "everyone" },
@@ -35,7 +29,6 @@ export default {
         "latest",
         "unread",
         "new",
-        "top",
         "starred",
         "read",
         "posted",
@@ -421,23 +414,6 @@ export default {
           default_view: "latest",
           subcategory_list_style: "boxes",
         },
-        {
-          id: 240,
-          name: "快乐的",
-          color: "0E78BD",
-          text_color: "FFFFFF",
-          slug: "",
-          topic_count: 137,
-          post_count: 1142,
-          description: "关于幸福的讨论",
-          topic_url: "/t/category-definition-for-快乐的/11",
-          read_restricted: false,
-          permission: 1,
-          notification_level: null,
-          show_subcategory_list: true,
-          default_view: "latest",
-          subcategory_list_style: "boxes",
-        },
       ],
       post_action_types: [
         {
@@ -558,6 +534,28 @@ export default {
           icon: null,
           id: 7,
           is_custom_flag: true,
+        },
+      ],
+      trust_levels: [
+        {
+          id: 0,
+          name: "new user",
+        },
+        {
+          id: 1,
+          name: "basic user",
+        },
+        {
+          id: 2,
+          name: "member",
+        },
+        {
+          id: 3,
+          name: "regular",
+        },
+        {
+          id: 4,
+          name: "leader",
         },
       ],
       archetypes: [

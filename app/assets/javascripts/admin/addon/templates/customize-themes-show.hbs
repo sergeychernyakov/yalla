@@ -16,7 +16,10 @@
   </div>
 
   {{#each model.errors as |error|}}
-    <div class="alert alert-error">{{error}}</div>
+    <div class="alert alert-error">
+      <button type="button" class="close" data-dismiss="alert" aria-label={{i18n "modal.dismiss_error"}}>×</button>
+      {{error}}
+    </div>
   {{/each}}
 
   {{#unless model.supported}}

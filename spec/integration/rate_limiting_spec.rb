@@ -10,6 +10,10 @@ describe 'rate limiter integration' do
     RateLimiter.clear_all!
   end
 
+  after do
+    RateLimiter.disable
+  end
+
   it "will rate limit message bus requests once queueing" do
     freeze_time
 
@@ -49,13 +53,12 @@ describe 'rate limiter integration' do
 
   it 'can cleanly limit requests and sets a Retry-After header' do
     freeze_time
-
-    RateLimiter.clear_all!
+    #request.set_header("action_dispatch.show_exceptions", true)
 
     admin = Fabricate(:admin)
     api_key = Fabricate(:api_key, user: admin)
 
-    global_setting :max_admin_api_reqs_per_minute, 1
+    global_setting :max_admin_api_reqs_per_key_per_minute, 1
 
     get '/admin/api/keys.json', headers: {
       HTTP_API_KEY: api_key.key,

@@ -83,23 +83,10 @@ export default Controller.extend(ModalFunctionality, {
     }
   },
 
-  siteSettingMatches(value, user) {
-    switch (value) {
-      case "disabled":
-        return false;
-      case "staff":
-        return user.staff;
-      case "admin":
-        return user.admin;
-      default:
-        return user.trust_level >= parseInt(value, 10) || user.staff;
-    }
-  },
-
-  @discourseComputed("siteSettings.allow_uploaded_avatars")
-  allowAvatarUpload(allowUploadedAvatars) {
+  @discourseComputed()
+  allowAvatarUpload() {
     return (
-      this.siteSettingMatches(allowUploadedAvatars, this.currentUser) &&
+      this.siteSettings.allow_uploaded_avatars &&
       allowsImages(this.currentUser.staff, this.siteSettings)
     );
   },

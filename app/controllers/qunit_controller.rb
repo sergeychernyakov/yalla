@@ -10,7 +10,6 @@ class QunitController < ApplicationController
 
   # only used in test / dev
   def index
-    raise Discourse::NotFound.new if request.headers["HTTP_X_DISCOURSE_EMBER_CLI"] == "true"
     raise Discourse::InvalidAccess.new if Rails.env.production?
   end
 
@@ -31,7 +30,7 @@ class QunitController < ApplicationController
     end
 
     if param_key && theme.blank?
-      return render plain: "Can't find theme with #{param_key} #{get_param(param_key).inspect}", status: :not_found
+      return render plain: "Can't find theme with #{param_key} #{params[param_key].inspect}", status: :not_found
     end
 
     if !param_key
@@ -44,7 +43,7 @@ class QunitController < ApplicationController
       return
     end
 
-    request.env[:resolved_theme_id] = theme.id
+    request.env[:resolved_theme_ids] = [theme.id]
     request.env[:skip_theme_ids_transformation] = true
   end
 

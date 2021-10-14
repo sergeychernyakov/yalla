@@ -25,9 +25,9 @@ class ContentSecurityPolicy
 
     THEME_SETTING = 'extend_content_security_policy'
 
-    def theme_extensions(theme_id)
-      key = "theme_extensions_#{theme_id}"
-      cache[key] ||= find_theme_extensions(theme_id)
+    def theme_extensions(theme_ids)
+      key = "theme_extensions_#{Theme.transform_ids(theme_ids).join(',')}"
+      cache[key] ||= find_theme_extensions(theme_ids)
     end
 
     def clear_theme_extensions_cache!
@@ -40,11 +40,12 @@ class ContentSecurityPolicy
       @cache ||= DistributedCache.new('csp_extensions')
     end
 
-    def find_theme_extensions(theme_id)
+    def find_theme_extensions(theme_ids)
       extensions = []
-      theme_ids = Theme.transform_ids(theme_id)
 
-      Theme.where(id: theme_ids).find_each do |theme|
+      resolved_ids = Theme.transform_ids(theme_ids)
+
+      Theme.where(id: resolved_ids).find_each do |theme|
         theme.cached_settings.each do |setting, value|
           extensions << build_theme_extension(value.split("|")) if setting.to_s == THEME_SETTING
         end
@@ -53,7 +54,7 @@ class ContentSecurityPolicy
       extensions << build_theme_extension(ThemeModifierHelper.new(theme_ids: theme_ids).csp_extensions)
 
       html_fields = ThemeField.where(
-        theme_id: theme_ids,
+        theme_id: resolved_ids,
         target_id: ThemeField.basic_targets.map { |target| Theme.targets[target.to_sym] },
         name: ThemeField.html_fields
       )

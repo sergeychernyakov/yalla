@@ -357,7 +357,7 @@ export default Component.extend({
 
       if (markup) {
         this._closeModal();
-        this.insertDate(markup);
+        this.toolbarEvent.addText(markup);
       }
     },
 

@@ -45,9 +45,7 @@ export default Component.extend({
     this.set("recentEmojis", this.emojiStore.favorites);
     this.set("selectedDiversity", this.emojiStore.diversity);
 
-    if ("IntersectionObserver" in window) {
-      this._sectionObserver = this._setupSectionObserver();
-    }
+    this._sectionObserver = this._setupSectionObserver();
   },
 
   didInsertElement() {
@@ -109,6 +107,10 @@ export default Component.extend({
         );
       }
 
+      emojiPicker
+        .querySelectorAll(".emojis-container .section .section-header")
+        .forEach((p) => this._sectionObserver.observe(p));
+
       // this is a low-tech trick to prevent appending hundreds of emojis
       // of blocking the rendering of the picker
       later(() => {
@@ -121,12 +123,6 @@ export default Component.extend({
           ) {
             const filter = emojiPicker.querySelector("input.filter");
             filter && filter.focus();
-
-            if (this._sectionObserver) {
-              emojiPicker
-                .querySelectorAll(".emojis-container .section .section-header")
-                .forEach((p) => this._sectionObserver.observe(p));
-            }
           }
 
           if (this.selectedDiversity !== 0) {
@@ -220,22 +216,23 @@ export default Component.extend({
 
   @action
   onFilter(event) {
-    const emojiPicker = document.querySelector(".emoji-picker");
-    const results = document.querySelector(".emoji-picker-emoji-area .results");
+    const emojiPickerArea = document.querySelector(".emoji-picker-emoji-area");
+    const emojisContainer = emojiPickerArea.querySelector(".emojis-container");
+    const results = emojiPickerArea.querySelector(".results");
     results.innerHTML = "";
 
     if (event.target.value) {
       results.innerHTML = emojiSearch(event.target.value.toLowerCase(), {
-        maxResults: 20,
+        maxResults: 10,
         diversity: this.emojiStore.diversity,
       })
         .map(this._replaceEmoji)
         .join("");
 
-      emojiPicker.classList.add("has-filter");
+      emojisContainer.style.visibility = "hidden";
       results.scrollIntoView();
     } else {
-      emojiPicker.classList.remove("has-filter");
+      emojisContainer.style.visibility = "visible";
     }
   },
 

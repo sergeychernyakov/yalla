@@ -15,12 +15,7 @@ export default Controller.extend(CanCheckEmails, {
   init() {
     this._super(...arguments);
 
-    this.saveAttrNames = [
-      "name",
-      "title",
-      "primary_group_id",
-      "flair_group_id",
-    ];
+    this.saveAttrNames = ["name", "title", "primary_group_id"];
     this.set("revoking", {});
   },
 
@@ -50,7 +45,6 @@ export default Controller.extend(CanCheckEmails, {
   },
 
   canSelectTitle: gt("model.availableTitles.length", 0),
-  canSelectFlair: gt("model.availableFlairs.length", 0),
 
   @discourseComputed("model.filteredGroups")
   canSelectPrimaryGroup(primaryGroupOptions) {
@@ -138,7 +132,6 @@ export default Controller.extend(CanCheckEmails, {
         name: this.newNameInput,
         title: this.newTitleInput,
         primary_group_id: this.newPrimaryGroupInput,
-        flair_group_id: this.newFlairGroupId,
       });
 
       return this.model

@@ -87,7 +87,7 @@ sq:
       record_invalid: ! "Verifikimi dështoj: %{errors}"
       restrict_dependent_destroy:
         one: "Cannot delete record because a dependent %{record} exists"
-        other: "Cannot delete record because dependent %{record} exist"
+        many: "Cannot delete record because dependent %{record} exist"
       other_than: "must be other than %{count}"
     template:
       body: ! "There were problems with the following fields:"
@@ -221,8 +221,16 @@ sq:
       has_subcategories: "Nuk e fshini dot këtë kategori sepse ajo ka nënkategori. "
       topic_exists_no_oldest: "Nuk e fshini dot këtë kategori sepse numri i temave është %{count}."
   trust_levels:
-    admin: "Admin"
-    staff: "Stafi"
+    newuser:
+      title: "anëtar i ri"
+    basic:
+      title: "anëtar i thjeshtë"
+    member:
+      title: "anëtarë"
+    regular:
+      title: "i zakonshëm"
+    leader:
+      title: "udhëheqës"
     change_failed_explanation: "You attempted to demote %{user_name} to '%{new_trust_level}'. However their trust level is already '%{current_trust_level}'. %{user_name} will remain at '%{current_trust_level}' - if you wish to demote user lock trust level first"
   rate_limiter:
     hours:
@@ -667,6 +675,7 @@ sq:
     allow_new_registrations: "Allow new user registrations. Uncheck this to prevent anyone from creating a new account."
     google_oauth2_client_id: "Client ID of your Google application."
     google_oauth2_client_secret: "Client secret of your Google application."
+    allow_restore: "Allow restore, which can replace ALL site data! Leave false unless you plan to restore a backup"
     maximum_backups: "The maximum amount of backups to keep on disk. Older backups are automatically deleted"
     s3_backup_bucket: "The remote bucket to hold backups. WARNING: Make sure it is a private bucket."
     active_user_rate_limit_secs: "How frequently we update the 'last_seen_at' field, in seconds"
@@ -828,6 +837,7 @@ sq:
       topic: "Results"
       user: "Users"
   original_poster: "Postuesi fillestar"
+  most_posts: "Most Posts"
   most_recent_poster: "Postuesi i përgjigjes së fundit"
   frequent_poster: "Postues i shpeshtë"
   redirected_to_top_reasons:
@@ -1072,24 +1082,6 @@ sq:
 
         %{respond_instructions}
     user_group_mentioned:
-      text_body_template: |
-        %{header_instructions}
-
-        %{message}
-
-        %{context}
-
-        %{respond_instructions}
-    user_group_mentioned_pm:
-      text_body_template: |
-        %{header_instructions}
-
-        %{message}
-
-        %{context}
-
-        %{respond_instructions}
-    user_group_mentioned_pm_group:
       text_body_template: |
         %{header_instructions}
 
@@ -1391,10 +1383,14 @@ sq:
             placeholder: "emri@adresa.com"
       corporate:
         title: "Organizata"
-      styling:
+      colors:
+        title: "Ngjyrat"
+      fonts:
         fields:
-          styling_preview:
+          font_preview:
             label: "Parashikimi"
+      homepage:
+        fields:
           homepage_style:
             choices:
               categories_only:
@@ -1416,6 +1412,8 @@ sq:
     actions:
       agree_and_suspend:
         title: "Pezullo anëtarin"
+      delete_spammer:
+        title: "Elimino Spammer"
       delete_single:
         title: "Fshij"
       disagree:
@@ -1427,7 +1425,8 @@ sq:
           title: "Fshij Anëtarin"
       reject:
         title: "Refuzo"
-  fallback_username: "përdorues"
+      delete_user:
+        title: "Fshij Anëtarin"
   activemodel:
     errors:
       <<: *errors

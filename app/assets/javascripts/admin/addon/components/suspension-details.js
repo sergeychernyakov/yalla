@@ -13,7 +13,7 @@ export default Component.extend({
   reasonKeys: [
     "not_listening_to_staff",
     "consuming_staff_time",
-    "combative",
+    "combatative",
     "in_wrong_place",
     "no_constructive_purpose",
     CUSTOM_REASON_KEY,

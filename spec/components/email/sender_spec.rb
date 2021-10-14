@@ -181,43 +181,6 @@ describe Email::Sender do
       end
     end
 
-    context "replaces reply_key in custom headers" do
-      fab!(:user) { Fabricate(:user) }
-      let(:email_sender) { Email::Sender.new(message, :valid_type, user) }
-      let(:reply_key) { PostReplyKey.find_by!(post_id: post.id, user_id: user.id).reply_key }
-
-      before do
-        SiteSetting.reply_by_email_address = 'replies+%{reply_key}@test.com'
-        SiteSetting.email_custom_headers = 'Auto-Submitted: auto-generated|Mail-Reply-To: sender-name+%{reply_key}@domain.net'
-
-        message.header['X-Discourse-Post-Id'] = post.id
-      end
-
-      it 'replaces headers with reply_key if present' do
-        message.header[Email::MessageBuilder::ALLOW_REPLY_BY_EMAIL_HEADER] = 'test-%{reply_key}@test.com'
-        message.header['Reply-To'] = 'Test <test-%{reply_key}@test.com>'
-        message.header['Auto-Submitted'] = 'auto-generated'
-        message.header['Mail-Reply-To'] = 'sender-name+%{reply_key}@domain.net'
-
-        email_sender.send
-
-        expect(message.header['Reply-To'].to_s).to eq("Test <test-#{reply_key}@test.com>")
-        expect(message.header['Auto-Submitted'].to_s).to eq('auto-generated')
-        expect(message.header['Mail-Reply-To'].to_s).to eq("sender-name+#{reply_key}@domain.net")
-      end
-
-      it 'removes headers with reply_key if absent' do
-        message.header['Auto-Submitted'] = 'auto-generated'
-        message.header['Mail-Reply-To'] = 'sender-name+%{reply_key}@domain.net'
-
-        email_sender.send
-
-        expect(message.header['Reply-To'].to_s).to eq('')
-        expect(message.header['Auto-Submitted'].to_s). to eq('auto-generated')
-        expect(message.header['Mail-Reply-To'].to_s).to eq('')
-      end
-    end
-
     context "adds Precedence header" do
       fab!(:topic) { Fabricate(:topic) }
       fab!(:post) { Fabricate(:post, topic: topic) }
@@ -373,47 +336,6 @@ describe Email::Sender do
         expect(email_log.email_type).to eq('valid_type')
         expect(email_log.to_address).to eq('eviltrout@test.domain')
         expect(email_log.user_id).to be_blank
-        expect(email_log.raw).to eq(nil)
-      end
-
-      context 'when the email is sent using group SMTP credentials' do
-        let(:reply) { Fabricate(:post, topic: post.topic, reply_to_user: post.user, reply_to_post_number: post.post_number) }
-        let(:notification) { Fabricate(:posted_notification, user: post.user, post: reply) }
-        let(:message) do
-          GroupSmtpMailer.send_mail(
-            group,
-            post.user.email,
-            post
-          )
-        end
-        let(:group) { Fabricate(:smtp_group) }
-
-        before do
-          SiteSetting.enable_smtp = true
-        end
-
-        it 'adds the group id and raw content to the email log' do
-          TopicAllowedGroup.create(topic: post.topic, group: group)
-
-          email_sender.send
-
-          expect(email_log).to be_present
-          expect(email_log.email_type).to eq('valid_type')
-          expect(email_log.to_address).to eq(post.user.email)
-          expect(email_log.user_id).to be_blank
-          expect(email_log.smtp_group_id).to eq(group.id)
-          expect(email_log.raw).to include("Hello world")
-        end
-
-        it "does not add any of the mailing list headers" do
-          TopicAllowedGroup.create(topic: post.topic, group: group)
-          email_sender.send
-
-          expect(message.header['List-ID']).to eq(nil)
-          expect(message.header['List-Archive']).to eq(nil)
-          expect(message.header['Precedence']).to eq(nil)
-          expect(message.header['List-Unsubscribe']).to eq(nil)
-        end
       end
     end
 
@@ -430,7 +352,6 @@ describe Email::Sender do
       it 'should create the right log' do
         email_sender.send
         expect(email_log.post_id).to eq(post.id)
-        expect(email_log.topic_id).to eq(topic.id)
         expect(email_log.topic.id).to eq(topic.id)
       end
     end
@@ -534,21 +455,6 @@ describe Email::Sender do
           SiteSetting.secure_media_allow_embed_images_in_emails = true
         end
 
-        it "can inline images with duplicate names" do
-          @secure_image_2 = UploadCreator.new(file_from_fixtures("logo-dev.png", "images"), "logo.png").create_for(Discourse.system_user.id)
-          @secure_image_2.update_secure_status(override: true)
-          @secure_image_2.update(access_control_post_id: reply.id)
-
-          Jobs::PullHotlinkedImages.any_instance.expects(:execute)
-          reply.update(raw: "#{UploadMarkdown.new(@secure_image).image_markdown}\n#{UploadMarkdown.new(@secure_image_2).image_markdown}")
-          reply.rebake!
-
-          Email::Sender.new(message, :valid_type).send
-          expect(message.attachments.size).to eq(2)
-          expect(message.to_s.scan(/cid:[\w\-@.]+/).length).to eq(2)
-          expect(message.to_s.scan(/cid:[\w\-@.]+/).uniq.length).to eq(2)
-        end
-
         it "does not attach images that are not marked as secure" do
           Email::Sender.new(message, :valid_type).send
           expect(message.attachments.length).to eq(4)
@@ -583,8 +489,8 @@ describe Email::Sender do
           let!(:optimized_image_file) { file_from_fixtures("smallest.png", "images") }
 
           before do
-            url = Discourse.store.store_optimized_image(optimized_image_file, optimized)
-            optimized.update(url: Discourse.store.absolute_base_url + '/' + url)
+            Discourse.store.store_optimized_image(optimized_image_file, optimized)
+            optimized.update(url: Discourse.store.absolute_base_url + '/' + optimized.url)
             Discourse.store.cache_file(optimized_image_file, File.basename("#{optimized.sha1}.png"))
           end
 
@@ -740,30 +646,4 @@ describe Email::Sender do
     end
   end
 
-  context "with cc addresses" do
-    let(:message) do
-      message = Mail::Message.new to: 'eviltrout@test.domain', body: 'test body', cc: 'someguy@test.com;otherguy@xyz.com'
-      message.stubs(:deliver_now)
-      message
-    end
-
-    fab!(:user) { Fabricate(:user) }
-    let(:email_sender) { Email::Sender.new(message, :valid_type, user) }
-
-    it "logs the cc addresses in the email log (but not users if they do not match the emails)" do
-      email_sender.send
-      email_log = EmailLog.last
-      expect(email_log.cc_addresses).to eq("someguy@test.com;otherguy@xyz.com")
-      expect(email_log.cc_users).to eq([])
-    end
-
-    it "logs the cc users if they match the emails" do
-      user1 = Fabricate(:user, email: "someguy@test.com")
-      user2 = Fabricate(:user, email: "otherguy@xyz.com")
-      email_sender.send
-      email_log = EmailLog.last
-      expect(email_log.cc_addresses).to eq("someguy@test.com;otherguy@xyz.com")
-      expect(email_log.cc_users).to match_array([user1, user2])
-    end
-  end
 end

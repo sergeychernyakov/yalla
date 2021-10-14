@@ -3,7 +3,6 @@
 require "aws-sdk-s3"
 
 class S3Helper
-  FIFTEEN_MEGABYTES = 15 * 1024 * 1024
 
   class SettingMissing < StandardError; end
 
@@ -15,13 +14,7 @@ class S3Helper
   # * cache time for secure-media URLs
   # * expiry time for S3 presigned URLs, which include backup downloads and
   #   any upload that has a private ACL (e.g. secure uploads)
-  DOWNLOAD_URL_EXPIRES_AFTER_SECONDS ||= 5.minutes.to_i
-
-  ##
-  # Controls the following:
-  #
-  # * presigned put_object URLs for direct S3 uploads
-  UPLOAD_URL_EXPIRES_AFTER_SECONDS ||= 10.minutes.to_i
+  DOWNLOAD_URL_EXPIRES_AFTER_SECONDS ||= 300
 
   def initialize(s3_bucket_name, tombstone_prefix = '', options = {})
     @s3_client = options.delete(:client)
@@ -49,8 +42,8 @@ class S3Helper
     obj = s3_bucket.object(path)
 
     etag = begin
-      if File.size(file.path) >= FIFTEEN_MEGABYTES
-        options[:multipart_threshold] = FIFTEEN_MEGABYTES
+      if File.size(file.path) >= Aws::S3::FileUploader::FIFTEEN_MEGABYTES
+        options[:multipart_threshold] = Aws::S3::FileUploader::FIFTEEN_MEGABYTES
         obj.upload_file(file, options)
         obj.load
         obj.etag
@@ -86,11 +79,6 @@ class S3Helper
   end
 
   def copy(source, destination, options: {})
-    if options[:apply_metadata_to_destination]
-      options = options.except(:apply_metadata_to_destination).merge(metadata_directive: "REPLACE")
-    end
-
-    destination = get_path_for_s3_upload(destination)
     if !Rails.configuration.multisite
       options[:copy_source] = File.join(@s3_bucket_name, source)
     else
@@ -98,30 +86,16 @@ class S3Helper
         options[:copy_source] = File.join(@s3_bucket_name, source)
       elsif @s3_bucket_folder_path
         folder, filename = begin
-                             source.split("/", 2)
-                           end
+          source.split("/", 2)
+        end
         options[:copy_source] = File.join(@s3_bucket_name, folder, multisite_upload_path, filename)
       else
         options[:copy_source] = File.join(@s3_bucket_name, multisite_upload_path, source)
       end
     end
-
-    destination_object = s3_bucket.object(destination)
-
-    # TODO: copy_source is a legacy option here and may become unsupported
-    # in later versions, we should change to use Aws::S3::Client#copy_object
-    # at some point.
-    #
-    # See https://github.com/aws/aws-sdk-ruby/blob/version-3/gems/aws-sdk-s3/lib/aws-sdk-s3/customizations/object.rb#L67-L74
-    #
-    # ----
-    #
-    # Also note, any options for metadata (e.g. content_disposition, content_type)
-    # will not be applied unless the metadata_directive = "REPLACE" option is passed
-    # in. If this is not passed in, the source object's metadata will be used.
-    response = destination_object.copy_from(options)
-
-    [destination, response.copy_object_result.etag.gsub('"', '')]
+    s3_bucket
+      .object(destination)
+      .copy_from(options)
   end
 
   # make sure we have a cors config for assets
@@ -282,12 +256,7 @@ class S3Helper
   end
 
   def get_path_for_s3_upload(path)
-    if @s3_bucket_folder_path &&
-        !path.starts_with?(@s3_bucket_folder_path) &&
-        !path.starts_with?(File.join(FileStore::BaseStore::TEMPORARY_UPLOAD_PREFIX, @s3_bucket_folder_path))
-      return File.join(@s3_bucket_folder_path, path)
-    end
-
+    path = File.join(@s3_bucket_folder_path, path) if @s3_bucket_folder_path && path !~ /^#{@s3_bucket_folder_path}\//
     path
   end
 

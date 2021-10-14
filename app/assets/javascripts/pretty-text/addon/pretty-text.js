@@ -33,8 +33,7 @@ export function buildOptions(state) {
     censoredRegexp,
     disableEmojis,
     customEmojiTranslation,
-    watchedWordsReplace,
-    watchedWordsLink,
+    watchedWordsReplacements,
   } = state;
 
   let features = {
@@ -84,8 +83,7 @@ export function buildOptions(state) {
       siteSettings.enable_advanced_editor_preview_sync,
     previewing,
     disableEmojis,
-    watchedWordsReplace,
-    watchedWordsLink,
+    watchedWordsReplacements,
   };
 
   // note, this will mutate options due to the way the API is designed

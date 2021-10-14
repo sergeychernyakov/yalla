@@ -42,7 +42,6 @@ async function runAllTests() {
         "--disable-dev-shm-usage",
         "--mute-audio",
         "--window-size=1440,900",
-        "--enable-precise-memory-info",
       ],
     };
 
@@ -76,25 +75,10 @@ async function runAllTests() {
     }
   }
 
-  const { Inspector, Page, Runtime, Log } = protocol;
-  // eslint-disable-next-line
-  await Promise.all([
-    Inspector.enable(),
-    Page.enable(),
-    Runtime.enable(),
-    Log.enable(),
-  ]);
+  const { Inspector, Page, Runtime } = protocol;
 
-  // Documentation https://chromedevtools.github.io/devtools-protocol/tot/Log/#type-LogEntry
-  Log.entryAdded(({ entry }) => {
-    let message = `${new Date(entry.timestamp).toISOString()} - (type: ${
-      entry.source
-    }/${entry.level}) message: ${entry.text}`;
-    if (entry.url) {
-      message += `, url: ${entry.url}`;
-    }
-    console.log(message);
-  });
+  // eslint-disable-next-line
+  await Promise.all([Inspector.enable(), Page.enable(), Runtime.enable()]);
 
   Inspector.targetCrashed((entry) => {
     console.log("Chrome target crashed:");
@@ -123,31 +107,6 @@ async function runAllTests() {
   });
 
   let url = args[0] + "&qunit_disable_auto_start=1";
-
-  const apiKey = process.env.ADMIN_API_KEY;
-  const apiUsername = process.env.ADMIN_API_USERNAME;
-  if (apiKey && apiUsername) {
-    const { Fetch } = protocol;
-    await Fetch.enable();
-    const urlObj = new URL(url);
-    Fetch.requestPaused((data) => {
-      const requestURL = new URL(data.request.url);
-      if (requestURL.hostname != urlObj.hostname) {
-        Fetch.continueRequest({
-          requestId: data.requestId,
-        });
-        return;
-      }
-      Fetch.continueRequest({
-        requestId: data.requestId,
-        headers: [
-          { name: "Api-Key", value: apiKey },
-          { name: "Api-Username", value: apiUsername },
-        ],
-      });
-    });
-  }
-
   console.log("navigate to ", url);
   Page.navigate({ url });
 
@@ -209,7 +168,7 @@ runAllTests().catch((e) => {
 });
 
 // The following functions are converted to strings
-// And then sent to chrome to be evaluated
+// And then sent to chrome to be evalaluated
 function logQUnit() {
   let testErrors = [];
   let assertionErrors = [];

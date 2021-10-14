@@ -2,9 +2,8 @@ import componentTest, {
   setupRenderingTest,
 } from "discourse/tests/helpers/component-test";
 import {
-  count,
   discourseModule,
-  exists,
+  queryAll,
 } from "discourse/tests/helpers/qunit-helpers";
 import { click } from "@ember/test-helpers";
 import hbs from "htmlbars-inline-precompile";
@@ -19,19 +18,20 @@ discourseModule("Integration | Component | image-uploader", function (hooks) {
 
     async test(assert) {
       assert.equal(
-        count(".d-icon-far-image"),
+        queryAll(".d-icon-far-image").length,
         1,
         "it displays the upload icon"
       );
 
       assert.equal(
-        count(".d-icon-far-trash-alt"),
+        queryAll(".d-icon-far-trash-alt").length,
         1,
         "it displays the trash icon"
       );
 
-      assert.ok(
-        !exists(".placeholder-overlay"),
+      assert.equal(
+        queryAll(".placeholder-overlay").length,
+        0,
         "it does not display the placeholder image"
       );
 
@@ -50,18 +50,20 @@ discourseModule("Integration | Component | image-uploader", function (hooks) {
 
     test(assert) {
       assert.equal(
-        count(".d-icon-far-image"),
+        queryAll(".d-icon-far-image").length,
         1,
         "it displays the upload icon"
       );
 
-      assert.ok(
-        !exists(".d-icon-far-trash-alt"),
+      assert.equal(
+        queryAll(".d-icon-far-trash-alt").length,
+        0,
         "it does not display trash icon"
       );
 
-      assert.ok(
-        !exists(".image-uploader-lightbox-btn"),
+      assert.equal(
+        queryAll(".image-uploader-lightbox-btn").length,
+        0,
         "it does not display the button to open image lightbox"
       );
     },
@@ -72,23 +74,25 @@ discourseModule("Integration | Component | image-uploader", function (hooks) {
 
     test(assert) {
       assert.equal(
-        count(".d-icon-far-image"),
+        queryAll(".d-icon-far-image").length,
         1,
         "it displays the upload icon"
       );
 
-      assert.ok(
-        !exists(".d-icon-far-trash-alt"),
+      assert.equal(
+        queryAll(".d-icon-far-trash-alt").length,
+        0,
         "it does not display trash icon"
       );
 
-      assert.ok(
-        !exists(".image-uploader-lightbox-btn"),
+      assert.equal(
+        queryAll(".image-uploader-lightbox-btn").length,
+        0,
         "it does not display the button to open image lightbox"
       );
 
       assert.equal(
-        count(".placeholder-overlay"),
+        queryAll(".placeholder-overlay").length,
         1,
         "it displays the placeholder image"
       );

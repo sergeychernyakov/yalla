@@ -17,6 +17,7 @@
 // Our base application
 //= require vendor
 //= require discourse-shims
+//= require pretty-text-bundle
 //= require markdown-it-bundle
 //= require application
 //= require admin

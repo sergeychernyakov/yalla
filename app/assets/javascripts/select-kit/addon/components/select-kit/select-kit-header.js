@@ -2,24 +2,37 @@ import Component from "@ember/component";
 import UtilsMixin from "select-kit/mixins/utils";
 import { computed } from "@ember/object";
 import { makeArray } from "discourse-common/lib/helpers";
+import { schedule } from "@ember/runloop";
 
 export default Component.extend(UtilsMixin, {
+  eventType: "click",
+
+  click(event) {
+    if (typeof document === "undefined") {
+      return;
+    }
+    if (this.isDestroyed || !this.selectKit || this.selectKit.isDisabled) {
+      return;
+    }
+    if (this.eventType !== "click" || event.button !== 0) {
+      return;
+    }
+    this.selectKit.toggle(event);
+    event.preventDefault();
+  },
+
   classNames: ["select-kit-header"],
   classNameBindings: ["isFocused"],
   attributeBindings: [
-    "role",
     "tabindex",
+    "ariaOwns:aria-owns",
+    "ariaHasPopup:aria-haspopup",
+    "ariaIsExpanded:aria-expanded",
+    "headerRole:role",
     "selectedValue:data-value",
     "selectedNames:data-name",
     "buttonTitle:title",
-    "selectKit.options.autofocus:autofocus",
   ],
-
-  selectKit: null,
-
-  role: "listbox",
-
-  tabindex: 0,
 
   selectedValue: computed("value", function () {
     return this.value === this.getValue(this.selectKit.noneItem)
@@ -49,6 +62,20 @@ export default Component.extend(UtilsMixin, {
     return icon.concat(icons).filter(Boolean);
   }),
 
+  ariaIsExpanded: computed("selectKit.isExpanded", function () {
+    return this.selectKit.isExpanded ? "true" : "false";
+  }),
+
+  ariaHasPopup: "menu",
+
+  ariaOwns: computed("selectKit.uniqueID", function () {
+    return `${this.selectKit.uniqueID}-body`;
+  }),
+
+  headerRole: "listbox",
+
+  tabindex: 0,
+
   didInsertElement() {
     this._super(...arguments);
     if (this.selectKit.options.autofocus) {
@@ -56,15 +83,8 @@ export default Component.extend(UtilsMixin, {
     }
   },
 
-  click(event) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    this.selectKit.toggle(event);
-  },
-
   keyUp(event) {
-    if (event.key === " ") {
+    if (event.keyCode === 32) {
       event.preventDefault();
     }
   },
@@ -78,14 +98,13 @@ export default Component.extend(UtilsMixin, {
       return false;
     }
 
-    const onlyShiftKey = event.shiftKey && event.key === "Shift";
+    const onlyShiftKey = event.shiftKey && event.keyCode === 16;
     if (event.metaKey || onlyShiftKey) {
       return;
     }
 
-    if (event.key === "Enter") {
-      event.stopPropagation();
-
+    if (event.keyCode === 13) {
+      // Enter
       if (this.selectKit.isExpanded) {
         if (this.selectKit.highlighted) {
           this.selectKit.select(
@@ -97,38 +116,48 @@ export default Component.extend(UtilsMixin, {
       } else {
         this.selectKit.close(event);
       }
-    } else if (event.key === "ArrowUp") {
-      event.stopPropagation();
-
+    } else if (event.keyCode === 38) {
+      // Up arrow
       if (this.selectKit.isExpanded) {
         this.selectKit.highlightPrevious();
       } else {
         this.selectKit.open(event);
       }
       return false;
-    } else if (event.key === "ArrowDown") {
-      event.stopPropagation();
+    } else if (event.keyCode === 40) {
+      // Down arrow
       if (this.selectKit.isExpanded) {
         this.selectKit.highlightNext();
       } else {
         this.selectKit.open(event);
       }
       return false;
-    } else if (event.key === " ") {
-      event.stopPropagation();
-      event.preventDefault(); // prevents the space to trigger a scroll page-next
-      this.selectKit.open(event);
-    } else if (event.key === "Escape") {
-      event.stopPropagation();
-      if (this.selectKit.isExpanded) {
-        this.selectKit.close(event);
-      } else {
-        this.element.blur();
-      }
-    } else if (event.key === "Tab") {
+    } else if (event.keyCode === 37 || event.keyCode === 39) {
+      // Do nothing for left/right arrow
       return true;
-    } else if (event.key === "Backspace") {
+    } else if (event.keyCode === 32) {
+      // Space
+      event.preventDefault(); // prevents the space to trigger a scroll page-next
+      this.selectKit.toggle(event);
+    } else if (event.keyCode === 27) {
+      // Escape
+      this.selectKit.close(event);
+    } else if (event.keyCode === 8) {
+      // Backspace
       this._focusFilterInput();
+    } else if (event.keyCode === 9) {
+      // Tab
+      if (
+        this.selectKit.highlighted &&
+        this.selectKit.isExpanded &&
+        this.selectKit.options.triggerOnChangeOnTab
+      ) {
+        this.selectKit.select(
+          this.getValue(this.selectKit.highlighted),
+          this.selectKit.highlighted
+        );
+      }
+      this.selectKit.close(event);
     } else if (
       this.selectKit.options.filterable ||
       this.selectKit.options.autoFilterable ||
@@ -137,12 +166,8 @@ export default Component.extend(UtilsMixin, {
       if (this.selectKit.isExpanded) {
         this._focusFilterInput();
       } else {
-        if (this.isValidInput(event.key)) {
-          this.selectKit.set("filter", event.key);
-          this.selectKit.open(event);
-          event.preventDefault();
-          event.stopPropagation();
-        }
+        this.selectKit.open(event);
+        schedule("afterRender", () => this._focusFilterInput());
       }
     } else {
       if (this.selectKit.isExpanded) {

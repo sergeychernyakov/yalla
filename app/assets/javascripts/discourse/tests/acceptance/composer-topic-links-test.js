@@ -181,7 +181,7 @@ acceptance(
       await visit("/");
       await click("#create-topic");
       assert.ok(
-        exists(".d-editor-textarea-wrapper.disabled"),
+        queryAll(".d-editor-textarea-wrapper.disabled").length,
         "textarea is disabled"
       );
       await fillIn("#reply-title", "http://www.example.com/has-title.html");
@@ -199,7 +199,7 @@ acceptance(
         "title is from the oneboxed article"
       );
       assert.ok(
-        !exists(".d-editor-textarea-wrapper.disabled"),
+        queryAll(".d-editor-textarea-wrapper.disabled").length === 0,
         "textarea is enabled"
       );
     });

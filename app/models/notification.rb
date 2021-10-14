@@ -76,7 +76,6 @@ class Notification < ActiveRecord::Base
       DELETE
         FROM notifications n
        WHERE high_priority
-         AND notification_type NOT IN (#{types[:chat_mention].to_i}, #{types[:chat_message].to_i})
          AND NOT EXISTS (
             SELECT 1
               FROM posts p
@@ -117,9 +116,7 @@ class Notification < ActiveRecord::Base
                         reaction: 25,
                         votes_released: 26,
                         event_reminder: 27,
-                        event_invitation: 28,
-                        chat_mention: 29,
-                        chat_message: 30,
+                        event_invitation: 28
                        )
   end
 

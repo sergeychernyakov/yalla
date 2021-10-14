@@ -1,7 +1,6 @@
 import {
   acceptance,
   count,
-  exists,
   queryAll,
   updateCurrentUser,
 } from "discourse/tests/helpers/qunit-helpers";
@@ -18,17 +17,17 @@ acceptance("Group Members - Anonymous", function () {
       count(".avatar-flair .d-icon-adjust") === 1,
       "it displays the group's avatar flair"
     );
-    assert.ok(exists(".group-members tr"), "it lists group members");
+    assert.ok(count(".group-members tr") > 0, "it lists group members");
 
     assert.ok(
-      !exists(".group-member-dropdown"),
+      count(".group-member-dropdown") === 0,
       "it does not allow anon user to manage group members"
     );
 
     assert.equal(
       queryAll(".group-username-filter").attr("placeholder"),
       I18n.t("groups.members.filter_placeholder"),
-      "it should display the right filter placeholder"
+      "it should display the right filter placehodler"
     );
   });
 });
@@ -49,7 +48,7 @@ acceptance("Group Members", function (needs) {
     await click(".group-members-add");
 
     assert.equal(
-      count(".user-chooser"),
+      queryAll("#group-add-members-user-selector").length,
       1,
       "it should display the add members modal"
     );
@@ -59,21 +58,21 @@ acceptance("Group Members", function (needs) {
     await visit("/g/discourse");
 
     assert.ok(
-      exists(".group-member-dropdown"),
+      count(".group-member-dropdown") > 0,
       "it allows admin user to manage group members"
     );
 
     assert.equal(
       queryAll(".group-username-filter").attr("placeholder"),
       I18n.t("groups.members.filter_placeholder_admin"),
-      "it should display the right filter placeholder"
+      "it should display the right filter placehodler"
     );
   });
 
   test("Shows bulk actions", async function (assert) {
     await visit("/g/discourse");
 
-    assert.ok(exists("button.bulk-select"));
+    assert.ok(count("button.bulk-select") > 0);
     await click("button.bulk-select");
 
     await click(queryAll("input.bulk-select")[0]);

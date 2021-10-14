@@ -23,7 +23,7 @@ class TestQuandoraApi < Minitest::Test
     @quandora = QuandoraApi.new @domain, @username, @password
   end
 
-  def test_initialize
+  def test_intialize
     assert_equal @domain, @quandora.domain
     assert_equal @username, @quandora.username
     assert_equal @password, @quandora.password

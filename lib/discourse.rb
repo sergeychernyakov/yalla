@@ -9,6 +9,12 @@ require_dependency 'auth/default_current_user_provider'
 require_dependency 'version'
 require 'digest/sha1'
 
+# Prevents errors with reloading dev with conditional includes
+if Rails.env.development?
+  require_dependency 'file_store/s3_store'
+  require_dependency 'file_store/local_store'
+end
+
 module Discourse
   DB_POST_MIGRATE_PATH ||= "db/post_migrate"
   REQUESTED_HOSTNAME ||= "REQUESTED_HOSTNAME"
@@ -42,49 +48,6 @@ module Discourse
       logs.join("\n")
     end
 
-    def self.logs_markdown(logs, user:, filename: 'log.txt')
-      # Reserve 250 characters for the rest of the text
-      max_logs_length = SiteSetting.max_post_length - 250
-      pretty_logs = Discourse::Utils.pretty_logs(logs)
-
-      # If logs are short, try to inline them
-      if pretty_logs.size < max_logs_length
-        return <<~TEXT
-        ```text
-        #{pretty_logs}
-        ```
-        TEXT
-      end
-
-      # Try to create an upload for the logs
-      upload = Dir.mktmpdir do |dir|
-        File.write(File.join(dir, filename), pretty_logs)
-        zipfile = Compression::Zip.new.compress(dir, filename)
-        File.open(zipfile) do |file|
-          UploadCreator.new(
-            file,
-            File.basename(zipfile),
-            type: 'backup_logs',
-            for_export: 'true'
-          ).create_for(user.id)
-        end
-      end
-
-      if upload.persisted?
-        return UploadMarkdown.new(upload).attachment_markdown
-      else
-        Rails.logger.warn("Failed to upload the backup logs file: #{upload.errors.full_messages}")
-      end
-
-      # If logs are long and upload cannot be created, show trimmed logs
-      <<~TEXT
-      ```text
-      ...
-      #{pretty_logs.last(max_logs_length)}
-      ```
-      TEXT
-    end
-
     def self.atomic_write_file(destination, contents)
       begin
         return if File.read(destination) == contents
@@ -99,7 +62,7 @@ module Discourse
         fd.fsync()
       end
 
-      FileUtils.mv(temp_destination, destination)
+      File.rename(temp_destination, destination)
 
       nil
     end
@@ -113,7 +76,7 @@ module Discourse
       FileUtils.mkdir_p(File.join(Rails.root, 'tmp'))
       temp_destination = File.join(Rails.root, 'tmp', SecureRandom.hex)
       execute_command('ln', '-s', source, temp_destination)
-      FileUtils.mv(temp_destination, destination)
+      File.rename(temp_destination, destination)
 
       nil
     end
@@ -245,7 +208,7 @@ module Discourse
   class ScssError < StandardError; end
 
   def self.filters
-    @filters ||= [:latest, :unread, :new, :unseen, :top, :read, :posted, :bookmarks]
+    @filters ||= [:latest, :unread, :new, :top, :read, :posted, :bookmarks]
   end
 
   def self.anonymous_filters
@@ -786,17 +749,6 @@ module Discourse
 
     DiscourseJsProcessor::Transpiler.reset_context if defined? DiscourseJsProcessor::Transpiler
     JsLocaleHelper.reset_context if defined? JsLocaleHelper
-
-    # warm up v8 after fork, that way we do not fork a v8 context
-    # it may cause issues if bg threads in a v8 isolate randomly stop
-    # working due to fork
-    begin
-      # Skip warmup in development mode - it makes boot take ~2s longer
-      PrettyText.cook("warm up **pretty text**") if !Rails.env.development?
-    rescue => e
-      Rails.logger.error("Failed to warm up pretty text: #{e}")
-    end
-
     nil
   end
 
@@ -968,9 +920,9 @@ module Discourse
 
     schema_cache = ActiveRecord::Base.connection.schema_cache
 
+    # load up schema cache for all multisite assuming all dbs have
+    # an identical schema
     RailsMultisite::ConnectionManagement.safe_each_connection do
-      # load up schema cache for all multisite assuming all dbs have
-      # an identical schema
       dup_cache = schema_cache.dup
       # this line is not really needed, but just in case the
       # underlying implementation changes lets give it a shot
@@ -983,16 +935,6 @@ module Discourse
       Search.prepare_data("test")
 
       JsLocaleHelper.load_translations(SiteSetting.default_locale)
-      Site.json_for(Guardian.new)
-      SvgSprite.preload
-
-      begin
-        SiteSetting.client_settings_json
-      rescue => e
-        # Rescue from Redis related errors so that we can still boot the
-        # application even if Redis is down.
-        warn_exception(e, message: "Error while preloading client settings json")
-      end
     end
 
     [
@@ -1012,9 +954,6 @@ module Discourse
       },
       Thread.new {
         LetterAvatar.image_magick_version
-      },
-      Thread.new {
-        SvgSprite.core_svgs
       }
     ].each(&:join)
   ensure
@@ -1045,10 +984,6 @@ module Discourse
     headers['Access-Control-Allow-Origin'] = '*'
     headers['Access-Control-Allow-Methods'] = CDN_REQUEST_METHODS.join(", ")
     headers
-  end
-
-  def self.allow_dev_populate?
-    Rails.env.development? || ENV["ALLOW_DEV_POPULATE"] == "1"
   end
 end
 

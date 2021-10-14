@@ -15,8 +15,8 @@ export default {
     const router = container.lookup("router:main");
 
     router.on("routeWillChange", viewTrackingRequired);
-    router.on("routeDidChange", (transition) => {
-      cleanDOM(container, { skipMiniProfilerPageTransition: !transition.from });
+    router.on("routeDidChange", () => {
+      cleanDOM(container);
     });
 
     let appEvents = container.lookup("service:app-events");

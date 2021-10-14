@@ -34,14 +34,6 @@ export default DiscourseRoute.extend({
       });
   },
 
-  afterModel() {
-    const topic = this.modelFor("topic");
-
-    if (topic.isPrivateMessage && topic.suggested_topics) {
-      this.pmTopicTrackingState.startTracking();
-    }
-  },
-
   deactivate() {
     this._super(...arguments);
     this.controllerFor("topic").unsubscribe();
@@ -77,8 +69,6 @@ export default DiscourseRoute.extend({
       "model.currentPost": closest,
       enteredIndex: topic.postStream.progressIndexOfPost(closestPost),
       enteredAt: Date.now().toString(),
-      userLastReadPostNumber: topic.last_read_post_number,
-      highestPostNumber: topic.highest_post_number,
     });
 
     this.appEvents.trigger("page:topic-loaded", topic);

@@ -60,10 +60,7 @@
     min-height: 35px;
   }
   #modal-alert:empty {
-    min-height: 0px;
-    padding: 0px;
-    overflow: hidden;
-    display: inline;
+    display: none;
   }
   .login-welcome-header {
     z-index: z("modal", "content");
@@ -76,7 +73,6 @@
     }
     .login-subheader {
       align-self: start;
-      grid-row-start: 2;
       margin: 0;
     }
     .waving-hand {
@@ -96,6 +92,9 @@
     }
   }
   .modal-footer {
+    .btn-primary {
+      margin-right: 1.5em;
+    }
     .inline-spinner {
       display: inline-flex;
     }
@@ -141,10 +140,7 @@
         border: 1px solid var(--tertiary);
         box-shadow: 0 0 0 2px rgba(var(--tertiary-rgb), 0.25);
       }
-      input:disabled {
-        background-color: var(--primary-low);
-      }
-      span.more-info {
+      label.more-info {
         color: var(--primary-medium);
         min-height: 1.4em; // prevents height increase due to tips
       }
@@ -157,7 +153,6 @@
         left: 1em;
         top: 10px;
         box-shadow: 0 0 0 0px rgba(var(--tertiary-rgb), 0);
-        border-radius: 0.25em;
         transition: 0.2s ease all;
       }
       input:focus + label.alt-placeholder,
@@ -251,6 +246,7 @@
 #login-link,
 #new-account-link {
   cursor: pointer;
+  padding-left: 0;
   text-align: left;
   // the second button can wrap in some locales, and this helps alignment
 }
@@ -261,11 +257,10 @@
     margin-top: 0.5em;
   }
 
-  @media screen and (min-width: 701px) {
-    .create-account-body {
-      max-width: 40em;
-    }
+  .create-account-body {
+    max-width: 40em;
   }
+
   .user-field {
     input[type="text"] {
       margin-bottom: 0;
@@ -334,8 +329,7 @@
       line-height: $line-height-medium;
     }
     .tip {
-      font-size: var(--font-down-1);
-      margin-bottom: 0.25em;
+      padding-left: 5px;
     }
   }
 }

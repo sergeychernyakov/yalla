@@ -7,10 +7,10 @@ import { popupAjaxError } from "discourse/lib/ajax-error";
 export default Controller.extend({
   application: controller(),
 
-  queryParams: ["order", "asc", "filter"],
+  queryParams: ["order", "desc", "filter"],
 
   order: "",
-  asc: null,
+  desc: null,
   filter: null,
   filterInput: null,
 
@@ -27,7 +27,7 @@ export default Controller.extend({
     );
   },
 
-  @observes("order", "asc", "filter")
+  @observes("order", "desc", "filter")
   _filtersChanged() {
     this.findRequesters(true);
   },
@@ -57,9 +57,9 @@ export default Controller.extend({
     });
   },
 
-  @discourseComputed("order", "asc", "filter")
-  memberParams(order, asc, filter) {
-    return { order, asc, filter };
+  @discourseComputed("order", "desc", "filter")
+  memberParams(order, desc, filter) {
+    return { order, desc, filter };
   },
 
   @discourseComputed("model.requesters.[]")

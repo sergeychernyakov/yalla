@@ -64,7 +64,6 @@ describe UsersController do
     context 'valid token' do
       context 'welcome message' do
         it 'enqueues a welcome message if the user object indicates so' do
-          SiteSetting.send_welcome_message = true
           user.update(active: false)
           put "/u/activate-account/#{token}"
           expect(response.status).to eq(200)
@@ -325,6 +324,7 @@ describe UsersController do
 
       context "rate limiting" do
         before { RateLimiter.clear_all!; RateLimiter.enable }
+        after  { RateLimiter.disable }
 
         it "rate limits reset passwords" do
           freeze_time
@@ -634,7 +634,7 @@ describe UsersController do
         post "/u.json", params: {
           name: @user.name,
           username: @user.username,
-          password: 'testing12352343'
+          password: 'tesing12352343'
         }
         expect(response.status).to eq(400)
       end
@@ -1083,11 +1083,8 @@ describe UsersController do
           expect(response.status).to eq(200)
           json = response.parsed_body
           expect(json['success']).to eq(true)
-
-          user = User.last
-
-          expect(user.username).to eq('testosama')
-          expect(user.name).to eq('Osama Test')
+          expect(User.last.username).to eq('testosama')
+          expect(User.last.name).to eq('Osama Test')
         end
 
       end
@@ -1260,130 +1257,6 @@ describe UsersController do
       end
 
       context "with values for the fields" do
-        let(:update_user_url) { "/u/#{user.username}.json" }
-        let(:field_id) { user_field.id.to_s }
-
-        before { sign_in(user) }
-
-        context "with multple select fields" do
-          let(:valid_options) { %w[Axe Sword] }
-
-          fab!(:user_field) do
-            Fabricate(:user_field, field_type: 'multiselect') do
-              user_field_options do
-                [
-                  Fabricate(:user_field_option, value: 'Axe'),
-                  Fabricate(:user_field_option, value: 'Sword')
-                ]
-              end
-            end
-          end
-
-          it "should allow single values and not just arrays" do
-            expect do
-              put update_user_url, params: { user_fields: { field_id => 'Axe' } }
-            end.to change { user.reload.user_fields[field_id] }.from(nil).to('Axe')
-
-            expect do
-              put update_user_url, params: { user_fields: { field_id => %w[Axe Juice Sword] } }
-            end.to change { user.reload.user_fields[field_id] }.from('Axe').to(%w[Axe Sword])
-          end
-
-          it "shouldn't allow unregistered field values" do
-            expect do
-              put update_user_url, params: { user_fields: { field_id => %w[Juice] } }
-            end.not_to change { user.reload.user_fields[field_id] }
-          end
-
-          it "should filter valid values" do
-            expect do
-              put update_user_url, params: { user_fields: { field_id => %w[Axe Juice Sword] } }
-            end.to change { user.reload.user_fields[field_id] }.from(nil).to(valid_options)
-          end
-
-          it "allows registered field values" do
-            expect do
-              put update_user_url, params: { user_fields: { field_id => valid_options } }
-            end.to change { user.reload.user_fields[field_id] }.from(nil).to(valid_options)
-          end
-
-          it "value can't be nil or empty if the field is required" do
-            put update_user_url, params: { user_fields: { field_id => valid_options } }
-
-            user_field.update!(required: true)
-
-            expect do
-              put update_user_url, params: { user_fields: { field_id => nil } }
-            end.not_to change { user.reload.user_fields[field_id] }
-
-            expect do
-              put update_user_url, params: { user_fields: { field_id => "" } }
-            end.not_to change { user.reload.user_fields[field_id] }
-          end
-
-          it 'value can nil or empty if the field is not required' do
-            put update_user_url, params: { user_fields: { field_id => valid_options } }
-
-            user_field.update!(required: false)
-
-            expect do
-              put update_user_url, params: { user_fields: { field_id => nil } }
-            end.to change { user.reload.user_fields[field_id] }.from(valid_options).to(nil)
-
-            expect do
-              put update_user_url, params: { user_fields: { field_id => "" } }
-            end.to change { user.reload.user_fields[field_id] }.from(nil).to("")
-          end
-
-        end
-
-        context "with dropdown fields" do
-          let(:valid_options) { ['Black Mesa', 'Fox Hound'] }
-
-          fab!(:user_field) do
-            Fabricate(:user_field, field_type: 'dropdown') do
-              user_field_options do
-                [
-                  Fabricate(:user_field_option, value: 'Black Mesa'),
-                  Fabricate(:user_field_option, value: 'Fox Hound')
-                ]
-              end
-            end
-          end
-
-          it "shouldn't allow unregistered field values" do
-            expect do
-              put update_user_url, params: { user_fields: { field_id => 'Umbrella Corporation' } }
-            end.not_to change { user.reload.user_fields[field_id] }
-          end
-
-          it "allows registered field values" do
-            expect do
-              put update_user_url, params: { user_fields: { field_id => valid_options.first } }
-            end.to change { user.reload.user_fields[field_id] }.from(nil).to(valid_options.first)
-          end
-
-          it "value can't be nil if the field is required" do
-            put update_user_url, params: { user_fields: { field_id => valid_options.first } }
-
-            user_field.update!(required: true)
-
-            expect do
-              put update_user_url, params: { user_fields: { field_id => nil } }
-            end.not_to change { user.reload.user_fields[field_id] }
-          end
-
-          it 'value can be set to nil if the field is not required' do
-            put update_user_url, params: { user_fields: { field_id => valid_options.last } }
-
-            user_field.update!(required: false)
-
-            expect do
-              put update_user_url, params: { user_fields: { field_id => nil } }
-            end.to change { user.reload.user_fields[field_id] }.from(valid_options.last).to(nil)
-          end
-        end
-
         let(:create_params) { {
           name: @user.name,
           password: 'suChS3cuRi7y',
@@ -1497,7 +1370,7 @@ describe UsersController do
     end
 
     context 'while logged in' do
-      let(:old_username) { "OrigUsername" }
+      let(:old_username) { "OrigUsrname" }
       let(:new_username) { "#{old_username}1234" }
       let(:user) { Fabricate(:user, username: old_username) }
 
@@ -1946,17 +1819,6 @@ describe UsersController do
         put "/u/guest.json"
         expect(response.status).to eq(403)
       end
-    end
-
-    it "does not allow name to be updated if auth auth_overrides_name is enabled" do
-      SiteSetting.auth_overrides_name = true
-
-      sign_in(user)
-
-      put "/u/#{user.username}", params: { name: 'test.test' }
-
-      expect(response.status).to eq(200)
-      expect(user.reload.name).to_not eq('test.test')
     end
 
     context "when username contains a period" do
@@ -2493,58 +2355,16 @@ describe UsersController do
       end
 
       it "raises an error when selecting the custom/uploaded avatar and allow_uploaded_avatars is disabled" do
-        SiteSetting.allow_uploaded_avatars = 'disabled'
+        SiteSetting.allow_uploaded_avatars = false
         put "/u/#{user.username}/preferences/avatar/pick.json", params: {
           upload_id: upload.id, type: "custom"
         }
 
         expect(response.status).to eq(422)
-      end
-
-      it "raises an error when selecting the custom/uploaded avatar and allow_uploaded_avatars is admin" do
-        SiteSetting.allow_uploaded_avatars = 'admin'
-        put "/u/#{user.username}/preferences/avatar/pick.json", params: {
-          upload_id: upload.id, type: "custom"
-        }
-        expect(response.status).to eq(422)
-
-        user.update!(admin: true)
-        put "/u/#{user.username}/preferences/avatar/pick.json", params: {
-          upload_id: upload.id, type: "custom"
-        }
-        expect(response.status).to eq(200)
-      end
-
-      it "raises an error when selecting the custom/uploaded avatar and allow_uploaded_avatars is staff" do
-        SiteSetting.allow_uploaded_avatars = 'staff'
-        put "/u/#{user.username}/preferences/avatar/pick.json", params: {
-          upload_id: upload.id, type: "custom"
-        }
-        expect(response.status).to eq(422)
-
-        user.update!(moderator: true)
-        put "/u/#{user.username}/preferences/avatar/pick.json", params: {
-          upload_id: upload.id, type: "custom"
-        }
-        expect(response.status).to eq(200)
-      end
-
-      it "raises an error when selecting the custom/uploaded avatar and allow_uploaded_avatars is a trust level" do
-        SiteSetting.allow_uploaded_avatars = '3'
-        put "/u/#{user.username}/preferences/avatar/pick.json", params: {
-          upload_id: upload.id, type: "custom"
-        }
-        expect(response.status).to eq(422)
-
-        user.update!(trust_level: 3)
-        put "/u/#{user.username}/preferences/avatar/pick.json", params: {
-          upload_id: upload.id, type: "custom"
-        }
-        expect(response.status).to eq(200)
       end
 
       it 'ignores the upload if picking a system avatar' do
-        SiteSetting.allow_uploaded_avatars = 'disabled'
+        SiteSetting.allow_uploaded_avatars = false
         another_upload = Fabricate(:upload)
 
         put "/u/#{user.username}/preferences/avatar/pick.json", params: {
@@ -2556,7 +2376,7 @@ describe UsersController do
       end
 
       it 'raises an error if the type is invalid' do
-        SiteSetting.allow_uploaded_avatars = 'disabled'
+        SiteSetting.allow_uploaded_avatars = false
         another_upload = Fabricate(:upload)
 
         put "/u/#{user.username}/preferences/avatar/pick.json", params: {
@@ -2678,7 +2498,7 @@ describe UsersController do
             expect(user.user_avatar.reload.custom_upload_id).to eq(avatar1.id)
           end
 
-          it 'can successfully select an avatar using a cooked URL' do
+          it 'can succesfully select an avatar using a cooked URL' do
             events = DiscourseEvent.track_events do
               put "/u/#{user.username}/preferences/avatar/select.json", params: { url: UrlHelper.cook_url(avatar1.url) }
             end
@@ -3291,32 +3111,32 @@ describe UsersController do
         expect(json["user_summary"]["most_liked_by_users"][0]["trust_level"]).to eq(1)
       end
 
-      it "returns data for flair when an icon is used" do
+      it "returns data for primary group flair when an icon is used for flair" do
         group = Fabricate(:group, name: "Groupie", flair_bg_color: "#111111", flair_color: "#999999", flair_icon: "icon")
-        liker = Fabricate(:user, flair_group: group)
+        liker = Fabricate(:user, primary_group: group)
         create_and_like_post(user, liker)
 
         get "/u/#{user.username_lower}/summary.json"
         json = response.parsed_body
 
-        expect(json["user_summary"]["most_liked_by_users"][0]["flair_name"]).to eq("Groupie")
-        expect(json["user_summary"]["most_liked_by_users"][0]["flair_url"]).to eq("icon")
-        expect(json["user_summary"]["most_liked_by_users"][0]["flair_bg_color"]).to eq("#111111")
-        expect(json["user_summary"]["most_liked_by_users"][0]["flair_color"]).to eq("#999999")
+        expect(json["user_summary"]["most_liked_by_users"][0]["primary_group_flair_url"]).to eq("icon")
+        expect(json["user_summary"]["most_liked_by_users"][0]["primary_group_name"]).to eq("Groupie")
+        expect(json["user_summary"]["most_liked_by_users"][0]["primary_group_flair_bg_color"]).to eq("#111111")
+        expect(json["user_summary"]["most_liked_by_users"][0]["primary_group_flair_color"]).to eq("#999999")
       end
 
-      it "returns data for flair when an image is used" do
+      it "returns data for primary group flair when an image is used for flair" do
         upload = Fabricate(:upload)
         group = Fabricate(:group, name: "Groupie", flair_bg_color: "#111111", flair_upload: upload)
-        liker = Fabricate(:user, flair_group: group)
+        liker = Fabricate(:user, primary_group: group)
         create_and_like_post(user, liker)
 
         get "/u/#{user.username_lower}/summary.json"
         json = response.parsed_body
 
-        expect(json["user_summary"]["most_liked_by_users"][0]["flair_name"]).to eq("Groupie")
-        expect(json["user_summary"]["most_liked_by_users"][0]["flair_url"]).to eq(upload.url)
-        expect(json["user_summary"]["most_liked_by_users"][0]["flair_bg_color"]).to eq("#111111")
+        expect(json["user_summary"]["most_liked_by_users"][0]["primary_group_flair_url"]).to eq(upload.url)
+        expect(json["user_summary"]["most_liked_by_users"][0]["primary_group_name"]).to eq("Groupie")
+        expect(json["user_summary"]["most_liked_by_users"][0]["primary_group_flair_bg_color"]).to eq("#111111")
       end
 
       def create_and_like_post(likee, liker)
@@ -3925,7 +3745,6 @@ describe UsersController do
     fab!(:topic) { Fabricate :topic }
     let(:user)  { Fabricate :user, username: "joecabot", name: "Lawrence Tierney" }
     let(:post1) { Fabricate(:post, user: user, topic: topic) }
-    let(:staged_user) { Fabricate(:user, staged: true) }
 
     before do
       SearchIndexer.enable
@@ -3988,13 +3807,6 @@ describe UsersController do
         term: "", topic_id: pm_topic.id, category_id: ""
       }
       expect(response.status).to eq(200)
-    end
-
-    context 'limit' do
-      it "returns an error if value is invalid" do
-        get "/u/search/users.json", params: { limit: '-1' }
-        expect(response.status).to eq(400)
-      end
     end
 
     context "when `enable_names` is true" do
@@ -4081,25 +3893,6 @@ describe UsersController do
 
           expect(groups.map { |group| group['name'] })
             .to_not include(private_group.name)
-        end
-
-        it 'allows plugins to register custom groups filter' do
-          get "/u/search/users.json", params: { include_groups: "true", term: "a" }
-
-          expect(response.status).to eq(200)
-          groups = response.parsed_body["groups"]
-          expect(groups.count).to eq(6)
-
-          plugin = Plugin::Instance.new
-          plugin.register_groups_callback_for_users_search_controller_action(:admins_filter) do |original_groups, user|
-            original_groups.where(name: "admins")
-          end
-          get "/u/search/users.json", params: { include_groups: "true", admins_filter: "true", term: "a" }
-          expect(response.status).to eq(200)
-          groups = response.parsed_body["groups"]
-          expect(groups).to eq([{ "name" => "admins", "full_name" => nil }])
-
-          DiscoursePluginRegistry.reset!
         end
 
         it "doesn't search for groups" do
@@ -4219,44 +4012,6 @@ describe UsersController do
         def users_found
           response.parsed_body['users'].map { |u| u['username'] }
         end
-      end
-    end
-
-    context '`include_staged_users`' do
-      it "includes staged users when the param is true" do
-        get "/u/search/users.json", params: { term: staged_user.name, include_staged_users: true }
-        json = response.parsed_body
-        expect(json["users"].map { |u| u["name"] }).to include(staged_user.name)
-      end
-
-      it "doesn't include staged users when the param is not passed" do
-        get "/u/search/users.json", params: { term: staged_user.name }
-        json = response.parsed_body
-        expect(json["users"].map { |u| u["name"] }).not_to include(staged_user.name)
-      end
-
-      it "doesn't include staged users when the param explicitly set to false" do
-        get "/u/search/users.json", params: { term: staged_user.name, include_staged_users: false }
-        json = response.parsed_body
-        expect(json["users"].map { |u| u["name"] }).not_to include(staged_user.name)
-      end
-    end
-
-    context '`last_seen_users`' do
-      it "returns results when the param is true" do
-        get "/u/search/users.json", params: { last_seen_users: true }
-
-        json = response.parsed_body
-        expect(json["users"]).not_to be_empty
-      end
-
-      it "respects limit parameter at the same time" do
-        limit = 3
-        get "/u/search/users.json", params: { last_seen_users: true, limit: limit }
-
-        json = response.parsed_body
-        expect(json["users"]).not_to be_empty
-        expect(json["users"].size).to eq(limit)
       end
     end
   end
@@ -5061,39 +4816,6 @@ describe UsersController do
       expect(response.parsed_body['user_bookmark_list']['bookmarks'].map { |b| b['id'] }).to match_array([bookmark1.id, bookmark2.id])
     end
 
-    it "returns an .ics file of bookmark reminders for the user in date order" do
-      bookmark1.update!(name: nil, reminder_at: 1.day.from_now)
-      bookmark2.update!(name: "Some bookmark note", reminder_at: 1.week.from_now)
-
-      sign_in(user)
-      get "/u/#{user.username}/bookmarks.ics"
-      expect(response.status).to eq(200)
-      expect(response.body).to eq(<<~ICS)
-        BEGIN:VCALENDAR
-        VERSION:2.0
-        PRODID:-//Discourse//#{Discourse.current_hostname}//#{Discourse.full_version}//EN
-        BEGIN:VEVENT
-        UID:bookmark_reminder_##{bookmark1.id}@#{Discourse.current_hostname}
-        DTSTAMP:#{bookmark1.updated_at.strftime(I18n.t("datetime_formats.formats.calendar_ics"))}
-        DTSTART:#{bookmark1.reminder_at_ics}
-        DTEND:#{bookmark1.reminder_at_ics(offset: 1.hour)}
-        SUMMARY:#{bookmark1.topic.title}
-        DESCRIPTION:#{Discourse.base_url}/t/-/#{bookmark1.topic_id}
-        URL:#{Discourse.base_url}/t/-/#{bookmark1.topic_id}
-        END:VEVENT
-        BEGIN:VEVENT
-        UID:bookmark_reminder_##{bookmark2.id}@#{Discourse.current_hostname}
-        DTSTAMP:#{bookmark2.updated_at.strftime(I18n.t("datetime_formats.formats.calendar_ics"))}
-        DTSTART:#{bookmark2.reminder_at_ics}
-        DTEND:#{bookmark2.reminder_at_ics(offset: 1.hour)}
-        SUMMARY:Some bookmark note
-        DESCRIPTION:#{Discourse.base_url}/t/-/#{bookmark2.topic_id}
-        URL:#{Discourse.base_url}/t/-/#{bookmark2.topic_id}
-        END:VEVENT
-        END:VCALENDAR
-      ICS
-    end
-
     it "does not show another user's bookmarks" do
       sign_in(user)
       get "/u/#{bookmark3.user.username}/bookmarks.json"
@@ -5123,43 +4845,6 @@ describe UsersController do
       expect(response.parsed_body['no_results_help']).to eq(
         I18n.t('user_activity.no_bookmarks.search')
       )
-    end
-  end
-
-  describe "#private_message_topic_tracking_state" do
-    fab!(:user) { Fabricate(:user) }
-    fab!(:user_2) { Fabricate(:user) }
-
-    fab!(:private_message) do
-      create_post(
-        user: user,
-        target_usernames: [user_2.username],
-        archetype: Archetype.private_message
-      ).topic
-    end
-
-    before do
-      sign_in(user_2)
-    end
-
-    it 'does not allow an unauthorized user to access the state of another user' do
-      get "/u/#{user.username}/private-message-topic-tracking-state.json"
-
-      expect(response.status).to eq(403)
-    end
-
-    it 'returns the right response' do
-      get "/u/#{user_2.username}/private-message-topic-tracking-state.json"
-
-      expect(response.status).to eq(200)
-
-      topic_state = response.parsed_body.first
-
-      expect(topic_state["topic_id"]).to eq(private_message.id)
-      expect(topic_state["highest_post_number"]).to eq(1)
-      expect(topic_state["last_read_post_number"]).to eq(nil)
-      expect(topic_state["notification_level"]).to eq(NotificationLevels.all[:watching])
-      expect(topic_state["group_ids"]).to eq([])
     end
   end
 

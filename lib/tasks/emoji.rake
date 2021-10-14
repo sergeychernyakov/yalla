@@ -320,9 +320,7 @@ def copy_emoji_db
   path = "#{EMOJI_IMAGES_PATH}/**/*"
   confirm_overwrite(path)
   puts "Cleaning emoji folder..."
-  emoji_assets = Dir.glob(path)
-  emoji_assets.delete_if { |x| x == "#{EMOJI_IMAGES_PATH}/emoji_one" }
-  FileUtils.rm_rf(emoji_assets)
+  FileUtils.rm_rf(Dir.glob(path))
 
   EMOJI_SETS.each do |set_name, set_destination|
     origin = File.join(GENERATED_PATH, set_name)

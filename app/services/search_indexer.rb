@@ -103,7 +103,7 @@ class SearchIndexer
   end
 
   def self.update_topics_index(topic_id, title, cooked)
-    # a bit inconsistent that we use title as A and body as B when in
+    # a bit inconsitent that we use title as A and body as B when in
     # the post index body is D
     update_index(
       table: 'topic',
@@ -120,11 +120,7 @@ class SearchIndexer
       a_weight: topic_title,
       b_weight: category_name,
       c_weight: topic_tags,
-      # Length of a tsvector must be less than 1_048_576 bytes.
-      # The difference between the max ouptut limit and imposed input limit
-      # accounts for the fact that sometimes the output tsvector may be
-      # slighlty longer than the input.
-      d_weight: scrub_html_for_search(cooked)[0..1_000_000]
+      d_weight: scrub_html_for_search(cooked)
     ) do |params|
       params["private_message"] = private_message
     end

@@ -221,17 +221,12 @@ $avatar_margin: -50px; // negative margin makes avatars extend above cards
   // custom user fields
   .public-user-fields {
     margin: 0;
-    .user-field-value-list-item:not(:last-of-type) {
-      &:after {
-        // create comma separated list
-        content: ",";
-      }
-    }
   }
 
   // badges
   .badge-section {
-    line-height: 0;
+    display: flex;
+    align-items: flex-start;
     .user-badge {
       @include ellipsis;
       background: var(--primary-very-low);
@@ -241,13 +236,11 @@ $avatar_margin: -50px; // negative margin makes avatars extend above cards
     .user-card-badge-link {
       overflow: hidden;
     }
-    .user-card-badge-link,
     .more-user-badges {
-      vertical-align: top;
-      display: inline-block;
-    }
-    .more-user-badges a {
-      @extend .user-badge;
+      flex: 0 0 auto; // this is more important than other badges, so don't allow it to shrink
+      a {
+        @extend .user-badge;
+      }
     }
   }
 }

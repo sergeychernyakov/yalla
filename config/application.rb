@@ -93,14 +93,11 @@ module Discourse
     require_dependency 'lib/highlight_js/highlight_js'
 
     # we skip it cause we configure it in the initializer
-    # the railtie for message_bus would insert it in the
+    # the railstie for message_bus would insert it in the
     # wrong position
     config.skip_message_bus_middleware = true
     config.skip_multisite_middleware = true
     config.skip_rails_failover_active_record_middleware = true
-
-    multisite_config_path = ENV['DISCOURSE_MULTISITE_CONFIG_PATH'] || GlobalSetting.multisite_config_path
-    config.multisite_config_path = File.absolute_path(multisite_config_path, Rails.root)
 
     # Disable so this is only run manually
     # we may want to change this later on
@@ -141,7 +138,7 @@ module Discourse
 
     config.assets.paths += %W(#{config.root}/config/locales #{config.root}/public/javascripts)
 
-    # Allows us to skip minification on some files
+    # Allows us to skip minifincation on some files
     config.assets.skip_minification = []
 
     # explicitly precompile any images in plugins ( /assets/images ) path
@@ -176,10 +173,9 @@ module Discourse
       confirm-new-email/bootstrap.js
       onpopstate-handler.js
       embed-application.js
-      discourse/tests/theme_qunit_ember_jquery.js
-      discourse/tests/theme_qunit_vendor.js
-      discourse/tests/theme_qunit_tests_vendor.js
       discourse/tests/theme_qunit_helper.js
+      discourse/tests/theme_qunit_vendor.js
+      discourse/tests/theme_qunit_ember_jquery.js
       discourse/tests/test_starter.js
     }
 
@@ -200,11 +196,9 @@ module Discourse
       app.config.assets.precompile += ['application.js']
 
       start_path = ::Rails.root.join("app/assets").to_s
-      exclude = ['.es6', '.hbs', '.hbr', '.js', '.css', '.lock', '.json', '.log', '.html', '']
+      exclude = ['.es6', '.hbs', '.hbr', '.js', '.css', '']
       app.config.assets.precompile << lambda do |logical_path, filename|
         filename.start_with?(start_path) &&
-        !filename.include?("/node_modules/") &&
-        !filename.include?("/dist/") &&
         !exclude.include?(File.extname(logical_path))
       end
     end
@@ -298,7 +292,7 @@ module Discourse
     # our setup does not use rack cache and instead defers to nginx
     config.action_dispatch.rack_cache = nil
 
-    # ember stuff only used for asset precompilation, production variant plays up
+    # ember stuff only used for asset precompliation, production variant plays up
     config.ember.variant = :development
     config.ember.ember_location = "#{Rails.root}/vendor/assets/javascripts/production/ember.js"
     config.ember.handlebars_location = "#{Rails.root}/vendor/assets/javascripts/handlebars.js"

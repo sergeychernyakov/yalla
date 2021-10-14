@@ -151,7 +151,6 @@ class ThemeField < ActiveRecord::Base
 
     js_compiler = ThemeJavascriptCompiler.new(theme_id, theme.name)
     filename, extension = name.split(".", 2)
-    filename = "test/#{filename}" if js_tests_field?
     begin
       case extension
       when "js.es6", "js"
@@ -168,29 +167,6 @@ class ThemeField < ActiveRecord::Base
     end
 
     [js_compiler.content, errors&.join("\n")]
-  end
-
-  def validate_svg_sprite_xml
-    upload = Upload.find(self.upload_id) rescue nil
-
-    if Discourse.store.external?
-      external_copy = Discourse.store.download(upload) rescue nil
-      path = external_copy.try(:path)
-    else
-      path = Discourse.store.path_for(upload)
-    end
-
-    error = nil
-
-    begin
-      content = File.read(path)
-      svg_file = Nokogiri::XML(content) do |config|
-        config.options = Nokogiri::XML::ParseOptions::NOBLANKS
-      end
-    rescue => e
-      error = "Error with #{self.name}: #{e.inspect}"
-    end
-    error
   end
 
   def raw_translation_data(internal: false)
@@ -381,7 +357,7 @@ class ThemeField < ActiveRecord::Base
       self.compiler_version = Theme.compiler_version
     elsif svg_sprite_field?
       DB.after_commit { SvgSprite.expire_cache }
-      self.error = validate_svg_sprite_xml
+      self.error = nil
       self.value_baked = "baked"
       self.compiler_version = Theme.compiler_version
     end
@@ -575,12 +551,6 @@ class ThemeField < ActiveRecord::Base
     # TODO message for mobile vs desktop
     MessageBus.publish "/header-change/#{theme.id}", self.value if theme && self.name == "header"
     MessageBus.publish "/footer-change/#{theme.id}", self.value if theme && self.name == "footer"
-  end
-
-  after_destroy do
-    if svg_sprite_field?
-      DB.after_commit { SvgSprite.expire_cache }
-    end
   end
 
   private

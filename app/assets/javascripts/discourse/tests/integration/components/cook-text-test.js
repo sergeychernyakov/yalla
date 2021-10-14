@@ -1,7 +1,10 @@
 import componentTest, {
   setupRenderingTest,
 } from "discourse/tests/helpers/component-test";
-import { discourseModule, query } from "discourse/tests/helpers/qunit-helpers";
+import {
+  discourseModule,
+  queryAll,
+} from "discourse/tests/helpers/qunit-helpers";
 import hbs from "htmlbars-inline-precompile";
 import pretender from "discourse/tests/helpers/create-pretender";
 import { resetCache } from "pretty-text/upload-short-url";
@@ -13,7 +16,7 @@ discourseModule("Integration | Component | cook-text", function (hooks) {
     template: hbs`{{cook-text "_foo_" class="post-body"}}`,
 
     test(assert) {
-      const html = query(".post-body").innerHTML.trim();
+      const html = queryAll(".post-body")[0].innerHTML.trim();
       assert.equal(html, "<p><em>foo</em></p>");
     },
   });
@@ -42,7 +45,7 @@ discourseModule("Integration | Component | cook-text", function (hooks) {
     },
 
     test(assert) {
-      const html = query(".post-body").innerHTML.trim();
+      const html = queryAll(".post-body")[0].innerHTML.trim();
       assert.equal(
         html,
         '<p><img src="/images/avatar.png" alt="an image"></p>'

@@ -139,8 +139,8 @@ class Reviewable < ActiveRecord::Base
     )
     reviewable.created_new!
 
-    if target.blank? || !Reviewable.where(target: target, type: reviewable.type).exists?
-      # If there is no target, or no existing reviewable with matching target and type, there's no chance of a conflict
+    if target.blank?
+      # If there is no target there's no chance of a conflict
       reviewable.save!
     else
       # In this case, a reviewable might already exist for this (type, target_id) index.
@@ -339,6 +339,7 @@ class Reviewable < ActiveRecord::Base
   # the result of the operation and whether the status of the reviewable changed.
   def perform(performed_by, action_id, args = nil)
     args ||= {}
+
     # Support this action or any aliases
     aliases = self.class.action_aliases
     valid = [ action_id, aliases.to_a.select { |k, v| v == action_id }.map(&:first) ].flatten
@@ -366,15 +367,7 @@ class Reviewable < ActiveRecord::Base
     if result && result.after_commit
       result.after_commit.call
     end
-
-    if update_count || result.remove_reviewable_ids.present?
-      Jobs.enqueue(
-        :notify_reviewable,
-        reviewable_id: self.id,
-        performing_username: performed_by.username,
-        updated_reviewable_ids: result.remove_reviewable_ids
-      )
-    end
+    Jobs.enqueue(:notify_reviewable, reviewable_id: self.id) if update_count
 
     result
   end
@@ -642,28 +635,6 @@ class Reviewable < ActiveRecord::Base
     DiscourseEvent.trigger(:reviewable_score_updated, self)
 
     self.score
-  end
-
-  def delete_user_actions(actions, require_reject_reason: false)
-    reject = actions.add_bundle(
-      'reject_user',
-      icon: 'user-times',
-      label: 'reviewables.actions.reject_user.title'
-    )
-
-    actions.add(:delete_user, bundle: reject) do |a|
-      a.icon = 'user-times'
-      a.label = "reviewables.actions.reject_user.delete.title"
-      a.require_reject_reason = require_reject_reason
-      a.description = "reviewables.actions.reject_user.delete.description"
-    end
-
-    actions.add(:delete_user_block, bundle: reject) do |a|
-      a.icon = 'ban'
-      a.label = "reviewables.actions.reject_user.block.title"
-      a.require_reject_reason = require_reject_reason
-      a.description = "reviewables.actions.reject_user.block.description"
-    end
   end
 
 protected

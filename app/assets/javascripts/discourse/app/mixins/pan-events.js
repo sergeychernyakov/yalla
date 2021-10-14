@@ -3,6 +3,7 @@ import Mixin from "@ember/object/mixin";
    Pan events is a mixin that allows components to detect and respond to swipe gestures
    It fires callbacks for panStart, panEnd, panMove with the pan state, and the original event.
  **/
+export const SWIPE_VELOCITY = 40;
 export const SWIPE_DISTANCE_THRESHOLD = 50;
 export const SWIPE_VELOCITY_THRESHOLD = 0.12;
 export const MINIMUM_SWIPE_DISTANCE = 5;
@@ -10,42 +11,38 @@ export default Mixin.create({
   //velocity is pixels per ms
 
   _panState: null,
-  _animationPending: false,
 
   didInsertElement() {
     this._super(...arguments);
-    this.addTouchListeners(this.element);
+    this.addTouchListeners($(this.element));
   },
 
   willDestroyElement() {
     this._super(...arguments);
-    this.removeTouchListeners(this.element);
+    this.removeTouchListeners($(this.element));
   },
 
-  addTouchListeners(element) {
+  addTouchListeners($element) {
     if (this.site.mobileView) {
-      this.touchStart = (e) => e.touches && this._panStart(e.touches[0]);
-      this.touchMove = (e) => {
-        const touchEvent = e.touches[0];
-        touchEvent.type = "pointermove";
-        this._panMove(touchEvent, e);
-      };
-      this.touchEnd = (e) => this._panMove({ type: "pointerup" }, e);
-      this.touchCancel = (e) => this._panMove({ type: "pointercancel" }, e);
-
-      element.addEventListener("touchstart", this.touchStart);
-      element.addEventListener("touchmove", this.touchMove);
-      element.addEventListener("touchend", this.touchEnd);
-      element.addEventListener("touchcancel", this.touchCancel);
+      $element
+        .on("touchstart", (e) => e.touches && this._panStart(e.touches[0]))
+        .on("touchmove", (e) => {
+          const touchEvent = e.touches[0];
+          touchEvent.type = "pointermove";
+          this._panMove(touchEvent, e);
+        })
+        .on("touchend", (e) => this._panMove({ type: "pointerup" }, e))
+        .on("touchcancel", (e) => this._panMove({ type: "pointercancel" }, e));
     }
   },
 
-  removeTouchListeners(element) {
+  removeTouchListeners($element) {
     if (this.site.mobileView) {
-      element.removeEventListener("touchstart", this.touchStart);
-      element.removeEventListener("touchmove", this.touchMove);
-      element.removeEventListener("touchend", this.touchEnd);
-      element.removeEventListener("touchcancel", this.touchCancel);
+      $element
+        .off("touchstart")
+        .off("touchmove")
+        .off("touchend")
+        .off("touchcancel");
     }
   },
 
@@ -72,7 +69,9 @@ export default Mixin.create({
     //calculate delta x, y, distance from START location
     const deltaX = e.clientX - oldState.startLocation.x;
     const deltaY = e.clientY - oldState.startLocation.y;
-    const distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
+    const distance = Math.round(
+      Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2))
+    );
 
     //calculate velocity from previous event center location
     const eventDeltaX = e.clientX - oldState.center.x;
@@ -86,7 +85,7 @@ export default Mixin.create({
 
     return {
       startLocation: oldState.startLocation,
-      center: { x: e.clientX, y: e.clientY },
+      center: { x: Math.round(e.clientX), y: Math.round(e.clientY) },
       velocity,
       velocityX,
       velocityY,
@@ -101,7 +100,7 @@ export default Mixin.create({
 
   _panStart(e) {
     const newState = {
-      center: { x: e.clientX, y: e.clientY },
+      center: { x: Math.round(e.clientX), y: Math.round(e.clientY) },
       startLocation: { x: e.clientX, y: e.clientY },
       velocity: 0,
       velocityX: 0,
@@ -121,7 +120,6 @@ export default Mixin.create({
       this._panStart(e);
       return;
     }
-
     const previousState = this._panState;
     const newState = this._calculateNewPanState(previousState, e);
     if (previousState.start && newState.distance < MINIMUM_SWIPE_DISTANCE) {
@@ -137,17 +135,7 @@ export default Mixin.create({
     ) {
       this.panEnd(newState);
     } else if (e.type === "pointermove" && "panMove" in this) {
-      if (this._animationPending) {
-        return;
-      }
-      this._animationPending = true;
-      window.requestAnimationFrame(() => {
-        if (!this._animationPending) {
-          return;
-        }
-        this.panMove(newState);
-        this._animationPending = false;
-      });
+      this.panMove(newState);
     }
   },
 });

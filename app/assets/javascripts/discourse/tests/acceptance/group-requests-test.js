@@ -1,8 +1,4 @@
-import {
-  acceptance,
-  count,
-  queryAll,
-} from "discourse/tests/helpers/qunit-helpers";
+import { acceptance, queryAll } from "discourse/tests/helpers/qunit-helpers";
 import { click, visit } from "@ember/test-helpers";
 import { test } from "qunit";
 
@@ -89,7 +85,7 @@ acceptance("Group Requests", function (needs) {
   test("Group Requests", async function (assert) {
     await visit("/g/Macdonald/requests");
 
-    assert.equal(count(".group-members tr"), 2);
+    assert.equal(queryAll(".group-members tr").length, 2);
     assert.equal(
       queryAll(".group-members tr:first-child td:nth-child(1)")
         .text()

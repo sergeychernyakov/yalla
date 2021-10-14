@@ -1,11 +1,11 @@
 .d-date-time-input {
   display: flex;
-  border: 1px solid var(--primary-medium);
+  border: 1px solid var(--primary-low);
   box-sizing: border-box;
   position: relative;
 
-  .date-picker {
-    max-width: unset;
+  .date-picker,
+  .fields {
     border-color: transparent;
   }
 
@@ -15,10 +15,10 @@
   }
 
   .d-time-input {
-    width: 90px;
-    .select-kit-header {
-      border-color: transparent;
-      width: 90px;
+    .combo-box {
+      .select-kit-header {
+        border-color: transparent;
+      }
     }
   }
 

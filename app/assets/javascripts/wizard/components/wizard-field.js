@@ -3,11 +3,10 @@ import { dasherize } from "@ember/string";
 import discourseComputed from "discourse-common/utils/decorators";
 
 export default Component.extend({
-  classNameBindings: [":wizard-field", "typeClasses", "field.invalid"],
+  classNameBindings: [":wizard-field", "typeClass", "field.invalid"],
 
-  @discourseComputed("field.type", "field.id")
-  typeClasses: (type, id) =>
-    `${dasherize(type)}-field ${dasherize(type)}-${dasherize(id)}`,
+  @discourseComputed("field.type")
+  typeClass: (type) => `${dasherize(type)}-field`,
 
   @discourseComputed("field.id")
   fieldClass: (id) => `field-${dasherize(id)} wizard-focusable`,

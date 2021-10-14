@@ -31,10 +31,7 @@ export default Component.extend({
     }
   },
 
-  @discourseComputed(
-    "topic",
-    "topic.details.{notification_level,notifications_reason_id}"
-  )
+  @discourseComputed("topic", "topic.details")
   notificationReasonText(topic, topicDetails) {
     let level = topicDetails.notification_level;
     let reason = topicDetails.notifications_reason_id;

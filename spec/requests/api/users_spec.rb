@@ -17,30 +17,43 @@ describe 'users' do
 
     post 'Creates a user' do
       tags 'Users'
-      operationId 'createUser'
       consumes 'application/json'
-      # This endpoint requires an api key or the active param is ignored
       parameter name: 'Api-Key', in: :header, type: :string, required: true
       parameter name: 'Api-Username', in: :header, type: :string, required: true
-      expected_request_schema = load_spec_schema('user_create_request')
-      parameter name: :params, in: :body, schema: expected_request_schema
+      parameter name: :user_body, in: :body, schema: {
+        type: :object,
+        properties: {
+          "name": { type: :string },
+          "email": { type: :string },
+          "password": { type: :string },
+          "username": { type: :string },
+          "active": { type: :boolean },
+          "approved": { type: :boolean },
+          "user_fields[1]": { type: :string },
+        },
+        required: ['name', 'email', 'password', 'username']
+      }
 
       produces 'application/json'
       response '200', 'user created' do
-        expected_response_schema = load_spec_schema('user_create_response')
-        schema expected_response_schema
+        schema type: :object, properties: {
+          success: { type: :boolean },
+          active: { type: :boolean },
+          message: { type: :string },
+          user_id: { type: :integer },
+        }
 
-        let(:params) { {
-          'name' => 'user',
-          'username' => 'user1',
-          'email' => 'user1@example.com',
-          'password' => '13498428e9597cab689b468ebc0a5d33',
-          'active' => true,
+        let(:user_body) { {
+          name: 'user',
+          username: 'user1',
+          email: 'user1@example.com',
+          password: '13498428e9597cab689b468ebc0a5d33',
+          active: true
         } }
-
-        it_behaves_like "a JSON endpoint", 200 do
-          let(:expected_response_schema) { expected_response_schema }
-          let(:expected_request_schema) { expected_request_schema }
+        run_test! do |response|
+          data = JSON.parse(response.body)
+          expect(data['success']).to eq(true)
+          expect(data['active']).to eq(true)
         end
       end
     end
@@ -51,23 +64,17 @@ describe 'users' do
 
     get 'Get a single user by username' do
       tags 'Users'
-      operationId 'getUser'
       consumes 'application/json'
       parameter name: 'Api-Key', in: :header, type: :string, required: true
       parameter name: 'Api-Username', in: :header, type: :string, required: true
       parameter name: :username, in: :path, type: :string, required: true
-      expected_request_schema = nil
 
       produces 'application/json'
       response '200', 'user response' do
-        expected_response_schema = load_spec_schema('user_get_response')
-        schema expected_response_schema
+        schema '$ref' => '#/components/schemas/user_response'
 
         let(:username) { 'system' }
-        it_behaves_like "a JSON endpoint", 200 do
-          let(:expected_response_schema) { expected_response_schema }
-          let(:expected_request_schema) { expected_request_schema }
-        end
+        run_test!
       end
     end
   end
@@ -76,17 +83,14 @@ describe 'users' do
 
     get 'Get a user by external_id' do
       tags 'Users'
-      operationId 'getUserExternalId'
       consumes 'application/json'
       parameter name: 'Api-Key', in: :header, type: :string, required: true
       parameter name: 'Api-Username', in: :header, type: :string, required: true
       parameter name: :external_id, in: :path, type: :string, required: true
-      expected_request_schema = nil
 
       produces 'application/json'
       response '200', 'user response' do
-        expected_response_schema = load_spec_schema('user_get_response')
-        schema expected_response_schema
+        schema '$ref' => '#/components/schemas/user_response'
 
         let(:user) { Fabricate(:user) }
         let(:external_id) { '1' }
@@ -97,10 +101,7 @@ describe 'users' do
           user.create_single_sign_on_record(external_id: '1', last_payload: '')
         end
 
-        it_behaves_like "a JSON endpoint", 200 do
-          let(:expected_response_schema) { expected_response_schema }
-          let(:expected_request_schema) { expected_request_schema }
-        end
+        run_test!
       end
     end
   end
@@ -109,7 +110,6 @@ describe 'users' do
 
     get 'Get a user by identity provider external ID' do
       tags 'Users'
-      operationId 'getUserIdentiyProviderExternalId'
       consumes 'application/json'
       parameter name: 'Api-Key', in: :header, type: :string, required: true
       parameter name: 'Api-Username', in: :header, type: :string, required: true
@@ -119,12 +119,10 @@ describe 'users' do
                 required: true,
                 description: "Authentication provider name. Can be found in the provider callback URL: `/auth/{provider}/callback`"
       parameter name: :external_id, in: :path, type: :string, required: true
-      expected_request_schema = nil
 
       produces 'application/json'
       response '200', 'user response' do
-        expected_response_schema = load_spec_schema('user_get_response')
-        schema expected_response_schema
+        schema '$ref' => '#/components/schemas/user_response'
 
         let(:user) { Fabricate(:user) }
         let(:provider) { 'google_oauth2' }
@@ -135,10 +133,7 @@ describe 'users' do
           UserAssociatedAccount.create!(user: user, provider_uid: 'myuid', provider_name: 'google_oauth2')
         end
 
-        it_behaves_like "a JSON endpoint", 200 do
-          let(:expected_response_schema) { expected_response_schema }
-          let(:expected_request_schema) { expected_request_schema }
-        end
+        run_test!
       end
     end
   end
@@ -147,7 +142,6 @@ describe 'users' do
 
     put 'Update avatar' do
       tags 'Users'
-      operationId 'updateAvatar'
       consumes 'application/json'
       expected_request_schema = load_spec_schema('user_update_avatar_request')
 
@@ -178,7 +172,6 @@ describe 'users' do
 
     put 'Update email' do
       tags 'Users'
-      operationId 'updateEmail'
       consumes 'application/json'
       expected_request_schema = load_spec_schema('user_update_email_request')
 
@@ -207,7 +200,6 @@ describe 'users' do
 
     get 'Get a public list of users' do
       tags 'Users'
-      operationId 'listUsersPublic'
       consumes 'application/json'
       expected_request_schema = nil
 
@@ -265,7 +257,6 @@ describe 'users' do
 
     get 'Get a user by id' do
       tags 'Users', 'Admin'
-      operationId 'adminGetUser'
       consumes 'application/json'
       expected_request_schema = nil
 
@@ -288,7 +279,6 @@ describe 'users' do
 
     delete 'Delete a user' do
       tags 'Users', 'Admin'
-      operationId 'deleteUser'
       consumes 'application/json'
       expected_request_schema = load_spec_schema('user_delete_request')
 
@@ -321,7 +311,6 @@ describe 'users' do
   path '/admin/users/{id}/suspend.json' do
     put 'Suspend a user' do
       tags 'Users', 'Admin'
-      operationId 'suspendUser'
       consumes 'application/json'
       expected_request_schema = load_spec_schema('user_suspend_request')
 
@@ -348,36 +337,10 @@ describe 'users' do
     end
   end
 
-  path '/admin/users/{id}/anonymize.json' do
-    put 'Anonymize a user' do
-      tags 'Users', 'Admin'
-      operationId 'anonymizeUser'
-      consumes 'application/json'
-      expected_request_schema = nil
-
-      parameter name: :id, in: :path, type: :integer, required: true
-
-      produces 'application/json'
-      response '200', 'response' do
-
-        let(:id) { Fabricate(:user).id }
-
-        expected_response_schema = load_spec_schema('user_anonymize_response')
-        schema(expected_response_schema)
-
-        it_behaves_like "a JSON endpoint", 200 do
-          let(:expected_response_schema) { expected_response_schema }
-          let(:expected_request_schema) { expected_request_schema }
-        end
-      end
-    end
-  end
-
   path '/admin/users/{id}/log_out.json' do
 
     post 'Log a user out' do
       tags 'Users', 'Admin'
-      operationId 'logOutUser'
       consumes 'application/json'
       expected_request_schema = nil
 
@@ -414,7 +377,6 @@ describe 'users' do
 
     post 'Refresh gravatar' do
       tags 'Users', 'Admin'
-      operationId 'refreshGravatar'
       consumes 'application/json'
       expected_request_schema = nil
 
@@ -441,7 +403,6 @@ describe 'users' do
 
     get 'Get a list of users' do
       tags 'Users', 'Admin'
-      operationId 'adminListUsers'
       consumes 'application/json'
       expected_request_schema = nil
 
@@ -503,7 +464,6 @@ describe 'users' do
 
     get 'Get a list of user actions' do
       tags 'Users'
-      operationId 'listUserActions'
       consumes 'application/json'
       expected_request_schema = nil
 
@@ -532,7 +492,6 @@ describe 'users' do
   path '/session/forgot_password.json' do
     post 'Send password reset email' do
       tags 'Users'
-      operationId 'sendPasswordResetEmail'
       consumes 'application/json'
       expected_request_schema = load_spec_schema('user_password_reset_request')
       parameter name: :params, in: :body, schema: expected_request_schema
@@ -556,7 +515,6 @@ describe 'users' do
   path '/users/password-reset/{token}.json' do
     put 'Change password' do
       tags 'Users'
-      operationId 'changePassword'
       consumes 'application/json'
       expected_request_schema = load_spec_schema('user_password_change_request')
       parameter name: :token, in: :path, type: :string, required: true

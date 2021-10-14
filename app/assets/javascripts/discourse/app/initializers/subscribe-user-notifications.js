@@ -13,20 +13,11 @@ import {
 } from "discourse/lib/push-notifications";
 import { isTesting } from "discourse-common/config/environment";
 
-let subscribeToNotifications = true;
-export function unsubscribeFromNotifications() {
-  subscribeToNotifications = false;
-}
-
 export default {
   name: "subscribe-user-notifications",
   after: "message-bus",
 
   initialize(container) {
-    if (!subscribeToNotifications) {
-      return;
-    }
-
     const user = container.lookup("current-user:main");
     const bus = container.lookup("message-bus:main");
     const appEvents = container.lookup("service:app-events");
@@ -82,36 +73,41 @@ export default {
             );
 
             if (staleIndex === -1) {
-              // high priority and unread notifications are first
+              // this gets a bit tricky, unread pms are bumped to front
               let insertPosition = 0;
-
-              if (!lastNotification.high_priority || lastNotification.read) {
-                const nextPosition = oldNotifications.findIndex(
-                  (n) => !n.high_priority || n.read
+              if (lastNotification.notification_type !== 6) {
+                insertPosition = oldNotifications.findIndex(
+                  (n) => n.notification_type !== 6 || n.read
                 );
-
-                if (nextPosition !== -1) {
-                  insertPosition = nextPosition;
-                }
+                insertPosition =
+                  insertPosition === -1
+                    ? oldNotifications.length - 1
+                    : insertPosition;
               }
-
               oldNotifications.insertAt(
                 insertPosition,
                 EmberObject.create(lastNotification)
               );
             }
 
-            // remove stale notifications and update existing ones
-            const read = Object.fromEntries(data.recent);
-            const newNotifications = oldNotifications
-              .map((notification) => {
-                if (read[notification.id] !== undefined) {
-                  notification.set("read", read[notification.id]);
-                  return notification;
+            for (let idx = 0; idx < data.recent.length; idx++) {
+              let old;
+              while ((old = oldNotifications[idx])) {
+                const info = data.recent[idx];
+
+                if (old.get("id") !== info[0]) {
+                  oldNotifications.removeAt(idx);
+                } else {
+                  if (old.get("read") !== info[1]) {
+                    old.set("read", info[1]);
+                  }
+                  break;
                 }
-              })
-              .filter(Boolean);
-            stale.results.set("content", newNotifications);
+              }
+              if (!old) {
+                break;
+              }
+            }
           }
         },
         user.notification_channel_position

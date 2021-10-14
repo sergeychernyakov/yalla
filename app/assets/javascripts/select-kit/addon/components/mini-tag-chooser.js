@@ -1,12 +1,15 @@
 import { empty, or } from "@ember/object/computed";
-import MultiSelectComponent from "select-kit/components/multi-select";
+import ComboBox from "select-kit/components/combo-box";
+import { ERRORS_COLLECTION } from "select-kit/components/select-kit";
 import I18n from "I18n";
 import TagsMixin from "select-kit/mixins/tags";
 import { computed } from "@ember/object";
 import { makeArray } from "discourse-common/lib/helpers";
+
+const SELECTED_TAGS_COLLECTION = "MINI_TAG_CHOOSER_SELECTED_TAGS";
 import { setting } from "discourse/lib/computed";
 
-export default MultiSelectComponent.extend(TagsMixin, {
+export default ComboBox.extend(TagsMixin, {
   pluginApiIdentifiers: ["mini-tag-chooser"],
   attributeBindings: ["selectKit.options.categoryId:category-id"],
   classNames: ["mini-tag-chooser"],
@@ -14,8 +17,20 @@ export default MultiSelectComponent.extend(TagsMixin, {
   noTags: empty("value"),
   maxTagSearchResults: setting("max_tag_search_results"),
   maxTagsPerTopic: setting("max_tags_per_topic"),
+  highlightedTag: null,
+  singleSelect: false,
+
+  collections: computed(
+    "mainCollection.[]",
+    "errorsCollection.[]",
+    "highlightedTag",
+    function () {
+      return this._super(...arguments);
+    }
+  ),
 
   selectKitOptions: {
+    headerComponent: "mini-tag-chooser/mini-tag-chooser-header",
     fullWidthOnMobile: true,
     filterable: true,
     caretDownIcon: "caretIcon",
@@ -26,7 +41,6 @@ export default MultiSelectComponent.extend(TagsMixin, {
     none: "tagging.choose_for_topic",
     closeOnChange: false,
     maximum: "maximumSelectedTags",
-    minimum: "minimumSelectedTags",
     autoInsertNoneItem: false,
   },
 
@@ -36,6 +50,21 @@ export default MultiSelectComponent.extend(TagsMixin, {
     }
 
     return "tag-row";
+  },
+
+  modifyComponentForCollection(collection) {
+    if (collection === SELECTED_TAGS_COLLECTION) {
+      return "mini-tag-chooser/selected-collection";
+    }
+  },
+
+  modifyContentForCollection(collection) {
+    if (collection === SELECTED_TAGS_COLLECTION) {
+      return {
+        selectedTags: this.value,
+        highlightedTag: this.highlightedTag,
+      };
+    }
   },
 
   allowAnyTag: or("allowCreate", "site.can_create_tag"),
@@ -49,7 +78,7 @@ export default MultiSelectComponent.extend(TagsMixin, {
     );
   }),
 
-  minimumSelectedTags: computed(function () {
+  modifyNoSelection() {
     if (
       this.selectKit.options.minimum ||
       this.selectKit.options.requiredTagGroups
@@ -62,18 +91,42 @@ export default MultiSelectComponent.extend(TagsMixin, {
         );
       }
     }
-  }),
 
-  caretIcon: computed("value.[]", "content.[]", function () {
+    return this._super(...arguments);
+  },
+
+  init() {
+    this._super(...arguments);
+
+    this.insertAfterCollection(ERRORS_COLLECTION, SELECTED_TAGS_COLLECTION);
+  },
+
+  caretIcon: computed("value.[]", function () {
     const maximum = this.selectKit.options.maximum;
     return maximum && makeArray(this.value).length >= parseInt(maximum, 10)
       ? null
       : "plus";
   }),
 
-  content: computed("value.[]", function () {
-    return makeArray(this.value).map((x) => this.defaultItem(x, x));
-  }),
+  modifySelection(content) {
+    const minimum = this.selectKit.options.minimum;
+    if (minimum && makeArray(this.value).length < parseInt(minimum, 10)) {
+      const key =
+        this.selectKit.options.minimumLabel ||
+        "select_kit.min_content_not_reached";
+      const label = I18n.t(key, { count: this.selectKit.options.minimum });
+      content.title = content.name = content.label = label;
+    } else {
+      content.name = content.value = makeArray(this.value).join(",");
+      content.title = content.label = makeArray(this.value).join(", ");
+
+      if (content.label.length > 32) {
+        content.label = `${content.label.slice(0, 32)}...`;
+      }
+    }
+
+    return content;
+  },
 
   search(filter) {
     const data = {
@@ -94,10 +147,6 @@ export default MultiSelectComponent.extend(TagsMixin, {
   },
 
   _transformJson(context, json) {
-    if (context.isDestroyed || context.isDestroying) {
-      return [];
-    }
-
     let results = json.results;
 
     context.setProperties({
@@ -109,10 +158,79 @@ export default MultiSelectComponent.extend(TagsMixin, {
       results = results.sort((a, b) => a.text.localeCompare(b.text));
     }
 
-    return results
+    results = results
       .filter((r) => !makeArray(context.tags).includes(r.id))
       .map((result) => {
         return { id: result.text, name: result.text, count: result.count };
       });
+
+    return results;
+  },
+
+  select(value) {
+    this._reset();
+
+    if (!this.validateSelect(value)) {
+      return;
+    }
+
+    const tags = [...new Set(makeArray(this.value).concat(value))];
+    this.selectKit.change(tags, tags);
+  },
+
+  deselect(value) {
+    this._reset();
+
+    const tags = [...new Set(makeArray(this.value).removeObject(value))];
+    this.selectKit.change(tags, tags);
+  },
+
+  _reset() {
+    this.clearErrors();
+    this.set("highlightedTag", null);
+  },
+
+  _onKeydown(event) {
+    const value = makeArray(this.value);
+
+    if (event.keyCode === 8) {
+      if (!this.selectKit.filter) {
+        this._onBackspace(this.value, this.highlightedTag);
+      }
+    } else if (event.keyCode === 37) {
+      if (this.highlightedTag) {
+        const index = value.indexOf(this.highlightedTag);
+        const highlightedTag = value[index - 1]
+          ? value[index - 1]
+          : value.lastObject;
+        this.set("highlightedTag", highlightedTag);
+      } else {
+        this.set("highlightedTag", value.lastObject);
+      }
+    } else if (event.keyCode === 39) {
+      if (this.highlightedTag) {
+        const index = value.indexOf(this.highlightedTag);
+        const highlightedTag = value[index + 1]
+          ? value[index + 1]
+          : value.firstObject;
+        this.set("highlightedTag", highlightedTag);
+      } else {
+        this.set("highlightedTag", value.firstObject);
+      }
+    } else {
+      this.set("highlightedTag", null);
+    }
+
+    return true;
+  },
+
+  _onBackspace(value, highlightedTag) {
+    if (value && value.length) {
+      if (!highlightedTag) {
+        this.set("highlightedTag", value.lastObject);
+      } else {
+        this.deselect(highlightedTag);
+      }
+    }
   },
 });

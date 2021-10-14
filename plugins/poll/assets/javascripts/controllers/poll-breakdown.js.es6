@@ -47,6 +47,7 @@ export default Controller.extend(ModalFunctionality, {
     loadScript("/javascripts/Chart.min.js")
       .then(() => loadScript("/javascripts/chartjs-plugin-datalabels.min.js"))
       .then(() => {
+        window.Chart.plugins.unregister(window.ChartDataLabels);
         this.fetchGroupedPollData();
       });
   },

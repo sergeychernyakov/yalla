@@ -1,11 +1,12 @@
 import PanEvents, {
   SWIPE_DISTANCE_THRESHOLD,
+  SWIPE_VELOCITY,
   SWIPE_VELOCITY_THRESHOLD,
 } from "discourse/mixins/pan-events";
 import Component from "@ember/component";
 import EmberObject from "@ember/object";
 import discourseDebounce from "discourse-common/lib/debounce";
-import { later, next } from "@ember/runloop";
+import { later } from "@ember/runloop";
 import { observes } from "discourse-common/utils/decorators";
 import showModal from "discourse/lib/show-modal";
 
@@ -16,21 +17,10 @@ export default Component.extend(PanEvents, {
   composerOpen: null,
   info: null,
   isPanning: false,
-  canRender: true,
-  _lastTopicId: null,
 
   init() {
     this._super(...arguments);
     this.set("info", EmberObject.create());
-  },
-
-  didUpdateAttrs() {
-    this._super(...arguments);
-    if (this._lastTopicId !== this.topic.id) {
-      this._lastTopicId = this.topic.id;
-      this.set("canRender", false);
-      next(() => this.set("canRender", true));
-    }
   },
 
   _performCheckSize() {
@@ -137,18 +127,17 @@ export default Component.extend(PanEvents, {
     const $timelineContainer = $(".timeline-container");
     const maxOffset = parseInt($timelineContainer.css("height"), 10);
 
-    $timelineContainer.addClass("animate");
-    if (this._shouldPanClose(event)) {
-      $timelineContainer.css("--offset", `${maxOffset}px`);
-      later(() => {
-        this._collapseFullscreen();
-        $timelineContainer.removeClass("animate");
-      }, 200);
+    this._shouldPanClose(event)
+      ? (offset += SWIPE_VELOCITY)
+      : (offset -= SWIPE_VELOCITY);
+
+    $timelineContainer.css("bottom", -offset);
+    if (offset > maxOffset) {
+      this._collapseFullscreen();
+    } else if (offset <= 0) {
+      $timelineContainer.css("bottom", "");
     } else {
-      $timelineContainer.css("--offset", 0);
-      later(() => {
-        $timelineContainer.removeClass("animate");
-      }, 200);
+      later(() => this._handlePanDone(offset, event), 20);
     }
   },
 
@@ -185,13 +174,11 @@ export default Component.extend(PanEvents, {
       return;
     }
     e.originalEvent.preventDefault();
-    $(".timeline-container").css("--offset", `${Math.max(0, e.deltaY)}px`);
+    $(".timeline-container").css("bottom", Math.min(0, -e.deltaY));
   },
 
   didInsertElement() {
     this._super(...arguments);
-
-    this._lastTopicId = this.topic.id;
 
     this.appEvents
       .on("topic:current-post-scrolled", this, this._topicScrolled)

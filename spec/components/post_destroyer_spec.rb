@@ -15,6 +15,8 @@ describe PostDestroyer do
   describe "destroy_old_hidden_posts" do
 
     it "destroys posts that have been hidden for 30 days" do
+      Fabricate(:admin)
+
       now = Time.now
 
       freeze_time(now - 60.days)
@@ -61,6 +63,7 @@ describe PostDestroyer do
 
     it 'destroys stubs for deleted by user posts' do
       SiteSetting.delete_removed_posts_after = 24
+      Fabricate(:admin)
       topic = post.topic
       reply1 = create_post(topic: topic)
       reply2 = create_post(topic: topic)
@@ -108,6 +111,7 @@ describe PostDestroyer do
     end
 
     it 'uses the delete_removed_posts_after site setting' do
+      Fabricate(:admin)
       topic = post.topic
       reply1 = create_post(topic: topic)
       reply2 = create_post(topic: topic)
@@ -143,6 +147,7 @@ describe PostDestroyer do
     end
 
     it "deletes posts immediately if delete_removed_posts_after is 0" do
+      Fabricate(:admin)
       topic = post.topic
       reply1 = create_post(topic: topic)
 
@@ -179,7 +184,7 @@ describe PostDestroyer do
       post = Fabricate(:post)
       UserDestroyer.new(Discourse.system_user).destroy(post.user, delete_posts: true)
 
-      expect { PostDestroyer.new(admin, post.reload).recover }
+      expect { PostDestroyer.new(Fabricate(:admin), post.reload).recover }
         .to change { post.reload.user_id }.to(Discourse.system_user.id)
         .and change { post.topic.user_id }.to(Discourse.system_user.id)
     end
@@ -235,13 +240,6 @@ describe PostDestroyer do
 
           expect(UserAction.where(target_topic_id: post.topic_id, action_type: UserAction::NEW_TOPIC).count).to eq(1)
           expect(UserAction.where(target_topic_id: post.topic_id, action_type: UserAction::REPLY).count).to eq(1)
-        end
-
-        it "runs the SyncTopicUserBookmarked for the topic that the post is in so topic_users.bookmarked is correct" do
-          PostDestroyer.new(@user, @reply).destroy
-          expect_enqueued_with(job: :sync_topic_user_bookmarked, args: { topic_id: @reply.topic_id  }) do
-            PostDestroyer.new(@user, @reply.reload).recover
-          end
         end
       end
 
@@ -383,7 +381,7 @@ describe PostDestroyer do
         expect(post2.deleted_at).to be_blank
         expect(post2.deleted_by).to be_blank
         expect(post2.user_deleted).to eq(true)
-        expect(post2.raw).to eq(I18n.t('js.topic.deleted_by_author_simple'))
+        expect(post2.raw).to eq(I18n.t('js.topic.deleted_by_author', count: 24))
         expect(post2.version).to eq(2)
         expect(called).to eq(1)
         expect(user_stat.reload.post_count).to eq(0)
@@ -432,7 +430,7 @@ describe PostDestroyer do
       expect(user2.user_stat.topic_count).to eq(0)
       expect(user2.user_stat.post_count).to eq(1)
 
-      PostDestroyer.new(admin, post).destroy
+      PostDestroyer.new(Fabricate(:admin), post).destroy
       user1.reload
       user2.reload
       expect(user1.user_stat.topic_count).to eq(0)
@@ -464,13 +462,7 @@ describe PostDestroyer do
       expect(post.deleted_at).to eq(nil)
       expect(post.user_deleted).to eq(true)
 
-      expect(post.raw).to eq(I18n.t('js.post.deleted_by_author_simple'))
-    end
-
-    it "runs the SyncTopicUserBookmarked for the topic that the post is in so topic_users.bookmarked is correct" do
-      post2 = create_post
-      PostDestroyer.new(post2.user, post2).destroy
-      expect_job_enqueued(job: :sync_topic_user_bookmarked, args: { topic_id: post2.topic_id })
+      expect(post.raw).to eq(I18n.t('js.post.deleted_by_author', count: 1))
     end
 
     context "as a moderator" do
@@ -663,6 +655,10 @@ describe PostDestroyer do
       it "sets the second user's last_read_post_number back to 1" do
         expect(topic_user.last_read_post_number).to eq(1)
       end
+
+      it "sets the second user's last_read_post_number back to 1" do
+        expect(topic_user.highest_seen_post_number).to eq(1)
+      end
     end
   end
 
@@ -831,7 +827,7 @@ describe PostDestroyer do
       user = Fabricate(:evil_trout)
       post = create_post(raw: 'Hello @eviltrout')
       expect {
-        PostDestroyer.new(moderator, post).destroy
+        PostDestroyer.new(Fabricate(:moderator), post).destroy
       }.to change(user.notifications, :count).by(-1)
     end
   end
@@ -955,43 +951,6 @@ describe PostDestroyer do
     it 'should destroy the topic links when the user destroys the post' do
       PostDestroyer.new(second_post.user, second_post.reload).destroy
       expect(topic.topic_links.count).to eq(0)
-    end
-  end
-
-  describe 'internal links' do
-    fab!(:topic)  { Fabricate(:topic) }
-    let!(:second_post) { Fabricate(:post, topic: topic) }
-    fab!(:other_topic)  { Fabricate(:topic) }
-    let!(:other_post) { Fabricate(:post, topic: other_topic) }
-    fab!(:user) { Fabricate(:user) }
-    let!(:base_url) { URI.parse(Discourse.base_url) }
-    let!(:guardian) { Guardian.new }
-    let!(:url) { "http://#{base_url.host}/t/#{other_topic.slug}/#{other_topic.id}/#{other_post.post_number}" }
-
-    it 'should destroy internal links when user deletes own post' do
-      new_post = Post.create!(user: user, topic: topic, raw: "Link to other topic:\n\n#{url}\n")
-      TopicLink.extract_from(new_post)
-
-      link_counts = TopicLink.counts_for(guardian, other_topic.reload, [other_post])
-      expect(link_counts.count).to eq(1)
-
-      PostDestroyer.new(user, new_post).destroy
-
-      updated_link_counts = TopicLink.counts_for(guardian, other_topic.reload, [other_post])
-      expect(updated_link_counts.count).to eq(0)
-    end
-
-    it 'should destroy internal links when moderator deletes post' do
-      new_post = Post.create!(user: user, topic: topic, raw: "Link to other topic:\n\n#{url}\n")
-      TopicLink.extract_from(new_post)
-      link_counts = TopicLink.counts_for(guardian, other_topic.reload, [other_post])
-      expect(link_counts.count).to eq(1)
-
-      PostDestroyer.new(moderator, new_post).destroy
-      TopicLink.extract_from(new_post)
-      updated_link_counts = TopicLink.counts_for(guardian, other_topic, [other_post])
-
-      expect(updated_link_counts.count).to eq(0)
     end
   end
 

@@ -2,10 +2,7 @@ import componentTest, {
   setupRenderingTest,
 } from "discourse/tests/helpers/component-test";
 import {
-  count,
   discourseModule,
-  exists,
-  query,
   queryAll,
 } from "discourse/tests/helpers/qunit-helpers";
 import I18n from "I18n";
@@ -34,24 +31,6 @@ discourseModule("Integration | Component | Widget | base", function (hooks) {
 
     test(assert) {
       assert.equal(queryAll(".test").text(), "Hello Robin");
-    },
-  });
-
-  componentTest("widget services", {
-    template: hbs`{{mount-widget widget="service-test"}}`,
-
-    beforeEach() {
-      createWidget("service-test", {
-        tagName: "div.base-url-test",
-        services: ["router"],
-        html() {
-          return this.router.rootURL;
-        },
-      });
-    },
-
-    test(assert) {
-      assert.equal(queryAll(".base-url-test").text(), "/");
     },
   });
 
@@ -118,7 +97,10 @@ discourseModule("Integration | Component | Widget | base", function (hooks) {
     },
 
     test(assert) {
-      assert.ok(exists(".test.static.cool-class"), "it has all the classes");
+      assert.ok(
+        queryAll(".test.static.cool-class").length,
+        "it has all the classes"
+      );
     },
   });
 
@@ -138,8 +120,8 @@ discourseModule("Integration | Component | Widget | base", function (hooks) {
     },
 
     test(assert) {
-      assert.ok(exists('.test[data-evil="trout"]'));
-      assert.ok(exists('.test[aria-label="accessibility"]'));
+      assert.ok(queryAll('.test[data-evil="trout"]').length);
+      assert.ok(queryAll('.test[aria-label="accessibility"]').length);
     },
   });
 
@@ -157,7 +139,7 @@ discourseModule("Integration | Component | Widget | base", function (hooks) {
     },
 
     test(assert) {
-      assert.ok(exists("#test-1234"));
+      assert.ok(queryAll("#test-1234").length);
     },
   });
 
@@ -181,10 +163,10 @@ discourseModule("Integration | Component | Widget | base", function (hooks) {
     },
 
     async test(assert) {
-      assert.ok(exists("button.test"), "it renders the button");
+      assert.ok(queryAll("button.test").length, "it renders the button");
       assert.equal(queryAll("button.test").text(), "0 clicks");
 
-      await click(query("button"));
+      await click(queryAll("button")[0]);
       assert.equal(queryAll("button.test").text(), "1 clicks");
     },
   });
@@ -218,7 +200,7 @@ discourseModule("Integration | Component | Widget | base", function (hooks) {
     async test(assert) {
       assert.equal(queryAll("button.test").text().trim(), "No name");
 
-      await click(query("button"));
+      await click(queryAll("button")[0]);
       assert.equal(queryAll("button.test").text().trim(), "Robin");
     },
   });
@@ -236,8 +218,8 @@ discourseModule("Integration | Component | Widget | base", function (hooks) {
     },
 
     test(assert) {
-      assert.ok(exists(".container"), "renders container");
-      assert.ok(exists(".container .embedded"), "renders attached");
+      assert.ok(queryAll(".container").length, "renders container");
+      assert.ok(queryAll(".container .embedded").length, "renders attached");
     },
   });
 
@@ -254,8 +236,8 @@ discourseModule("Integration | Component | Widget | base", function (hooks) {
     },
 
     test(assert) {
-      assert.ok(exists(".container"), "renders container");
-      assert.ok(exists(".container .embedded"), "renders attached");
+      assert.ok(queryAll(".container").length, "renders container");
+      assert.ok(queryAll(".container .embedded").length, "renders attached");
     },
   });
 
@@ -275,30 +257,6 @@ discourseModule("Integration | Component | Widget | base", function (hooks) {
     },
 
     test(assert) {
-      assert.ok(exists(".container"), "renders container");
-      assert.equal(queryAll(".container .value").text(), "hello world");
-    },
-  });
-
-  componentTest("using transformed values in a subexpression", {
-    template: hbs`{{mount-widget widget="attach-test"}}`,
-
-    beforeEach() {
-      createWidget("testing", {
-        tagName: "span.value",
-        template: widgetHbs`{{attrs.value}}`,
-      });
-
-      createWidget("attach-test", {
-        transform() {
-          return { someValue: "world" };
-        },
-        tagName: "div.container",
-        template: widgetHbs`{{testing value=(concat "hello" " " transformed.someValue)}}`,
-      });
-    },
-
-    test(assert) {
       assert.ok(queryAll(".container").length, "renders container");
       assert.equal(queryAll(".container .value").text(), "hello world");
     },
@@ -314,7 +272,7 @@ discourseModule("Integration | Component | Widget | base", function (hooks) {
     },
 
     test(assert) {
-      assert.equal(count(".d-icon-arrow-down"), 1);
+      assert.equal(queryAll(".d-icon-arrow-down").length, 1);
     },
   });
 
@@ -347,7 +305,7 @@ discourseModule("Integration | Component | Widget | base", function (hooks) {
     },
 
     test(assert) {
-      // coming up
+      // comin up
       assert.equal(queryAll("span.string").text(), "evil");
       assert.equal(queryAll("span.var").text(), "trout");
       assert.equal(queryAll("a").prop("title"), "evil");
@@ -373,7 +331,7 @@ discourseModule("Integration | Component | Widget | base", function (hooks) {
     },
 
     test(assert) {
-      assert.equal(count("ul li"), 3);
+      assert.equal(queryAll("ul li").length, 3);
       assert.equal(queryAll("ul li:nth-of-type(1)").text(), "one");
     },
   });
@@ -399,7 +357,7 @@ discourseModule("Integration | Component | Widget | base", function (hooks) {
     },
 
     test(assert) {
-      assert.ok(exists(".decorate"));
+      assert.ok(queryAll(".decorate").length);
       assert.equal(queryAll(".decorate b").text(), "before");
       assert.equal(queryAll(".decorate i").text(), "after");
     },
@@ -474,7 +432,7 @@ discourseModule("Integration | Component | Widget | base", function (hooks) {
 
     test(assert) {
       assert.ok(
-        exists("section.override"),
+        queryAll("section.override").length,
         "renders container with overrided tagName"
       );
     },

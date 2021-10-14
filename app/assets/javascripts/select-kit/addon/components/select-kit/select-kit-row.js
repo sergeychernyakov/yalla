@@ -11,16 +11,17 @@ export default Component.extend(UtilsMixin, {
   layout,
   classNames: ["select-kit-row"],
   tagName: "li",
-  tabIndex: 0,
+  tabIndex: -1,
   attributeBindings: [
     "tabIndex",
     "title",
     "rowValue:data-value",
     "rowName:data-name",
-    "role",
-    "ariaChecked:aria-checked",
+    "ariaLabel:aria-label",
+    "ariaSelected:aria-selected",
     "guid:data-guid",
     "rowLang:lang",
+    "role",
   ],
   classNameBindings: [
     "isHighlighted",
@@ -30,24 +31,15 @@ export default Component.extend(UtilsMixin, {
     "item.classNames",
   ],
 
-  role: "menuitemradio",
-
   didInsertElement() {
     this._super(...arguments);
-
-    if (!this?.site?.mobileView) {
-      this.element.addEventListener("mouseenter", this.handleMouseEnter);
-      this.element.addEventListener("focus", this.handleMouseEnter);
-      this.element.addEventListener("blur", this.handleBlur);
-    }
+    this.element.addEventListener("mouseenter", this.handleMouseEnter);
   },
 
   willDestroyElement() {
     this._super(...arguments);
-    if (!this?.site?.mobileView && this.element) {
-      this.element.removeEventListener("mouseenter", this.handleBlur);
-      this.element.removeEventListener("focus", this.handleMouseEnter);
-      this.element.removeEventListener("blur", this.handleMouseEnter);
+    if (this.element) {
+      this.element.removeEventListener("mouseenter", this.handleMouseEnter);
     }
   },
 
@@ -55,13 +47,19 @@ export default Component.extend(UtilsMixin, {
     return this.rowValue === this.getValue(this.selectKit.noneItem);
   }),
 
+  role: "option",
+
   guid: computed("item", function () {
     return guidFor(this.item);
   }),
 
   lang: reads("item.lang"),
 
-  ariaChecked: computed("isSelected", function () {
+  ariaLabel: computed("item.ariaLabel", "title", function () {
+    return this.getProperty(this.item, "ariaLabel") || this.title;
+  }),
+
+  ariaSelected: computed("isSelected", function () {
     return this.isSelected ? "true" : "false";
   }),
 
@@ -69,10 +67,6 @@ export default Component.extend(UtilsMixin, {
     return (
       this.rowTitle || this.getProperty(this.item, "title") || this.rowName
     );
-  }),
-
-  dasherizedTitle: computed("title", function () {
-    return (this.title || "").replace(".", "-").dasherize();
   }),
 
   label: computed("rowLabel", "item.label", "title", "rowName", function () {
@@ -125,29 +119,12 @@ export default Component.extend(UtilsMixin, {
   @action
   handleMouseEnter() {
     if (!this.isDestroying || !this.isDestroyed) {
-      this.element.focus({ preventScroll: true });
       this.selectKit.onHover(this.rowValue, this.item);
     }
     return false;
   },
 
-  @action
-  handleBlur(event) {
-    if (
-      (!this.isDestroying || !this.isDestroyed) &&
-      event.relatedTarget &&
-      this.selectKit.mainElement()
-    ) {
-      if (!this.selectKit.mainElement().contains(event.relatedTarget)) {
-        this.selectKit.close(event);
-      }
-    }
-    return false;
-  },
-
-  click(event) {
-    event.preventDefault();
-    event.stopPropagation();
+  click() {
     this.selectKit.select(this.rowValue, this.item);
     return false;
   },
@@ -155,50 +132,6 @@ export default Component.extend(UtilsMixin, {
   mouseDown(event) {
     if (this.selectKit.options.preventHeaderFocus) {
       event.preventDefault();
-    }
-  },
-
-  focusIn(event) {
-    event.stopImmediatePropagation();
-  },
-
-  keyDown(event) {
-    if (this.selectKit.isExpanded) {
-      if (event.key === "Backspace") {
-        if (this.selectKit.isFilterExpanded) {
-          this.selectKit.set("filter", this.selectKit.filter.slice(0, -1));
-          this.selectKit.triggerSearch();
-          this.selectKit.focusFilter();
-          event.preventDefault();
-          event.stopPropagation();
-          return false;
-        }
-      } else if (event.key === "ArrowUp") {
-        this.selectKit.highlightPrevious();
-        return false;
-      } else if (event.key === "ArrowDown") {
-        this.selectKit.highlightNext();
-        return false;
-      } else if (event.key === "Enter") {
-        event.stopImmediatePropagation();
-
-        this.selectKit.select(
-          this.getValue(this.selectKit.highlighted),
-          this.selectKit.highlighted
-        );
-        return false;
-      } else if (event.key === "Escape") {
-        this.selectKit.close(event);
-        this.selectKit.headerElement().focus();
-      } else {
-        if (this.isValidInput(event.key)) {
-          this.selectKit.set("filter", event.key);
-          this.selectKit.triggerSearch();
-          this.selectKit.focusFilter();
-          event.preventDefault();
-          event.stopPropagation();
-        }
-      }
     }
   },
 });

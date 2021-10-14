@@ -1,13 +1,12 @@
 {{#unless isHidden}}
-  {{!-- filter-input-search prevents 1password from attempting autocomplete --}}
   {{input
-    tabindex=0
+    tabindex=-1
     class="filter-input"
     placeholder=placeholder
     autocomplete="discourse"
     autocorrect="off"
     autocapitalize="off"
-    name="filter-input-search"
+    autofocus=selectKit.options.autofocus
     spellcheck=false
     value=(readonly selectKit.filter)
     input=(action "onInput")

@@ -1,7 +1,10 @@
 import componentTest, {
   setupRenderingTest,
 } from "discourse/tests/helpers/component-test";
-import { count, discourseModule } from "discourse/tests/helpers/qunit-helpers";
+import {
+  discourseModule,
+  queryAll,
+} from "discourse/tests/helpers/qunit-helpers";
 import { click } from "@ember/test-helpers";
 import hbs from "htmlbars-inline-precompile";
 
@@ -31,7 +34,7 @@ discourseModule(
       },
       test(assert) {
         assert.equal(
-          count(".post-links a.track-link"),
+          queryAll(".post-links a.track-link").length,
           1,
           "it hides the dupe link"
         );
@@ -83,9 +86,12 @@ discourseModule(
         });
       },
       async test(assert) {
-        assert.equal(count(".expand-links"), 1, "collapsed by default");
+        assert.ok(
+          queryAll(".expand-links").length === 1,
+          "collapsed by default"
+        );
         await click("a.expand-links");
-        assert.equal(count(".post-links a.track-link"), 7);
+        assert.equal(queryAll(".post-links a.track-link").length, 7);
       },
     });
   }

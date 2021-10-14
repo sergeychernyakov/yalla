@@ -12,13 +12,11 @@ module Jobs
     sidekiq_options retry: RETRY_TIMES.size
 
     sidekiq_retry_in do |count, exception|
-      # returning nil/0 will trigger the default sidekiq
-      # retry formula
-      #
-      # See https://github.com/mperham/sidekiq/blob/3330df0ee37cfd3e0cd3ef01e3e66b584b99d488/lib/sidekiq/job_retry.rb#L216-L234
       case exception.wrapped
       when SocketError
-        return RETRY_TIMES[count]
+        RETRY_TIMES[count]
+      else
+        ::Jobs::UserEmail.seconds_to_delay(count)
       end
     end
 
@@ -28,8 +26,7 @@ module Jobs
       post_id = args[:post_id]
       post = post_id ? Post.with_deleted.find_by(id: post_id) : nil
 
-      return if !post || post.trashed? || post.user_deleted? ||
-                  !post.topic || post.raw.blank? || post.topic.private_message?
+      return if !post || post.trashed? || post.user_deleted? || !post.topic || post.raw.blank?
 
       users =
           User.activated.not_silenced.not_suspended.real

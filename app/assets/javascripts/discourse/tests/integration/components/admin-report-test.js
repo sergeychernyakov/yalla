@@ -2,7 +2,6 @@ import componentTest, {
   setupRenderingTest,
 } from "discourse/tests/helpers/component-test";
 import {
-  count,
   discourseModule,
   exists,
   queryAll,
@@ -95,7 +94,7 @@ discourseModule("Integration | Component | admin-report", function (hooks) {
     test(assert) {
       assert.ok(exists(".pagination"), "it paginates the results");
       assert.equal(
-        count(".pagination button"),
+        queryAll(".pagination button").length,
         3,
         "it creates the correct number of pages"
       );
@@ -162,17 +161,6 @@ discourseModule("Integration | Component | admin-report", function (hooks) {
       assert.ok(
         exists(".alert-error.rate-limited"),
         "it displays a rate limited error"
-      );
-    },
-  });
-
-  componentTest("post edits", {
-    template: hbs`{{admin-report dataSourceName='post_edits'}}`,
-
-    test(assert) {
-      assert.ok(
-        exists(".admin-report.post-edits"),
-        "it displays the post edits report"
       );
     },
   });

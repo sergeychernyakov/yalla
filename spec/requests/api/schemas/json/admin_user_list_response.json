@@ -48,13 +48,13 @@
         "type": "string"
       },
       "last_seen_age": {
-        "type": ["number", "null"]
+        "type": ""
       },
       "last_emailed_age": {
-        "type": ["number", "null"]
+        "type": ""
       },
       "created_at_age": {
-        "type": ["number", "null"]
+        "type": ""
       },
       "trust_level": {
         "type": "integer"

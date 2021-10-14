@@ -1,6 +1,5 @@
 import { alias, equal, gte, none } from "@ember/object/computed";
 import discourseComputed, { on } from "discourse-common/utils/decorators";
-import DiscourseURL from "discourse/lib/url";
 import Controller from "@ember/controller";
 import I18n from "I18n";
 import { schedule } from "@ember/runloop";
@@ -32,15 +31,15 @@ export default Controller.extend({
   thrown: null,
   lastTransition: null,
 
-  @discourseComputed("thrown")
-  isNetwork(thrown) {
+  @discourseComputed
+  isNetwork() {
     // never made it on the wire
-    if (thrown && thrown.readyState === 0) {
+    if (this.get("thrown.readyState") === 0) {
       return true;
     }
 
     // timed out
-    if (thrown && thrown.jqTextStatus === "timeout") {
+    if (this.get("thrown.jqTextStatus") === "timeout") {
       return true;
     }
 
@@ -51,9 +50,6 @@ export default Controller.extend({
   isForbidden: equal("thrown.status", 403),
   isServer: gte("thrown.status", 500),
   isUnknown: none("isNetwork", "isServer"),
-
-  // Handling for the detailed_404 setting (which actually creates 403s)
-  errorHtml: alias("thrown.responseJSON.extras.html"),
 
   // TODO
   // make ajax requests to /srv/status with exponential backoff
@@ -66,18 +62,16 @@ export default Controller.extend({
     this.set("loading", false);
   },
 
-  @discourseComputed("isNetwork", "thrown.status", "thrown")
-  reason(isNetwork, thrownStatus, thrown) {
-    if (isNetwork) {
+  @discourseComputed("isNetwork", "isServer", "isUnknown")
+  reason() {
+    if (this.isNetwork) {
       return I18n.t("errors.reasons.network");
-    } else if (thrownStatus >= 500) {
+    } else if (this.isServer) {
       return I18n.t("errors.reasons.server");
-    } else if (thrownStatus === 404) {
+    } else if (this.isNotFound) {
       return I18n.t("errors.reasons.not_found");
-    } else if (thrownStatus === 403) {
+    } else if (this.isForbidden) {
       return I18n.t("errors.reasons.forbidden");
-    } else if (thrown === null) {
-      return I18n.t("errors.reasons.unknown");
     } else {
       // TODO
       return I18n.t("errors.reasons.unknown");
@@ -86,42 +80,30 @@ export default Controller.extend({
 
   requestUrl: alias("thrown.requestedUrl"),
 
-  @discourseComputed(
-    "networkFixed",
-    "isNetwork",
-    "thrown.status",
-    "thrown.statusText",
-    "thrown"
-  )
-  desc(networkFixed, isNetwork, thrownStatus, thrownStatusText, thrown) {
-    if (networkFixed) {
+  @discourseComputed("networkFixed", "isNetwork", "isServer", "isUnknown")
+  desc() {
+    if (this.networkFixed) {
       return I18n.t("errors.desc.network_fixed");
-    } else if (isNetwork) {
+    } else if (this.isNetwork) {
       return I18n.t("errors.desc.network");
-    } else if (thrownStatus === 404) {
+    } else if (this.isNotFound) {
       return I18n.t("errors.desc.not_found");
-    } else if (thrownStatus === 403) {
-      return I18n.t("errors.desc.forbidden");
-    } else if (thrownStatus >= 500) {
+    } else if (this.isServer) {
       return I18n.t("errors.desc.server", {
-        status: thrownStatus + " " + thrownStatusText,
+        status: this.get("thrown.status") + " " + this.get("thrown.statusText"),
       });
-    } else if (thrown === null) {
-      return I18n.t("errors.desc.unknown");
     } else {
       // TODO
       return I18n.t("errors.desc.unknown");
     }
   },
 
-  @discourseComputed("networkFixed", "isNetwork", "lastTransition")
-  enabledButtons(networkFixed, isNetwork, lastTransition) {
-    if (networkFixed) {
+  @discourseComputed("networkFixed", "isNetwork", "isServer", "isUnknown")
+  enabledButtons() {
+    if (this.networkFixed) {
       return [ButtonLoadPage];
-    } else if (isNetwork) {
+    } else if (this.isNetwork) {
       return [ButtonBackDim, ButtonTryAgain];
-    } else if (!lastTransition) {
-      return [ButtonBackBright];
     } else {
       return [ButtonBackBright, ButtonTryAgain];
     }
@@ -129,25 +111,14 @@ export default Controller.extend({
 
   actions: {
     back() {
-      // Strip off subfolder
-      const currentURL = DiscourseURL.router.location.getURL();
-      if (this.lastTransition && currentURL !== "/exception") {
-        this.lastTransition.abort();
-        this.setProperties({ lastTransition: null, thrown: null });
-        // Can't use routeTo because it handles navigation to the same page
-        DiscourseURL.handleURL(currentURL);
-      } else {
-        window.history.back();
-      }
+      window.history.back();
     },
 
     tryLoading() {
       this.set("loading", true);
 
       schedule("afterRender", () => {
-        const transition = this.lastTransition;
-        this.setProperties({ lastTransition: null, thrown: null });
-        transition.retry();
+        this.lastTransition.retry();
         this.set("loading", false);
       });
     },

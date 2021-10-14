@@ -2,7 +2,8 @@ import Controller from "@ember/controller";
 import { INPUT_DELAY } from "discourse-common/config/environment";
 import discourseComputed from "discourse-common/utils/decorators";
 import discourseDebounce from "discourse-common/lib/debounce";
-import { get } from "@ember/object";
+
+const { get } = Ember;
 
 export default Controller.extend({
   filter: null,

@@ -1,9 +1,7 @@
 import {
   acceptance,
-  count,
   exists,
   invisible,
-  query,
   queryAll,
   updateCurrentUser,
   visible,
@@ -12,8 +10,7 @@ import { click, currentURL, fillIn, visit } from "@ember/test-helpers";
 import { skip, test } from "qunit";
 import Draft from "discourse/models/draft";
 import I18n from "I18n";
-import { CREATE_TOPIC, NEW_TOPIC_KEY } from "discourse/models/composer";
-import { withPluginApi } from "discourse/lib/plugin-api";
+import { NEW_TOPIC_KEY } from "discourse/models/composer";
 import { Promise } from "rsvp";
 import { run } from "@ember/runloop";
 import selectKit from "discourse/tests/helpers/select-kit-helper";
@@ -94,7 +91,7 @@ acceptance("Composer", function (needs) {
       "the body is now good"
     );
 
-    const textarea = query("#reply-control .d-editor-input");
+    const textarea = queryAll("#reply-control .d-editor-input")[0];
     textarea.selectionStart = textarea.value.length;
     textarea.selectionEnd = textarea.value.length;
 
@@ -103,7 +100,6 @@ acceptance("Composer", function (needs) {
     const event = document.createEvent("Event");
     event.initEvent("keydown", true, true);
     event[mac ? "metaKey" : "ctrlKey"] = true;
-    event.key = "B";
     event.keyCode = 66;
 
     run(() => textarea.dispatchEvent(event));
@@ -288,7 +284,7 @@ acceptance("Composer", function (needs) {
   test("Create an enqueued Reply", async function (assert) {
     await visit("/t/internationalization-localization/280");
 
-    assert.ok(!exists(".pending-posts .reviewable-item"));
+    assert.notOk(queryAll(".pending-posts .reviewable-item").length);
 
     await click("#topic-footer-buttons .btn.create");
     assert.ok(exists(".d-editor-input"), "the composer input is visible");
@@ -309,7 +305,7 @@ acceptance("Composer", function (needs) {
     await click(".modal-footer button");
     assert.ok(invisible(".d-modal"), "the modal can be dismissed");
 
-    assert.ok(exists(".pending-posts .reviewable-item"));
+    assert.ok(queryAll(".pending-posts .reviewable-item").length);
   });
 
   test("Edit the first post", async function (assert) {
@@ -349,62 +345,6 @@ acceptance("Composer", function (needs) {
       "it updates the post"
     );
   });
-
-  test("Editing a post stages new content", async function (assert) {
-    await visit("/t/internationalization-localization/280");
-    await click(".topic-post:nth-of-type(1) button.show-more-actions");
-    await click(".topic-post:nth-of-type(1) button.edit");
-
-    await fillIn(".d-editor-input", "will return empty json");
-    await fillIn("#reply-title", "This is the new text for the title");
-
-    // when this promise resolves, the request had already started because
-    // this promise will be resolved by the pretender
-    const promise = new Promise((resolve) => {
-      window.resolveLastPromise = resolve;
-    });
-
-    // click to trigger the save, but wait until the request starts
-    click("#reply-control button.create");
-    await promise;
-
-    // at this point, request is in flight, so post is staged
-    assert.equal(count(".topic-post.staged"), 1);
-    assert.ok(
-      find(".topic-post:nth-of-type(1)")[0].className.includes("staged")
-    );
-    assert.equal(
-      find(".topic-post.staged .cooked").text().trim(),
-      "will return empty json"
-    );
-
-    // finally, finish request and wait for last render
-    window.resolveLastPromise();
-    await visit("/t/internationalization-localization/280");
-
-    assert.equal(count(".topic-post.staged"), 0);
-  });
-
-  QUnit.skip(
-    "Editing a post can rollback to old content",
-    async function (assert) {
-      await visit("/t/internationalization-localization/280");
-      await click(".topic-post:nth-of-type(1) button.show-more-actions");
-      await click(".topic-post:nth-of-type(1) button.edit");
-
-      await fillIn(".d-editor-input", "this will 409");
-      await fillIn("#reply-title", "This is the new text for the title");
-      await click("#reply-control button.create");
-
-      assert.ok(!exists(".topic-post.staged"));
-      assert.equal(
-        find(".topic-post .cooked")[0].innerText,
-        "Any plans to support localization of UI elements, so that I (for example) could set up a completely German speaking forum?"
-      );
-
-      await click(".bootbox.modal .btn-primary");
-    }
-  );
 
   test("Composer can switch between edits", async function (assert) {
     await visit("/t/this-is-a-test-topic/9");
@@ -470,9 +410,8 @@ acceptance("Composer", function (needs) {
     await menu.expand();
     await menu.selectRowByValue("toggleWhisper");
 
-    assert.equal(
-      count(".composer-actions svg.d-icon-far-eye-slash"),
-      1,
+    assert.ok(
+      queryAll(".composer-actions svg.d-icon-far-eye-slash").length === 1,
       "it sets the post type to whisper"
     );
 
@@ -480,7 +419,7 @@ acceptance("Composer", function (needs) {
     await menu.selectRowByValue("toggleWhisper");
 
     assert.ok(
-      !exists(".composer-actions svg.d-icon-far-eye-slash"),
+      queryAll(".composer-actions svg.d-icon-far-eye-slash").length === 0,
       "it removes the whisper mode"
     );
 
@@ -501,42 +440,37 @@ acceptance("Composer", function (needs) {
     await visit("/t/this-is-a-test-topic/9");
     await click(".topic-post:nth-of-type(1) button.reply");
 
-    assert.equal(
-      count("#reply-control.open"),
-      1,
+    assert.ok(
+      queryAll("#reply-control.open").length === 1,
       "it starts in open state by default"
     );
 
     await click(".toggle-fullscreen");
 
-    assert.equal(
-      count("#reply-control.fullscreen"),
-      1,
+    assert.ok(
+      queryAll("#reply-control.fullscreen").length === 1,
       "it expands composer to full screen"
     );
 
     await click(".toggle-fullscreen");
 
-    assert.equal(
-      count("#reply-control.open"),
-      1,
+    assert.ok(
+      queryAll("#reply-control.open").length === 1,
       "it collapses composer to regular size"
     );
 
     await fillIn(".d-editor-input", "This is a dirty reply");
     await click(".toggler");
 
-    assert.equal(
-      count("#reply-control.draft"),
-      1,
+    assert.ok(
+      queryAll("#reply-control.draft").length === 1,
       "it collapses composer to draft bar"
     );
 
     await click(".toggle-fullscreen");
 
-    assert.equal(
-      count("#reply-control.open"),
-      1,
+    assert.ok(
+      queryAll("#reply-control.open").length === 1,
       "from draft, it expands composer back to open state"
     );
   });
@@ -550,9 +484,8 @@ acceptance("Composer", function (needs) {
       "toggleWhisper"
     );
 
-    assert.equal(
-      count(".composer-actions svg.d-icon-far-eye-slash"),
-      1,
+    assert.ok(
+      queryAll(".composer-actions svg.d-icon-far-eye-slash").length === 1,
       "it sets the post type to whisper"
     );
 
@@ -561,7 +494,7 @@ acceptance("Composer", function (needs) {
 
     await click("#create-topic");
     assert.ok(
-      !exists(".composer-fields .whisper .d-icon-far-eye-slash"),
+      queryAll(".composer-fields .whisper .d-icon-far-eye-slash").length === 0,
       "it should reset the state of the composer's model"
     );
 
@@ -581,7 +514,9 @@ acceptance("Composer", function (needs) {
 
     await click(".topic-post:nth-of-type(1) button.reply");
     assert.ok(
-      !exists(".composer-fields .whisper"),
+      queryAll(".composer-fields .whisper")
+        .text()
+        .indexOf(I18n.t("composer.unlist")) === -1,
       "it should reset the state of the composer's model"
     );
   });
@@ -703,20 +638,17 @@ acceptance("Composer", function (needs) {
 
       await fillIn(".d-editor-input", longText);
 
-      assert.ok(
-        exists(
-          '.action-title a[href="/t/internationalization-localization/280"]'
-        ),
-        "the mode should be: reply to post"
-      );
-
       await click("article#post_3 button.reply");
 
       const composerActions = selectKit(".composer-actions");
       await composerActions.expand();
       await composerActions.selectRowByValue("reply_as_private_message");
 
-      assert.ok(!exists(".modal-body"), "abandon popup shouldn't come");
+      assert.equal(
+        queryAll(".modal-body").text(),
+        "",
+        "abandon popup shouldn't come"
+      );
 
       assert.ok(
         queryAll(".d-editor-input").val().includes(longText),
@@ -724,11 +656,13 @@ acceptance("Composer", function (needs) {
       );
 
       assert.ok(
-        !exists(
+        queryAll(
           '.action-title a[href="/t/internationalization-localization/280"]'
         ),
         "mode should have changed"
       );
+
+      assert.ok(queryAll(".save-animation"), "save animation should show");
     } finally {
       toggleCheckDraftPopup(false);
     }
@@ -751,8 +685,12 @@ acceptance("Composer", function (needs) {
       await click("button.compose-pm");
       await click(".modal .btn-default");
 
-      const privateMessageUsers = selectKit("#private-message-users");
-      assert.equal(privateMessageUsers.header().value(), "codinghorror");
+      assert.equal(
+        queryAll("#private-message-users .selected-name:nth-of-type(1)")
+          .text()
+          .trim(),
+        "codinghorror"
+      );
     } finally {
       toggleCheckDraftPopup(false);
     }
@@ -813,9 +751,9 @@ acceptance("Composer", function (needs) {
       I18n.t("composer.create_pm"),
       "reply button says Message"
     );
-    assert.equal(
-      count(".save-or-cancel button.create svg.d-icon-envelope"),
-      1,
+    assert.ok(
+      queryAll(".save-or-cancel button.create svg.d-icon-envelope").length ===
+        1,
       "reply button has envelope icon"
     );
   });
@@ -830,9 +768,9 @@ acceptance("Composer", function (needs) {
       I18n.t("composer.save_edit"),
       "save button says Save Edit"
     );
-    assert.equal(
-      count(".save-or-cancel button.create svg.d-icon-pencil-alt"),
-      1,
+    assert.ok(
+      queryAll(".save-or-cancel button.create svg.d-icon-pencil-alt").length ===
+        1,
       "save button has pencil icon"
     );
   });
@@ -850,7 +788,7 @@ acceptance("Composer", function (needs) {
       "![test|690x313, 50%](upload://test.png)",
       // 3 No dimensions, should not work
       "![test](upload://test.jpeg)",
-      // 4 Wrapped in backticks should not work
+      // 4 Wrapped in backquetes should not work
       "`![test|690x313](upload://test.png)`",
       // 5 html image - should not work
       "<img src='/images/avatar.png' wight='20' height='20'>",
@@ -871,9 +809,8 @@ acceptance("Composer", function (needs) {
 
     await fillIn(".d-editor-input", uploads.join("\n"));
 
-    assert.equal(
-      count(".button-wrapper"),
-      10,
+    assert.ok(
+      queryAll(".button-wrapper").length === 10,
       "it adds correct amount of scaling button groups"
     );
 
@@ -953,8 +890,8 @@ acceptance("Composer", function (needs) {
     );
 
     assert.ok(
-      !exists("script"),
-      "it does not unescape script tags in code blocks"
+      queryAll("script").length === 0,
+      "it does not unescapes script tags in code blocks"
     );
   });
 
@@ -975,13 +912,13 @@ acceptance("Composer", function (needs) {
     );
 
     await fillIn(".d-editor-input", "[](https://discourse.org)");
-    assert.ok(!exists(".composer-popup"));
+    assert.equal(find(".composer-popup").length, 0);
 
     await fillIn(".d-editor-input", "[quote][](https://github.com)[/quote]");
-    assert.ok(!exists(".composer-popup"));
+    assert.equal(find(".composer-popup").length, 0);
 
     await fillIn(".d-editor-input", "[](https://github.com)");
-    assert.equal(count(".composer-popup"), 1);
+    assert.equal(find(".composer-popup").length, 1);
   });
 
   test("Shows the 'group_mentioned' notice", async function (assert) {
@@ -996,64 +933,5 @@ acceptance("Composer", function (needs) {
 
     await fillIn(".d-editor-input", "@staff");
     assert.ok(exists(".composer-popup"), "Shows the 'group_mentioned' notice");
-  });
-
-  test("Does not save invalid draft", async function (assert) {
-    this.siteSettings.min_first_post_length = 20;
-
-    await visit("/");
-    await click("#create-topic");
-    await fillIn("#reply-title", "Something");
-    await fillIn(".d-editor-input", "Something");
-    await click(".save-or-cancel .cancel");
-    assert.notOk(exists(".discard-draft-modal .save-draft"));
-  });
-});
-
-acceptance("Composer - Customizations", function (needs) {
-  needs.user();
-  needs.site({ can_tag_topics: true });
-
-  function customComposerAction(composer) {
-    return (
-      (composer.tags || []).indexOf("monkey") !== -1 &&
-      composer.action === CREATE_TOPIC
-    );
-  }
-
-  needs.hooks.beforeEach(() => {
-    withPluginApi("0.8.14", (api) => {
-      api.customizeComposerText({
-        actionTitle(model) {
-          if (customComposerAction(model)) {
-            return "custom text";
-          }
-        },
-
-        saveLabel(model) {
-          if (customComposerAction(model)) {
-            return "composer.emoji";
-          }
-        },
-      });
-    });
-  });
-
-  test("Supports text customization", async function (assert) {
-    await visit("/");
-    await click("#create-topic");
-    assert.equal(query(".action-title").innerText, I18n.t("topic.create_long"));
-    assert.equal(
-      query(".save-or-cancel button").innerText,
-      I18n.t("composer.create_topic")
-    );
-    const tags = selectKit(".mini-tag-chooser");
-    await tags.expand();
-    await tags.selectRowByValue("monkey");
-    assert.equal(query(".action-title").innerText, "custom text");
-    assert.equal(
-      query(".save-or-cancel button").innerText,
-      I18n.t("composer.emoji")
-    );
   });
 });

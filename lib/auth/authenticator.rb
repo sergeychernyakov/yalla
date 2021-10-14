@@ -52,7 +52,7 @@ class Auth::Authenticator
     false
   end
 
-  # can existing discourse users connect this provider to their accounts
+  # can exising discourse users connect this provider to their accounts
   def can_connect_existing_user?
     false
   end

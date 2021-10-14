@@ -12,24 +12,15 @@ class GroupShowSerializer < BasicGroupSerializer
     end
   end
 
-  has_one :smtp_updated_by, embed: :object, serializer: BasicUserSerializer
-  has_one :imap_updated_by, embed: :object, serializer: BasicUserSerializer
-
   admin_attributes :automatic_membership_email_domains,
                    :smtp_server,
                    :smtp_port,
                    :smtp_ssl,
-                   :smtp_enabled,
-                   :smtp_updated_at,
-                   :smtp_updated_by,
                    :imap_server,
                    :imap_port,
                    :imap_ssl,
                    :imap_mailbox_name,
                    :imap_mailboxes,
-                   :imap_enabled,
-                   :imap_updated_at,
-                   :imap_updated_by,
                    :email_username,
                    :email_password,
                    :imap_last_error,
@@ -95,7 +86,7 @@ class GroupShowSerializer < BasicGroupSerializer
   end
 
   def messageable
-    scope.can_send_private_message?(object)
+    Group.messageable(scope.user).exists?(id: object.id)
   end
 
   def include_flair_icon?

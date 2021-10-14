@@ -152,7 +152,6 @@ describe Draft do
     Draft.set(user, key, 0, 'draft')
     Draft.cleanup!
     expect(Draft.count).to eq 1
-    expect(user.user_stat.draft_count).to eq(1)
 
     seq = DraftSequence.next!(user, key)
 
@@ -162,7 +161,6 @@ describe Draft do
     Draft.cleanup!
 
     expect(Draft.count).to eq 0
-    expect(user.reload.user_stat.draft_count).to eq(0)
 
     Draft.set(Fabricate(:user), Draft::NEW_TOPIC, 0, 'draft')
 
@@ -176,20 +174,6 @@ describe Draft do
     Draft.last.update_columns(updated_at: 200.days.ago)
     Draft.cleanup!
     expect(Draft.count).to eq 0
-  end
-
-  it 'updates draft count when a draft is created or destroyed' do
-    messages = MessageBus.track_publish("/user") do
-      Draft.set(user, "test", 0, "data")
-    end
-
-    expect(messages.first.data[:draft_count]).to eq(1)
-
-    messages = MessageBus.track_publish("/user") do
-      Draft.where(user: user).destroy_all
-    end
-
-    expect(messages.first.data[:draft_count]).to eq(0)
   end
 
   describe '#stream' do

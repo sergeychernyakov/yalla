@@ -137,7 +137,7 @@ def rebake_post(post, opts = {})
   if !opts[:priority]
     opts[:priority] = :ultra_low
   end
-  post.rebake!(**opts)
+  post.rebake!(opts)
 rescue => e
   puts "", "Failed to rebake (topic_id: #{post.topic_id}, post_id: #{post.id})", e, e.backtrace.join("\n")
 end
@@ -346,6 +346,7 @@ task 'posts:reorder_posts', [:topic_id] => [:environment] do |_, args|
       ["post_timings", "post_number"],
       ["posts", "reply_to_post_number"],
       ["topic_users", "last_read_post_number"],
+      ["topic_users", "highest_seen_post_number"],
       ["topic_users", "last_emailed_post_number"],
     ].each do |table, column|
       builder = DB.build <<~SQL

@@ -39,9 +39,8 @@ discourseModule(
           avatar_template: "/images/avatar.png",
           post_count: 5,
           primary_group_name: "devs",
-          flair_name: "devs",
-          flair_url: "/images/d-logo-sketch-small.png",
-          flair_bg_color: "222",
+          primary_group_flair_url: "/images/d-logo-sketch-small.png",
+          primary_group_flair_bg_color: "222",
         });
       },
 

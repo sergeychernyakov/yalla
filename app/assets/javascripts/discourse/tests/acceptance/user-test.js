@@ -1,7 +1,6 @@
 import {
   acceptance,
   exists,
-  query,
   queryAll,
 } from "discourse/tests/helpers/qunit-helpers";
 import { click, currentRouteName, visit } from "@ember/test-helpers";
@@ -38,6 +37,11 @@ acceptance("User Routes", function (needs) {
     assert.ok($("body.user-invites-page").length, "has the body class");
   });
 
+  test("Messages", async function (assert) {
+    await visit("/u/eviltrout/messages");
+    assert.ok($("body.user-messages-page").length, "has the body class");
+  });
+
   test("Notifications", async function (assert) {
     await visit("/u/eviltrout/notifications");
     assert.ok($("body.user-notifications-page").length, "has the body class");
@@ -45,7 +49,7 @@ acceptance("User Routes", function (needs) {
     const $links = queryAll(".item.notification a");
 
     assert.ok(
-      $links[2].href.includes(
+      $links[1].href.includes(
         "/u/eviltrout/notifications/likes-received?acting_username=aquaman"
       )
     );
@@ -91,43 +95,5 @@ acceptance("User Routes", function (needs) {
       exists(".d-editor-input"),
       "composer is visible after resuming a draft"
     );
-  });
-});
-
-acceptance(
-  "User Routes - Periods in current user's username",
-  function (needs) {
-    needs.user({ username: "e.il.rout" });
-
-    test("Periods in current user's username don't act like wildcards", async function (assert) {
-      await visit("/u/eviltrout");
-      assert.equal(
-        query(".user-profile-names .username").textContent.trim(),
-        "eviltrout",
-        "eviltrout profile is shown"
-      );
-
-      await visit("/u/e.il.rout");
-      assert.equal(
-        query(".user-profile-names .username").textContent.trim(),
-        "e.il.rout",
-        "e.il.rout profile is shown"
-      );
-    });
-  }
-);
-
-acceptance("User Routes - Moderator viewing warnings", function (needs) {
-  needs.user({
-    username: "notEviltrout",
-    moderator: true,
-    staff: true,
-    admin: false,
-  });
-
-  test("Messages - Warnings", async function (assert) {
-    await visit("/u/eviltrout/messages/warnings");
-    assert.ok($("body.user-messages-page").length, "has the body class");
-    assert.ok($("div.alert-info").length, "has the permissions alert");
   });
 });

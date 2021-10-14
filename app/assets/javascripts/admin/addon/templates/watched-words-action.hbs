@@ -1,7 +1,3 @@
-{{#if regexpError}}
-  <div class="alert alert-error">{{regexpError}}</div>
-{{/if}}
-
 <div class="watched-word-controls">
   {{d-button
     class="btn-default download-link"
@@ -12,7 +8,6 @@
   {{watched-word-uploader uploading=uploading actionKey=actionNameKey done=(action "uploadComplete")}}
 
   {{d-button
-    class="watched-word-test"
     label="admin.watched_words.test.button_label"
     icon="far-eye"
     action=(action "test")}}
@@ -26,27 +21,23 @@
 
 <p class="about">{{actionDescription}}</p>
 
-{{#if siteSettings.watched_words_regular_expressions}}
-  <p>{{html-safe (i18n "admin.watched_words.regex_warning" basePath=(base-path))}}</p>
-{{/if}}
-
 {{watched-word-form
   actionKey=actionNameKey
   action=(action "recordAdded")
-  filteredContent=currentAction.words
-}}
+  filteredContent=filteredContent
+  regularExpressions=adminWatchedWords.regularExpressions}}
 
-{{#if currentAction.words}}
+{{#if wordCount}}
   <label class="show-words-checkbox">
     {{input type="checkbox" checked=adminWatchedWords.showWords disabled=adminWatchedWords.disableShowWords}}
-    {{i18n "admin.watched_words.show_words" count=currentAction.words.length}}
+    {{i18n "admin.watched_words.show_words" count=wordCount}}
   </label>
 {{/if}}
 
 {{#if showWordsList}}
-  <div class="watched-words-list watched-words-{{actionNameKey}}">
-    {{#each currentAction.words as |word| }}
-      <div class="watched-word-box">{{admin-watched-word actionKey=actionNameKey word=word action=(action "recordRemoved")}}</div>
+  <div class="watched-words-list">
+    {{#each filteredContent as |word| }}
+      <div class="watched-word-box">{{admin-watched-word word=word action=(action "recordRemoved")}}</div>
     {{/each}}
   </div>
 {{/if}}

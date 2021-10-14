@@ -99,10 +99,6 @@ module Jobs
       begin
         retries ||= 3
 
-        if SiteSetting.verbose_upload_logging
-          Rails.logger.warn("Verbose Upload Logging: Downloading hotlinked image from #{src}")
-        end
-
         downloaded = FileHelper.download(
           src,
           max_file_size: @max_size,

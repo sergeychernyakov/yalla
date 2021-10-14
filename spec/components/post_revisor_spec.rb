@@ -171,58 +171,34 @@ describe PostRevisor do
         topic.update!(slow_mode_seconds: 1000)
       end
 
-      it 'regular edits are not allowed by default' do
-        subject.revise!(
-          post.user,
-          { raw: 'updated body' },
-          revised_at: post.updated_at + 1000.minutes
-        )
+      it 'regular edit' do
+        subject.revise!(post.user, { raw: 'updated body' }, revised_at: post.updated_at + 10.minutes)
 
-        post.reload
         expect(post.errors.present?).to eq(true)
         expect(post.errors.messages[:base].first).to be I18n.t("cannot_edit_on_slow_mode")
       end
 
-      it 'grace period editing is allowed' do
+      it 'ninja editing is allowed' do
         SiteSetting.editing_grace_period = 1.minute
 
-        subject.revise!(
-          post.user,
-          { raw: 'updated body' },
-          revised_at: post.updated_at + 10.seconds
-        )
+        subject.revise!(post.user, { raw: 'updated body' }, revised_at: post.updated_at + 10.seconds)
 
         post.reload
-        expect(post.errors).to be_empty
-      end
 
-      it 'regular edits are allowed if it was turned on in settings' do
-        SiteSetting.slow_mode_prevents_editing = false
-
-        subject.revise!(
-          post.user,
-          { raw: 'updated body' },
-          revised_at: post.updated_at + 10.minutes
-        )
-
-        post.reload
         expect(post.errors).to be_empty
       end
 
       it 'staff is allowed to edit posts even if the topic is in slow mode' do
         admin = Fabricate(:admin)
-        subject.revise!(
-          admin,
-          { raw: 'updated body' },
-          revised_at: post.updated_at + 10.minutes
-        )
+        subject.revise!(admin, { raw: 'updated body' }, revised_at: post.updated_at + 10.minutes)
 
         post.reload
+
         expect(post.errors).to be_empty
       end
     end
 
-    describe 'grace period editing' do
+    describe 'ninja editing' do
       it 'correctly applies edits' do
         SiteSetting.editing_grace_period = 1.minute
 
@@ -509,57 +485,9 @@ describe PostRevisor do
     describe 'rate limiter' do
       fab!(:changed_by) { Fabricate(:coding_horror) }
 
-      before do
-        RateLimiter.enable
-        RateLimiter.clear_all!
-        SiteSetting.editing_grace_period = 0
-      end
-
       it "triggers a rate limiter" do
         EditRateLimiter.any_instance.expects(:performed!)
         subject.revise!(changed_by, raw: 'updated body')
-      end
-
-      it "raises error when a user gets rate limited" do
-        SiteSetting.max_edits_per_day = 1
-        user = Fabricate(:user, trust_level: 1)
-
-        subject.revise!(user, raw: 'body (edited)')
-
-        expect do
-          subject.revise!(user, raw: 'body (edited twice) ')
-        end.to raise_error(RateLimiter::LimitExceeded)
-      end
-
-      it "edit limits scale up depending on user's trust level" do
-        SiteSetting.max_edits_per_day = 1
-        SiteSetting.tl2_additional_edits_per_day_multiplier = 2
-        SiteSetting.tl3_additional_edits_per_day_multiplier = 3
-        SiteSetting.tl4_additional_edits_per_day_multiplier = 4
-
-        user = Fabricate(:user, trust_level: 2)
-        expect { subject.revise!(user, raw: 'body (edited)') }.to_not raise_error
-        expect { subject.revise!(user, raw: 'body (edited twice)') }.to_not raise_error
-        expect do
-          subject.revise!(user, raw: 'body (edited three times) ')
-        end.to raise_error(RateLimiter::LimitExceeded)
-
-        user = Fabricate(:user, trust_level: 3)
-        expect { subject.revise!(user, raw: 'body (edited)') }.to_not raise_error
-        expect { subject.revise!(user, raw: 'body (edited twice)') }.to_not raise_error
-        expect { subject.revise!(user, raw: 'body (edited three times)') }.to_not raise_error
-        expect do
-          subject.revise!(user, raw: 'body (edited four times) ')
-        end.to raise_error(RateLimiter::LimitExceeded)
-
-        user = Fabricate(:user, trust_level: 4)
-        expect { subject.revise!(user, raw: 'body (edited)') }.to_not raise_error
-        expect { subject.revise!(user, raw: 'body (edited twice)') }.to_not raise_error
-        expect { subject.revise!(user, raw: 'body (edited three times)') }.to_not raise_error
-        expect { subject.revise!(user, raw: 'body (edited four times)') }.to_not raise_error
-        expect do
-          subject.revise!(user, raw: 'body (edited five times) ')
-        end.to raise_error(RateLimiter::LimitExceeded)
       end
     end
 
@@ -620,15 +548,9 @@ describe PostRevisor do
         expect(post.topic.word_count).to eq(5)
       end
 
-      it 'increases the post_edits stat count' do
-        expect do
-          subject.revise!(post.user, { raw: "This is a new revision" })
-        end.to change { post.user.user_stat.post_edits_count.to_i }.by(1)
-      end
-
       context 'second poster posts again quickly' do
 
-        it 'is a grace period edit, because the second poster posted again quickly' do
+        it 'is a ninja edit, because the second poster posted again quickly' do
           SiteSetting.editing_grace_period = 1.minute
           subject.revise!(changed_by, { raw: 'yet another updated body' }, revised_at: post.updated_at + 10.seconds)
           post.reload
@@ -673,34 +595,6 @@ describe PostRevisor do
       subject.revise!(post.user, raw: "    <-- whitespaces -->    ")
       post.reload
       expect(post.raw).to eq("    <-- whitespaces -->")
-    end
-
-    it "revises and tracks changes of topic titles" do
-      new_title = "New topic title"
-      result = subject.revise!(
-        post.user,
-        { title: new_title },
-        revised_at: post.updated_at + 10.minutes
-      )
-
-      expect(result).to eq(true)
-      post.reload
-      expect(post.topic.title).to eq(new_title)
-      expect(post.revisions.first.modifications["title"][1]).to eq(new_title)
-    end
-
-    it "revises and tracks changes of topic archetypes" do
-      new_archetype = Archetype.banner
-      result = subject.revise!(
-        post.user,
-        { archetype: new_archetype },
-        revised_at: post.updated_at + 10.minutes
-      )
-
-      expect(result).to eq(true)
-      post.reload
-      expect(post.topic.archetype).to eq(new_archetype)
-      expect(post.revisions.first.modifications["archetype"][1]).to eq(new_archetype)
     end
 
     context "#publish_changes" do
@@ -1173,38 +1067,6 @@ describe PostRevisor do
 
         expect(post.reload.post_uploads.pluck(:upload_id)).to contain_exactly(image2.id, image3.id, image4.id)
       end
-
-      context "secure media uploads" do
-        let!(:image5) { Fabricate(:secure_upload) }
-        before do
-          Jobs.run_immediately!
-          setup_s3
-          SiteSetting.authorized_extensions = "png|jpg|gif|mp4"
-          SiteSetting.secure_media = true
-          stub_upload(image5)
-        end
-
-        it "updates the upload secure status, which is secure by default from the composer. set to false for a public topic" do
-          subject.revise!(user, raw: <<~RAW)
-              This is a post with a secure upload
-              ![image5](#{image5.short_url})
-          RAW
-
-          expect(image5.reload.secure).to eq(false)
-          expect(image5.security_last_changed_reason).to eq("access control post dictates security | source: post revisor")
-        end
-
-        it "does not update the upload secure status, which is secure by default from the composer for a private" do
-          post.topic.update(category: Fabricate(:private_category,  group: Fabricate(:group)))
-          subject.revise!(user, raw: <<~RAW)
-              This is a post with a secure upload
-              ![image5](#{image5.short_url})
-          RAW
-
-          expect(image5.reload.secure).to eq(true)
-          expect(image5.security_last_changed_reason).to eq("access control post dictates security | source: post revisor")
-        end
-      end
     end
   end
 
@@ -1226,7 +1088,7 @@ describe PostRevisor do
       expect { revisor.revise!(admin, { raw: 'updated body' }) }.to change(ReviewablePost, :count).by(0)
     end
 
-    it 'skips grace period edits' do
+    it 'skips ninja edits' do
       SiteSetting.editing_grace_period = 1.minute
 
       expect {

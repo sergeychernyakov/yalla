@@ -4,7 +4,6 @@ import { withPluginApi } from "discourse/lib/plugin-api";
 
 function initializePollUIBuilder(api) {
   api.modifyClass("controller:composer", {
-    pluginId: "discourse-poll-ui-builder",
     @discourseComputed(
       "siteSettings.poll_enabled",
       "siteSettings.poll_minimum_trust_level_to_create",

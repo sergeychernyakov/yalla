@@ -15,12 +15,13 @@
   }
   .mobile-view & {
     font-size: $font-0;
+    margin-top: 20px;
   }
   li {
     margin-bottom: 8px;
   }
   .nav-pills {
-    margin: 0 0 2em;
+    margin-bottom: 20px;
   }
   ul:not(.nav-pills),
   ol:not(.nav-pills) {

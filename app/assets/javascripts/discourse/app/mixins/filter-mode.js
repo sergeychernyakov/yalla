@@ -36,7 +36,13 @@ export default Mixin.create({
 
     set(key, value) {
       this.set("rawFilterMode", value);
-      this.set("filterType", value.split("/").pop());
+      const parts = value.split("/");
+
+      if (parts.length >= 2 && parts[parts.length - 2] === "top") {
+        this.set("filterType", "top");
+      } else {
+        this.set("filterType", parts.pop());
+      }
 
       return value;
     },

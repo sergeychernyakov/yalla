@@ -99,7 +99,7 @@ export function sanitize(text, allowLister) {
         }
 
         if (tag === "video" && name === "autoplay") {
-          // This might give us duplicate 'muted' attributes
+          // This might give us duplicate 'muted' atttributes
           // but they will be deduped by later processing
           return "autoplay muted";
         }

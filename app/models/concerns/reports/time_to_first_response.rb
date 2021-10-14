@@ -11,7 +11,6 @@ module Reports::TimeToFirstResponse
       report.icon = 'reply'
       report.higher_is_better = false
       report.data = []
-      report.average = true
 
       Topic.time_to_first_response_per_day(report.start_date, report.end_date, category_id: category_id, include_subcategories: include_subcategories).each do |r|
         report.data << { x: r['date'], y: r['hours'].to_f.round(2) }

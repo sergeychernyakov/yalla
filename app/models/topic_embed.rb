@@ -27,14 +27,14 @@ class TopicEmbed < ActiveRecord::Base
   end
 
   # Import an article from a source (RSS/Atom/Other)
-  def self.import(user, url, title, contents, category_id: nil, cook_method: nil, tags: nil)
+  def self.import(user, url, title, contents)
     return unless url =~ /^https?\:\/\//
 
-    if SiteSetting.embed_truncate && cook_method.nil?
+    if SiteSetting.embed_truncate
       contents = first_paragraph_from(contents)
     end
     contents ||= ''
-    contents = contents.dup << imported_from_html(url)
+    contents = +contents << imported_from_html(url)
 
     url = normalize_url(url)
 
@@ -47,7 +47,7 @@ class TopicEmbed < ActiveRecord::Base
       Topic.transaction do
         eh = EmbeddableHost.record_for_url(url)
 
-        cook_method ||= if SiteSetting.embed_support_markdown
+        cook_method = if SiteSetting.embed_support_markdown
           Post.cook_methods[:regular]
         else
           Post.cook_methods[:raw_html]
@@ -58,8 +58,7 @@ class TopicEmbed < ActiveRecord::Base
           raw: absolutize_urls(url, contents),
           skip_validations: true,
           cook_method: cook_method,
-          category: category_id || eh.try(:category_id),
-          tags: SiteSetting.tagging_enabled ? tags : nil,
+          category: eh.try(:category_id)
         }
         if SiteSetting.embed_unlisted?
           create_args[:visible] = false
@@ -113,8 +112,7 @@ class TopicEmbed < ActiveRecord::Base
     fd = FinalDestination.new(
       url,
       validate_uri: true,
-      max_redirects: 5,
-      follow_canonical: true,
+      max_redirects: 5
     )
 
     url = fd.resolve
@@ -242,7 +240,7 @@ class TopicEmbed < ActiveRecord::Base
     end
     return result unless result.blank?
 
-    # If there is no first paragraph, return the first div (onebox)
+    # If there is no first paragaph, return the first div (onebox)
     doc.css('div').first.to_s
   end
 

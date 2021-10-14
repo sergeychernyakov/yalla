@@ -38,11 +38,7 @@
               </div>
             {{/if}}
             {{#if model.warnings_received_count}}
-              <div>
-                {{#link-to "userPrivateMessages.warnings" model}}
-                  <span class="warnings-received">{{model.warnings_received_count}}</span>{{i18n "user.staff_counters.warnings_received"}}
-                {{/link-to}}
-              </div>
+              <div><span class="warnings-received">{{model.warnings_received_count}}</span>{{i18n "user.staff_counters.warnings_received"}}</div>
             {{/if}}
           </div>
         {{/if}}
@@ -82,7 +78,6 @@
                 <li>
                   {{d-button
                     ariaExpanded=collapsedInfoState.isExpanded
-                    ariaLabel=collapsedInfoState.ariaLabel
                     ariaControls="collapsed-info-panel"
                     class="btn-default"
                     label=(concat "user." collapsedInfoState.label)
@@ -160,13 +155,7 @@
                   {{#if uf.value}}
                     <div class="public-user-field {{uf.field.dasherized_name}}">
                       <span class="user-field-name">{{uf.field.name}}</span>:
-                      <span class="user-field-value">
-                        {{#each uf.value as |v|}} {{! some values are arrays }}
-                          <span class="user-field-value-list-item">{{v}}</span>
-                        {{else }}
-                          {{uf.value}}
-                        {{/each}}
-                      </span>
+                      <span class="user-field-value">{{uf.value}}</span>
                     </div>
                   {{/if}}
                 {{/each}}

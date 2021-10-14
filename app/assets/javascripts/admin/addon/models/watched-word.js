@@ -31,21 +31,27 @@ WatchedWord.reopenClass({
   findAll() {
     return ajax("/admin/customize/watched_words.json").then((list) => {
       const actions = {};
-
-      list.actions.forEach((action) => {
-        actions[action] = [];
+      list.words.forEach((s) => {
+        if (!actions[s.action]) {
+          actions[s.action] = [];
+        }
+        actions[s.action].pushObject(WatchedWord.create(s));
       });
 
-      list.words.forEach((watchedWord) => {
-        actions[watchedWord.action].pushObject(WatchedWord.create(watchedWord));
+      list.actions.forEach((a) => {
+        if (!actions[a]) {
+          actions[a] = [];
+        }
       });
 
-      return Object.keys(actions).map((nameKey) => {
+      return Object.keys(actions).map((n) => {
         return EmberObject.create({
-          nameKey,
-          name: I18n.t("admin.watched_words.actions." + nameKey),
-          words: actions[nameKey],
-          compiledRegularExpression: list.compiled_regular_expressions[nameKey],
+          nameKey: n,
+          name: I18n.t("admin.watched_words.actions." + n),
+          words: actions[n],
+          count: actions[n].length,
+          regularExpressions: list.regular_expressions,
+          compiledRegularExpression: list.compiled_regular_expressions[n],
         });
       });
     });

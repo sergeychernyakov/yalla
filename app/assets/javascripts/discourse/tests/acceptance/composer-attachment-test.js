@@ -1,6 +1,5 @@
 import {
   acceptance,
-  exists,
   query,
   queryAll,
 } from "discourse/tests/helpers/qunit-helpers";
@@ -27,7 +26,7 @@ async function writeInComposer(assert) {
 
   assert.equal(
     queryAll(".d-editor-preview:visible").html().trim(),
-    '<p><a href="/404" tabindex="-1">test</a></p>'
+    '<p><a href="/404">test</a></p>'
   );
 
   await fillIn(".d-editor-input", "[test|attachment](upload://asdsad.png)");
@@ -41,7 +40,7 @@ acceptance("Composer Attachment - Cooking", function (needs) {
     await writeInComposer(assert);
     assert.equal(
       queryAll(".d-editor-preview:visible").html().trim(),
-      '<p><a class="attachment" href="/uploads/short-url/asdsad.png" tabindex="-1">test</a></p>'
+      '<p><a class="attachment" href="/uploads/short-url/asdsad.png">test</a></p>'
     );
   });
 });
@@ -55,7 +54,7 @@ acceptance("Composer Attachment - Secure Media Enabled", function (needs) {
     await writeInComposer(assert);
     assert.equal(
       queryAll(".d-editor-preview:visible").html().trim(),
-      '<p><a class="attachment" href="/secure-media-uploads/default/3X/1/asjdiasjdiasida.png" tabindex="-1">test</a></p>'
+      '<p><a class="attachment" href="/secure-media-uploads/default/3X/1/asjdiasjdiasida.png">test</a></p>'
     );
   });
 });
@@ -253,41 +252,4 @@ acceptance("Composer Attachment - Upload Placeholder", function (needs) {
       },
     };
   }
-});
-
-acceptance("Composer Attachment - File input", function (needs) {
-  needs.user();
-
-  test("shouldn't add to DOM the hidden file input if uploads aren't allowed", async function (assert) {
-    this.siteSettings.authorized_extensions = "";
-    await visit("/");
-    await click("#create-topic");
-
-    assert.notOk(exists("input#file-uploader"));
-  });
-
-  test("should fill the accept attribute with allowed file extensions", async function (assert) {
-    this.siteSettings.authorized_extensions = "jpg|jpeg|png";
-    await visit("/");
-    await click("#create-topic");
-
-    assert.ok(exists("input#file-uploader"), "An input is rendered");
-    assert.equal(
-      query("input#file-uploader").accept,
-      ".jpg,.jpeg,.png",
-      "Accepted values are correct"
-    );
-  });
-
-  test("the hidden file input shouldn't have the accept attribute if any file extension is allowed", async function (assert) {
-    this.siteSettings.authorized_extensions = "jpg|jpeg|png|*";
-    await visit("/");
-    await click("#create-topic");
-
-    assert.ok(exists("input#file-uploader"), "An input is rendered");
-    assert.notOk(
-      query("input#file-uploader").hasAttribute("accept"),
-      "The input doesn't contain the accept attribute"
-    );
-  });
 });

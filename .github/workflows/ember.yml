@@ -1,9 +1,10 @@
-name: (experimental) Ember CLI tests (core)
+name: Ember CLI tests
 
 on:
   pull_request:
   push:
     branches:
+      - master
       - main
 
 jobs:
@@ -11,12 +12,7 @@ jobs:
     name: run
     runs-on: ubuntu-latest
     container: discourse/discourse_test:release
-    timeout-minutes: 60
-
-    strategy:
-      fail-fast: false
-      matrix:
-        browser: ["Chrome", "Firefox", "Headless Firefox"]
+    timeout-minutes: 40
 
     steps:
       - uses: actions/checkout@master
@@ -47,5 +43,5 @@ jobs:
 
       - name: Core QUnit
         working-directory: ./app/assets/javascripts/discourse
-        run: sudo -E -u discourse -H yarn ember test --launch "${{ matrix.browser }}"
-        timeout-minutes: 60
+        run: yarn ember test
+        timeout-minutes: 30

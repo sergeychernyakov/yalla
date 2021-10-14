@@ -2,8 +2,6 @@ import Badge from "discourse/models/badge";
 import DiscourseRoute from "discourse/routes/discourse";
 import I18n from "I18n";
 import PreloadStore from "discourse/lib/preload-store";
-import { scrollTop } from "discourse/mixins/scroll-top";
-import { action } from "@ember/object";
 
 export default DiscourseRoute.extend({
   model() {
@@ -20,10 +18,10 @@ export default DiscourseRoute.extend({
     return I18n.t("badges.title");
   },
 
-  @action
-  didTransition() {
-    this.controllerFor("application").set("showFooter", true);
-    scrollTop();
-    return true;
+  actions: {
+    didTransition() {
+      this.controllerFor("application").set("showFooter", true);
+      return true;
+    },
   },
 });

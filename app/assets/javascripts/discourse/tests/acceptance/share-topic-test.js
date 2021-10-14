@@ -1,7 +1,6 @@
 import { click, visit } from "@ember/test-helpers";
 import {
   acceptance,
-  count,
   exists,
   queryAll,
 } from "discourse/tests/helpers/qunit-helpers";
@@ -30,14 +29,15 @@ acceptance("Share and Invite modal", function (needs) {
       "it shows the topic sharing url"
     );
 
-    assert.ok(count("button[class*='share-']") > 1, "it shows social sources");
+    assert.ok(queryAll(".social-link").length > 1, "it shows social sources");
+
     assert.ok(
-      exists(".link-share-actions .notify"),
+      exists(".btn-primary[aria-label='Notify']"),
       "it shows the notify button"
     );
 
     assert.ok(
-      exists(".link-share-actions .invite"),
+      exists(".btn-primary[aria-label='Invite']"),
       "it shows the invite button"
     );
   });

@@ -37,7 +37,6 @@ export default DropdownSelectBoxComponent.extend({
     filterable: false,
     showFullTitle: false,
     preventHeaderFocus: true,
-    customStyle: true,
   },
 
   @discourseComputed("isEditing", "action", "whisper", "noBump", "isInSlowMode")
@@ -225,7 +224,7 @@ export default DropdownSelectBoxComponent.extend({
       }
 
       // Edge case: If personal messages are disabled, it is possible to have
-      // no items which still renders a button that pops up nothing. In this
+      // no items which stil renders a button that pops up nothing. In this
       // case, add an option for what you're currently doing.
       if (items.length === 0) {
         showCreateTopic = true;

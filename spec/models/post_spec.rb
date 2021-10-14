@@ -692,7 +692,7 @@ describe Post do
 
     end
 
-    describe 'grace period editing & edit windows' do
+    describe 'ninja editing & edit windows' do
 
       before { SiteSetting.editing_grace_period = 1.minute.to_i }
 
@@ -700,7 +700,7 @@ describe Post do
         revised_at = post.updated_at + 2.minutes
         new_revised_at = revised_at + 2.minutes
 
-        # grace period edit
+        # ninja edit
         post.revise(post.user, { raw: 'updated body' }, revised_at: post.updated_at + 10.seconds)
         post.reload
         expect(post.version).to eq(1)
@@ -760,7 +760,7 @@ describe Post do
 
       context 'second poster posts again quickly' do
 
-        it 'is a grace period edit, because the second poster posted again quickly' do
+        it 'is a ninja edit, because the second poster posted again quickly' do
           SiteSetting.editing_grace_period = 1.minute.to_i
           post.revise(changed_by, { raw: 'yet another updated body' }, revised_at: post.updated_at + 10.seconds)
           post.reload
@@ -1481,8 +1481,6 @@ describe Post do
       end
 
       before do
-        Jobs.run_immediately!
-
         setup_s3
         SiteSetting.authorized_extensions = "pdf|png|jpg|csv"
         SiteSetting.secure_media = true
@@ -1715,17 +1713,6 @@ describe Post do
       post.each_upload_url { |src, _, _| urls << src }
       expect(urls).to be_empty
     end
-
-    it "skip S3 cdn urls with different path" do
-      setup_s3
-      SiteSetting.Upload.stubs(:s3_cdn_url).returns("https://cdn.example.com/site1")
-
-      urls = []
-      raw = "<img src='https://cdn.example.com/site1/original/1X/bc68acbc8c022726e69f980e00d6811212r.jpg' /><img src='https://cdn.example.com/site2/original/1X/bc68acbc8c022726e69f980e00d68112128.jpg' />"
-      post = Fabricate(:post, raw: raw)
-      post.each_upload_url { |src, _, _| urls << src }
-      expect(urls).to contain_exactly("https://cdn.example.com/site1/original/1X/bc68acbc8c022726e69f980e00d6811212r.jpg")
-    end
   end
 
   describe "#publish_changes_to_client!" do
@@ -1749,9 +1736,7 @@ describe Post do
         version: post.version
       }
 
-      MessageBus.expects(:publish).once.with("/topic/#{topic.id}", message, is_a(Hash)) do |_, _, options|
-        options[:user_ids].sort == [user1.id, user2.id, user3.id].sort
-      end
+      MessageBus.expects(:publish).with("/topic/#{topic.id}", message, user_ids: [user1.id, user2.id, user3.id]).once
       post.publish_change_to_clients!(:created)
     end
   end

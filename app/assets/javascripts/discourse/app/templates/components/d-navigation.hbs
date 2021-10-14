@@ -24,14 +24,14 @@
           class="btn-default edit-category"
           action=editCategory
           icon="wrench"
-          ariaLabel="category.edit"}}
+          label="category.edit"}}
       {{/if}}
     {{/unless}}
   {{/if}}
 
   {{#if tag}}
     {{#if showToggleInfo}}
-      {{d-button icon="wrench" class="btn-default" ariaLabel="tagging.info" action=toggleInfo id="show-tag-info"}}
+      {{d-button icon="tag" class="btn-default" label="tagging.info" action=toggleInfo id="show-tag-info"}}
     {{/if}}
   {{/if}}
 
@@ -39,10 +39,7 @@
     args=(hash
       canCreateTopic=canCreateTopic
       createTopicDisabled=createTopicDisabled
-      createTopicLabel=createTopicLabel
-      additionalTags=additionalTags
-      category=category
-      tag=tag)
+      createTopicLabel=createTopicLabel)
   }}
 
   {{create-topic-button
@@ -52,14 +49,6 @@
     label=createTopicLabel
     btnClass=createTopicClass
     canCreateTopicOnTag=canCreateTopicOnTag
-  }}
-
-  {{plugin-outlet name="after-create-topic-button" tagName=""
-    args=(hash
-      canCreateTopic=canCreateTopic
-      createTopicDisabled=createTopicDisabled
-      createTopicLabel=createTopicLabel
-      category=category)
   }}
 
   {{#if category}}

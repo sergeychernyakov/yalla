@@ -20,8 +20,8 @@ describe Imap::Sync do
       :group,
       imap_server: 'imap.gmail.com',
       imap_port: 993,
-      email_username: 'groupemailusername@example.com',
-      email_password: 'password',
+      email_username: 'discourse@example.com',
+      email_password: 'discourse@example.com',
       imap_mailbox_name: '[Gmail]/All Mail'
     )
   end
@@ -530,7 +530,7 @@ describe Imap::Sync do
 
   end
 
-  context 'invalidated previous sync' do
+  context 'invaidated previous sync' do
     let(:subject) { 'Testing email post' }
 
     let(:first_from) { 'john@free.fr' }

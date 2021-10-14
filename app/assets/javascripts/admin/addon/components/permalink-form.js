@@ -28,7 +28,8 @@ export default Component.extend({
 
     schedule("afterRender", () => {
       $(this.element.querySelector(".external-url")).keydown((e) => {
-        if (e.key === "Enter") {
+        // enter key
+        if (e.keyCode === 13) {
           this.send("submit");
         }
       });

@@ -10,7 +10,6 @@ export default DropdownSelectBoxComponent.extend({
     filterable: false,
     autoFilterable: false,
     preventHeaderFocus: true,
-    customStyle: true,
   },
 
   modifyContent(contents) {

@@ -124,27 +124,27 @@ $quote-share-maxwidth: 150px;
   }
 
   h1 {
-    font-size: var(--font-up-3-rem);
+    font-size: $font-up-3;
   }
 
   h2 {
-    font-size: var(--font-up-2-rem);
+    font-size: $font-up-2;
   }
 
   h3 {
-    font-size: var(--font-up-1-rem);
+    font-size: $font-up-1;
   }
 
   h4 {
-    font-size: var(--font-0-rem);
+    font-size: $font-0;
   }
 
   h5 {
-    font-size: var(--font-down-1-rem);
+    font-size: $font-down-1;
   }
 
   h6 {
-    font-size: var(--font-down-2-rem);
+    font-size: $font-down-2;
   }
 
   a {
@@ -195,17 +195,17 @@ $quote-share-maxwidth: 150px;
   sup sup {
     top: 0;
   }
-
-  img:not(.thumbnail):not(.ytp-thumbnail-image):not(.emoji) {
-    max-width: 100%;
-    height: auto;
-  }
 }
 
 // add staff color
 .moderator {
   .regular > .cooked {
     background-color: var(--highlight-low-or-medium);
+    padding: 10px;
+    img:not(.thumbnail) {
+      max-width: 100%;
+      height: auto;
+    }
   }
   .clearfix > .topic-meta-data > .names {
     span.user-title {
@@ -231,53 +231,6 @@ $quote-share-maxwidth: 150px;
     display: flex;
     flex: 0 0 auto;
     align-items: center;
-  }
-}
-
-.deleted {
-  .regular > .cooked {
-    background-color: var(--danger-low-mid);
-  }
-  .topic-meta-data:not(.embedded-reply) {
-    color: var(--danger);
-
-    .post-info a,
-    a {
-      color: currentColor;
-    }
-
-    .d-icon {
-      color: currentColor;
-    }
-  }
-  nav.post-controls {
-    color: var(--danger);
-
-    .show-replies,
-    button.reply.create {
-      color: var(--danger);
-      .d-icon {
-        color: var(--danger);
-      }
-    }
-    .widget-button {
-      &:hover {
-        color: currentColor;
-        background: var(--danger-low);
-        .d-icon {
-          color: currentColor;
-        }
-      }
-      &.fade-out {
-        opacity: 1;
-      }
-    }
-    .d-icon {
-      color: var(--danger);
-    }
-  }
-  .post-action {
-    color: var(--danger);
   }
 }
 
@@ -308,6 +261,15 @@ aside.quote {
   // blockquote is docked within aside for content
   blockquote {
     margin-top: 0;
+  }
+}
+
+blockquote {
+  // due to #image-sizing-hack large images and lightboxes extend past the
+  // limits blockquotes. Since #image-sizing-hack is inline, we need to use
+  // !important here otherwise it won't work.
+  img {
+    max-width: 100% !important;
   }
 }
 
@@ -378,42 +340,9 @@ aside.quote {
   z-index: z("dropdown");
   opacity: 0.9;
   background-color: var(--secondary-high);
-  flex-direction: column;
 
   &.visible {
-    display: flex;
-  }
-
-  &.fast-editing {
-    opacity: 1;
-  }
-
-  .buttons {
-    display: flex;
-  }
-
-  .extra {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .fast-edit-container {
-    display: flex;
-    padding: 0.5em;
-    padding-top: 0;
-    flex-direction: column;
-    align-items: flex-start;
-
-    #fast-edit-input {
-      margin: 0;
-      width: 300px;
-      height: 90px;
-    }
-
-    .save-fast-edit {
-      margin-top: 0.5em;
-    }
+    display: inline-flex;
   }
 
   .btn,
@@ -532,7 +461,7 @@ aside.quote {
   td {
     vertical-align: top;
     padding: 1px;
-    word-break: break-all;
+    word-wrap: anywhere;
   }
 
   .topic-links {
@@ -721,10 +650,6 @@ aside.quote {
   // a deeply nested blockquote, and so on.. you get the idea.
   .cooked {
     overflow: hidden;
-
-    .button-wrapper {
-      display: none;
-    }
   }
   .group-request {
     border-top: 1px solid var(--primary-low);
@@ -988,29 +913,6 @@ blockquote > *:last-child {
     &:last-of-type {
       margin-left: auto;
       order: 8;
-    }
-  }
-
-  &.topic-post-visited {
-    border-top: none;
-
-    + .small-action {
-      border-top: none;
-    }
-
-    .topic-post-visited-line {
-      text-align: center;
-      border-bottom: 1px solid var(--danger-medium);
-      line-height: 0.1em;
-      margin: 1rem 0px;
-      width: 100%;
-
-      .topic-post-visited-message {
-        background-color: var(--secondary);
-        color: var(--danger-medium);
-        font-size: $font-down-1;
-        padding: 0 8px;
-      }
     }
   }
 }

@@ -2,6 +2,7 @@ import DiscourseURL, { userPath } from "discourse/lib/url";
 import I18n from "I18n";
 import { addExtraUserClasses } from "discourse/helpers/user-avatar";
 import { ajax } from "discourse/lib/ajax";
+import { applySearchAutocomplete } from "discourse/lib/search";
 import { avatarImg } from "discourse/widgets/post";
 import { createWidget } from "discourse/widgets/widget";
 import { get } from "@ember/object";
@@ -100,18 +101,7 @@ createWidget("header-notifications", {
                 "span.ring-backdrop",
                 {},
                 h("h1.ring-first-notification", {}, [
-                  h(
-                    "span",
-                    { className: "first-notification" },
-                    I18n.t("user.first_notification")
-                  ),
-                  h("span", { className: "read-later" }, [
-                    this.attach("link", {
-                      action: "readLater",
-                      className: "read-later-link",
-                      label: "user.skip_new_user_tips.read_later",
-                    }),
-                  ]),
+                  h("span", {}, I18n.t("user.first_notification")),
                   h("span", {}, [
                     I18n.t("user.skip_new_user_tips.not_first_time"),
                     " ",
@@ -120,6 +110,7 @@ createWidget("header-notifications", {
                       className: "skip-new-user-tips",
                       label: "user.skip_new_user_tips.skip_link",
                       title: "user.skip_new_user_tips.description",
+                      omitSpan: true,
                     }),
                   ]),
                 ])
@@ -212,6 +203,10 @@ createWidget(
 
 createWidget("header-icons", {
   tagName: "ul.icons.d-header-icons",
+
+  buildAttributes() {
+    return { role: "navigation" };
+  },
 
   html(attrs) {
     if (this.siteSettings.login_required && !this.currentUser) {
@@ -331,7 +326,6 @@ export function attachAdditionalPanel(name, toggle, transformAttrs) {
 export default createWidget("header", {
   tagName: "header.d-header.clearfix",
   buildKey: () => `header`,
-  services: ["router"],
 
   defaultState() {
     let states = {
@@ -462,7 +456,9 @@ export default createWidget("header", {
         params = `?context=${context.type}&context_id=${context.id}&skip_context=${this.state.skipSearchContext}`;
       }
 
-      const currentPath = this.router.get("_router.currentPath");
+      const currentPath = this.register
+        .lookup("service:router")
+        .get("_router.currentPath");
 
       if (currentPath === "full-page-search") {
         scrollTop();
@@ -478,9 +474,17 @@ export default createWidget("header", {
 
     if (this.state.searchVisible) {
       schedule("afterRender", () => {
-        const searchInput = document.querySelector("#search-term");
-        searchInput.focus();
-        searchInput.select();
+        const $searchInput = $("#search-term");
+        $searchInput.focus().select();
+
+        applySearchAutocomplete(
+          $searchInput,
+          this.siteSettings,
+          this.appEvents,
+          {
+            appendSelector: ".menu-panel",
+          }
+        );
       });
     }
   },
@@ -540,7 +544,9 @@ export default createWidget("header", {
 
     state.contextEnabled = false;
 
-    const currentPath = this.router.get("_router.currentPath");
+    const currentPath = this.register
+      .lookup("service:router")
+      .get("_router.currentPath");
     const blocklist = [/^discovery\.categories/];
     const allowlist = [/^topic\./];
     const check = function (regex) {
@@ -607,10 +613,6 @@ export default createWidget("header", {
     // Update UI
     this.state.ringBackdrop = false;
     this.scheduleRerender();
-  },
-
-  readLater() {
-    this.headerDismissFirstNotificationMask();
   },
 
   skipNewUserTips() {

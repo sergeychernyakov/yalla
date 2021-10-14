@@ -1,5 +1,4 @@
 import PrettyText, { buildOptions } from "pretty-text/pretty-text";
-import { module, test } from "qunit";
 
 module("lib:details-cooked-test");
 

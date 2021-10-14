@@ -132,9 +132,9 @@ module Middleware
 
       def theme_ids
         ids, _ = @request.cookies['theme_ids']&.split('|')
-        id = ids&.split(",")&.map(&:to_i)&.first
-        if id && Guardian.new.allow_themes?([id])
-          Theme.transform_ids(id)
+        ids = ids&.split(",")&.map(&:to_i)
+        if ids && Guardian.new.allow_themes?(ids)
+          Theme.transform_ids(ids)
         else
           []
         end
@@ -171,7 +171,6 @@ module Middleware
       def force_anonymous!
         @env[Auth::DefaultCurrentUserProvider::USER_API_KEY] = nil
         @env['HTTP_COOKIE'] = nil
-        @env['HTTP_DISCOURSE_LOGGED_IN'] = nil
         @env['rack.request.cookie.hash'] = {}
         @env['rack.request.cookie.string'] = ''
         @env['_bypass_cache'] = nil

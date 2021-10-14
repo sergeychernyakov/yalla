@@ -23,12 +23,6 @@ export default Controller.extend({
       "card_background_upload_url",
       "date_of_birth",
       "timezone",
-      "default_calendar",
-    ];
-
-    this.calendarOptions = [
-      { name: I18n.t("download_calendar.google"), value: "google" },
-      { name: I18n.t("download_calendar.ics"), value: "ics" },
     ];
   },
 
@@ -51,11 +45,6 @@ export default Controller.extend({
     }
   },
 
-  @discourseComputed("model.default_calendar")
-  canChangeDefaultCalendar(defaultCalendar) {
-    return defaultCalendar !== "none_selected";
-  },
-
   canChangeBio: readOnly("model.can_change_bio"),
 
   canChangeLocation: readOnly("model.can_change_location"),
@@ -66,10 +55,6 @@ export default Controller.extend({
 
   canUploadUserCardBackground: readOnly(
     "model.can_upload_user_card_background"
-  ),
-
-  experimentalUserCardImageUpload: readOnly(
-    "siteSettings.enable_experimental_image_uploader"
   ),
 
   actions: {
@@ -101,29 +86,21 @@ export default Controller.extend({
       this.model.set("user_option.timezone", moment.tz.guess());
     },
 
-    _updateUserFields() {
+    save() {
+      this.set("saved", false);
+
       const model = this.model,
         userFields = this.userFields;
 
+      // Update the user fields
       if (!isEmpty(userFields)) {
         const modelFields = model.get("user_fields");
         if (!isEmpty(modelFields)) {
           userFields.forEach(function (uf) {
-            const value = uf.get("value");
-            modelFields[uf.get("field.id").toString()] = isEmpty(value)
-              ? null
-              : value;
+            modelFields[uf.get("field.id").toString()] = uf.get("value");
           });
         }
       }
-    },
-
-    save() {
-      this.set("saved", false);
-      const model = this.model;
-
-      // Update the user fields
-      this.send("_updateUserFields");
 
       return model
         .save(this.saveAttrNames)

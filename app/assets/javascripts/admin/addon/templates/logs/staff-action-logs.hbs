@@ -1,29 +1,29 @@
 <div class="staff-action-logs-controls">
   {{#if filtersExists}}
     <div class="staff-action-logs-filters">
-      <a href {{action "clearAllFilters"}} class="clear-filters filter btn">
+      <a href {{action "clearAllFilters"}} class="clear-filters filter">
         <span class="label">{{i18n "admin.logs.staff_actions.clear_filters"}}</span>
       </a>
       {{#if actionFilter}}
-        <a href {{action "clearFilter" "actionFilter"}} class="filter btn">
+        <a href {{action "clearFilter" "actionFilter"}} class="filter">
           <span class="label">{{i18n "admin.logs.action"}}</span>: {{actionFilter}}
           {{d-icon "times-circle"}}
         </a>
       {{/if}}
       {{#if filters.acting_user}}
-        <a href {{action "clearFilter" "acting_user"}} class="filter btn">
+        <a href {{action "clearFilter" "acting_user"}} class="filter">
           <span class="label">{{i18n "admin.logs.staff_actions.staff_user"}}</span>: {{filters.acting_user}}
           {{d-icon "times-circle"}}
         </a>
       {{/if}}
       {{#if filters.target_user}}
-        <a href {{action "clearFilter" "target_user"}} class="filter btn">
+        <a href {{action "clearFilter" "target_user"}} class="filter">
           <span class="label">{{i18n "admin.logs.staff_actions.target_user"}}</span>: {{filters.target_user}}
           {{d-icon "times-circle"}}
         </a>
       {{/if}}
       {{#if filters.subject}}
-        <a href {{action "clearFilter" "subject"}} class="filter btn">
+        <a href {{action "clearFilter" "subject"}} class="filter">
           <span class="label">{{i18n "admin.logs.staff_actions.subject"}}</span>: {{filters.subject}}
           {{d-icon "times-circle"}}
         </a>

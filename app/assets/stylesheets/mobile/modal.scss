@@ -25,8 +25,6 @@
   }
   .modal-body {
     padding: 0.667em;
-    overflow-y: scroll;
-
     > * {
       // adding box-sizing: border-box; to .modal-body causes iOS dropdown issues
       box-sizing: border-box;

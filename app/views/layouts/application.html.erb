@@ -1,10 +1,11 @@
+<%- hijack_if_ember_cli! -%>
 <!DOCTYPE html>
 <html lang="<%= html_lang %>" class="<%= html_classes %>">
   <head>
     <meta charset="utf-8">
     <title><%= content_for?(:title) ? yield(:title) : SiteSetting.title %></title>
     <meta name="description" content="<%= @description_meta || SiteSetting.site_description %>">
-    <meta name="discourse_theme_id" content="<%= theme_id %>">
+    <meta name="discourse_theme_ids" content="<%= theme_ids&.join(",") %>">
     <meta name="discourse_current_homepage" content="<%= current_homepage %>">
     <%= render partial: "layouts/head" %>
     <%= discourse_csrf_tags %>
@@ -27,7 +28,9 @@
     <%- if ExtraLocalesController.client_overrides_exist? %>
       <%= preload_script_url ExtraLocalesController.url('overrides') %>
     <%- end %>
+    <%= preload_script "ember_jquery" %>
     <%= preload_script "vendor" %>
+    <%= preload_script "pretty-text-bundle" %>
     <%= preload_script "application" %>
     <%- Discourse.find_plugin_js_assets(include_official: allow_plugins?, include_unofficial: allow_third_party_plugins?, request: request).each do |file| %>
       <%= preload_script file %>
@@ -45,7 +48,7 @@
 
     <%= render_google_tag_manager_head_code %>
     <%= render_google_universal_analytics_code %>
-    <link id="manifest-link" rel="manifest" href=<%= manifest_url %> crossorigin="use-credentials">
+    <link rel="manifest" href="<%= Discourse.base_path %>/manifest.webmanifest" crossorigin="use-credentials">
 
     <%- if include_ios_native_app_banner? %>
         <meta name="apple-itunes-app" content="app-id=<%= SiteSetting.ios_app_id %><%= ios_app_argument %>">
@@ -58,17 +61,12 @@
 
     <%= tag.meta id: 'data-discourse-setup', data: client_side_setup_data %>
 
-    <meta name="discourse/config/environment" content="<%=u discourse_config_environment %>" />
     <%- if authentication_data %>
       <meta id="data-authentication" data-authentication-data="<%= authentication_data %>">
     <%- end %>
   </head>
 
   <body class="<%= body_classes %>">
-    <%- if allow_plugins? %>
-      <%= build_plugin_html 'server:after-body-open' %>
-    <%- end -%>
-
     <%= render_google_tag_manager_body_code %>
     <noscript data-path="<%= request.env['PATH_INFO'] %>">
       <%= render partial: 'header' %>
@@ -94,14 +92,14 @@
 
     <%- unless customization_disabled? %>
       <%= theme_lookup("header") %>
-    <%- end %>
-
-    <%- if allow_plugins? %>
       <%= build_plugin_html 'server:header' %>
     <%- end %>
 
     <section id='main'>
     </section>
+
+    <div id='offscreen-content'>
+    </div>
 
     <% unless current_user %>
       <form id='hidden-login-form' method="post" action="<%=main_app.login_path%>" style="display: none;">
@@ -122,10 +120,6 @@
     <%- unless customization_disabled? %>
       <%= theme_lookup("body_tag") %>
     <%- end %>
-
-    <%- if allow_plugins? %>
-      <%= build_plugin_html 'server:before-body-close' %>
-    <%- end %>
+    <%= build_plugin_html 'server:before-body-close' %>
   </body>
 </html>
-<%- hijack_if_ember_cli! -%>

@@ -1,8 +1,10 @@
 import { ajax } from "discourse/lib/ajax";
 import {
   caretPosition,
+  clipboardHelpers,
+  determinePostReplaceSelection,
   inCodeBlock,
-  translateModKey,
+  safariHacksDisabled,
 } from "discourse/lib/utilities";
 import discourseComputed, {
   observes,
@@ -10,10 +12,10 @@ import discourseComputed, {
 } from "discourse-common/utils/decorators";
 import { emojiSearch, isSkinTonableEmoji } from "pretty-text/emoji";
 import { emojiUrlFor, generateCookFunction } from "discourse/lib/text";
-import { later, schedule, scheduleOnce } from "@ember/runloop";
+import { later, next, schedule, scheduleOnce } from "@ember/runloop";
 import Component from "@ember/component";
 import I18n from "I18n";
-import ItsATrap from "@discourse/itsatrap";
+import Mousetrap from "mousetrap";
 import { Promise } from "rsvp";
 import { SKIP } from "discourse/lib/autocomplete";
 import { categoryHashtagTriggerRule } from "discourse/lib/category-hashtags";
@@ -32,10 +34,9 @@ import { search as searchCategoryTag } from "discourse/lib/category-tag-search";
 import { inject as service } from "@ember/service";
 import showModal from "discourse/lib/show-modal";
 import { siteDir } from "discourse/lib/text-direction";
+import toMarkdown from "discourse/lib/to-markdown";
 import { translations } from "pretty-text/emoji/data";
 import { wantsNewWindow } from "discourse/lib/intercept-click";
-import { action } from "@ember/object";
-import TextareaTextManipulation from "discourse/mixins/textarea-text-manipulation";
 
 // Our head can be a static string or a function that returns a string
 // based on input (like for numbered lists).
@@ -61,6 +62,11 @@ const OP = {
 const FOUR_SPACES_INDENT = "4-spaces-indent";
 
 let _createCallbacks = [];
+
+const isInside = (text, regex) => {
+  const matches = text.match(regex);
+  return matches && matches.length % 2;
+};
 
 class Toolbar {
   constructor(opts) {
@@ -123,7 +129,7 @@ class Toolbar {
     this.addButton({
       id: "code",
       group: "insertions",
-      shortcut: "E",
+      shortcut: "Shift+C",
       preventFocus: true,
       trimLeading: true,
       action: (...args) => this.context.send("formatCode", args),
@@ -176,7 +182,6 @@ class Toolbar {
 
     const createdButton = {
       id: button.id,
-      tabindex: button.tabindex || "-1",
       className: button.className || button.id,
       label: button.label,
       icon: button.label ? null : button.icon || button.id,
@@ -195,12 +200,24 @@ class Toolbar {
     if (button.shortcut) {
       const mac = /Mac|iPod|iPhone|iPad/.test(navigator.platform);
       const mod = mac ? "Meta" : "Ctrl";
+      let shortcutTitle = `${mod}+${button.shortcut}`;
 
-      const shortcutTitle = `${translateModKey(mod + "+")}${translateModKey(
-        button.shortcut
-      )}`;
+      // Mac users are used to glyphs for shortcut keys
+      if (mac) {
+        shortcutTitle = shortcutTitle
+          .replace("Shift", "\u21E7")
+          .replace("Meta", "\u2318")
+          .replace("Alt", "\u2325")
+          .replace(/\+/g, "");
+      } else {
+        shortcutTitle = shortcutTitle
+          .replace("Shift", I18n.t("shortcut_modifier_key.shift"))
+          .replace("Ctrl", I18n.t("shortcut_modifier_key.ctrl"))
+          .replace("Alt", I18n.t("shortcut_modifier_key.alt"));
+      }
 
       createdButton.title = `${title} (${shortcutTitle})`;
+
       this.shortcuts[`${mod}+${button.shortcut}`.toLowerCase()] = createdButton;
     } else {
       createdButton.title = title;
@@ -226,17 +243,15 @@ export function onToolbarCreate(func) {
   addToolbarCallback(func);
 }
 
-export default Component.extend(TextareaTextManipulation, {
+export default Component.extend({
   classNames: ["d-editor"],
   ready: false,
   lastSel: null,
-  _itsatrap: null,
+  _mouseTrap: null,
   showLink: true,
   emojiPickerIsActive: false,
   emojiStore: service("emoji-store"),
   isEditorFocused: false,
-  processPreview: true,
-  composerFocusSelector: "#reply-control .d-editor-input",
 
   @discourseComputed("placeholder")
   placeholderTranslated(placeholder) {
@@ -250,7 +265,7 @@ export default Component.extend(TextareaTextManipulation, {
     this.set("ready", true);
 
     if (this.autofocus) {
-      this._textarea.focus();
+      this.element.querySelector("textarea").focus();
     }
   },
 
@@ -263,21 +278,20 @@ export default Component.extend(TextareaTextManipulation, {
   didInsertElement() {
     this._super(...arguments);
 
-    this._previewMutationObserver = this._disablePreviewTabIndex();
-
-    this._textarea = this.element.querySelector("textarea.d-editor-input");
-    this._$textarea = $(this._textarea);
-    this._applyEmojiAutocomplete(this._$textarea);
-    this._applyCategoryHashtagAutocomplete(this._$textarea);
+    const $editorInput = $(this.element.querySelector(".d-editor-input"));
+    this._applyEmojiAutocomplete($editorInput);
+    this._applyCategoryHashtagAutocomplete($editorInput);
 
     scheduleOnce("afterRender", this, this._readyNow);
 
-    this._itsatrap = new ItsATrap(this._textarea);
+    this._mouseTrap = new Mousetrap(
+      this.element.querySelector(".d-editor-input")
+    );
     const shortcuts = this.get("toolbar.shortcuts");
 
     Object.keys(shortcuts).forEach((sc) => {
       const button = shortcuts[sc];
-      this._itsatrap.bind(sc, () => {
+      this._mouseTrap.bind(sc, () => {
         button.action(button);
         return false;
       });
@@ -321,6 +335,14 @@ export default Component.extend(TextareaTextManipulation, {
     }
   },
 
+  _insertBlock(text) {
+    this._addBlock(this._getSelected(), text);
+  },
+
+  _insertText(text, options) {
+    this._addText(this._getSelected(), text, options);
+  },
+
   @on("willDestroyElement")
   _shutDown() {
     if (this.composerEvents) {
@@ -329,12 +351,8 @@ export default Component.extend(TextareaTextManipulation, {
       this.appEvents.off("composer:replace-text", this, "_replaceText");
     }
 
-    this._itsatrap?.destroy();
-    this._itsatrap = null;
-
+    this._mouseTrap.reset();
     $(this.element.querySelector(".d-editor-preview")).off("click.preview");
-
-    this._previewMutationObserver?.disconnect();
 
     if (isTesting()) {
       this.element.removeEventListener("paste", this.paste);
@@ -369,7 +387,7 @@ export default Component.extend(TextareaTextManipulation, {
   },
 
   _updatePreview() {
-    if (this._state !== "inDOM" || !this.processPreview) {
+    if (this._state !== "inDOM") {
       return;
     }
 
@@ -385,8 +403,6 @@ export default Component.extend(TextareaTextManipulation, {
       }
 
       this.set("preview", cooked);
-
-      let previewPromise = Promise.resolve();
 
       if (this.siteSettings.enable_diffhtml_preview) {
         const cookedElement = document.createElement("div");
@@ -405,34 +421,39 @@ export default Component.extend(TextareaTextManipulation, {
           true
         );
 
-        previewPromise = loadScript("/javascripts/diffhtml.min.js").then(() => {
+        loadScript("/javascripts/diffhtml.min.js").then(() => {
+          // changing the contents of the preview element between two uses of
+          // diff.innerHTML did not apply the diff correctly
+          window.diff.release(this.element.querySelector(".d-editor-preview"));
           window.diff.innerHTML(
             this.element.querySelector(".d-editor-preview"),
-            cookedElement.innerHTML
+            cookedElement.innerHTML,
+            {
+              parser: {
+                rawElements: ["script", "noscript", "style", "template"],
+              },
+            }
           );
         });
       }
 
-      previewPromise.then(() => {
-        schedule("afterRender", () => {
-          if (this._state !== "inDOM" || !this.element) {
-            return;
-          }
+      schedule("afterRender", () => {
+        if (this._state !== "inDOM" || !this.element) {
+          return;
+        }
+        const $preview = $(this.element.querySelector(".d-editor-preview"));
+        if ($preview.length === 0) {
+          return;
+        }
 
-          const preview = this.element.querySelector(".d-editor-preview");
-          if (!preview) {
-            return;
-          }
-
-          if (this.previewUpdated) {
-            this.previewUpdated($(preview));
-          }
-        });
+        if (this.previewUpdated) {
+          this.previewUpdated($preview);
+        }
       });
     });
   },
 
-  @observes("ready", "value", "processPreview")
+  @observes("ready", "value")
   _watchForChanges() {
     if (!this.ready) {
       return;
@@ -449,7 +470,7 @@ export default Component.extend(TextareaTextManipulation, {
   _applyCategoryHashtagAutocomplete() {
     const siteSettings = this.siteSettings;
 
-    this._$textarea.autocomplete({
+    $(this.element.querySelector(".d-editor-input")).autocomplete({
       template: findRawTemplate("category-tag-autocomplete"),
       key: "#",
       afterComplete: (value) => {
@@ -471,12 +492,12 @@ export default Component.extend(TextareaTextManipulation, {
     });
   },
 
-  _applyEmojiAutocomplete($textarea) {
+  _applyEmojiAutocomplete($editorInput) {
     if (!this.siteSettings.enable_emoji) {
       return;
     }
 
-    $textarea.autocomplete({
+    $editorInput.autocomplete({
       template: findRawTemplate("emoji-selector-autocomplete"),
       key: ":",
       afterComplete: (text) => {
@@ -503,7 +524,7 @@ export default Component.extend(TextareaTextManipulation, {
           this.emojiStore.track(v.code);
           return `${v.code}:`;
         } else {
-          $textarea.autocomplete({ cancel: true });
+          $editorInput.autocomplete({ cancel: true });
           this.set("emojiPickerIsActive", true);
 
           schedule("afterRender", () => {
@@ -591,6 +612,63 @@ export default Component.extend(TextareaTextManipulation, {
 
       triggerRule: (textarea) =>
         !inCodeBlock(textarea.value, caretPosition(textarea)),
+    });
+  },
+
+  _getSelected(trimLeading, opts) {
+    if (!this.ready || !this.element) {
+      return;
+    }
+
+    const textarea = this.element.querySelector("textarea.d-editor-input");
+    const value = textarea.value;
+    let start = textarea.selectionStart;
+    let end = textarea.selectionEnd;
+
+    // trim trailing spaces cause **test ** would be invalid
+    while (end > start && /\s/.test(value.charAt(end - 1))) {
+      end--;
+    }
+
+    if (trimLeading) {
+      // trim leading spaces cause ** test** would be invalid
+      while (end > start && /\s/.test(value.charAt(start))) {
+        start++;
+      }
+    }
+
+    const selVal = value.substring(start, end);
+    const pre = value.slice(0, start);
+    const post = value.slice(end);
+
+    if (opts && opts.lineVal) {
+      const lineVal = value.split("\n")[
+        value.substr(0, textarea.selectionStart).split("\n").length - 1
+      ];
+      return { start, end, value: selVal, pre, post, lineVal };
+    } else {
+      return { start, end, value: selVal, pre, post };
+    }
+  },
+
+  _selectText(from, length, opts = { scroll: true }) {
+    next(() => {
+      if (!this.element) {
+        return;
+      }
+
+      const textarea = this.element.querySelector("textarea.d-editor-input");
+      const $textarea = $(textarea);
+      textarea.selectionStart = from;
+      textarea.selectionEnd = from + length;
+      $textarea.trigger("change");
+      if (opts.scroll) {
+        const oldScrollPos = $textarea.scrollTop();
+        if (!this.capabilities.isIOS || safariHacksDisabled()) {
+          $textarea.focus();
+        }
+        $textarea.scrollTop(oldScrollPos);
+      }
     });
   },
 
@@ -726,52 +804,226 @@ export default Component.extend(TextareaTextManipulation, {
     }
   },
 
-  _toggleDirection() {
-    let currentDir = this._$textarea.attr("dir")
-        ? this._$textarea.attr("dir")
-        : siteDir(),
-      newDir = currentDir === "ltr" ? "rtl" : "ltr";
+  _replaceText(oldVal, newVal, opts = {}) {
+    const val = this.value;
+    const needleStart = val.indexOf(oldVal);
 
-    this._$textarea.attr("dir", newDir).focus();
+    if (needleStart === -1) {
+      // Nothing to replace.
+      return;
+    }
+
+    const textarea = this.element.querySelector("textarea.d-editor-input");
+
+    // Determine post-replace selection.
+    const newSelection = determinePostReplaceSelection({
+      selection: { start: textarea.selectionStart, end: textarea.selectionEnd },
+      needle: { start: needleStart, end: needleStart + oldVal.length },
+      replacement: { start: needleStart, end: needleStart + newVal.length },
+    });
+
+    if (opts.index && opts.regex) {
+      let i = -1;
+      const newValue = val.replace(opts.regex, (match) => {
+        i++;
+        return i === opts.index ? newVal : match;
+      });
+      this.set("value", newValue);
+    } else {
+      // Replace value (side effect: cursor at the end).
+      this.set("value", val.replace(oldVal, newVal));
+    }
+
+    if (opts.forceFocus || $("textarea.d-editor-input").is(":focus")) {
+      // Restore cursor.
+      this._selectText(
+        newSelection.start,
+        newSelection.end - newSelection.start
+      );
+    }
   },
 
-  @action
-  rovingButtonBar(event) {
-    let target = event.target;
-    let siblingFinder;
-    if (event.code === "ArrowRight") {
-      siblingFinder = "nextElementSibling";
-    } else if (event.code === "ArrowLeft") {
-      siblingFinder = "previousElementSibling";
+  _addBlock(sel, text) {
+    text = (text || "").trim();
+    if (text.length === 0) {
+      return;
+    }
+
+    let pre = sel.pre;
+    let post = sel.value + sel.post;
+
+    if (pre.length > 0) {
+      pre = pre.replace(/\n*$/, "\n\n");
+    }
+
+    if (post.length > 0) {
+      post = post.replace(/^\n*/, "\n\n");
     } else {
-      return true;
+      post = "\n";
     }
 
-    while (
-      target.parentNode &&
-      !target.parentNode.classList.contains("d-editor-button-bar")
+    const value = pre + text + post;
+    const $textarea = $(this.element.querySelector("textarea.d-editor-input"));
+
+    this.set("value", value);
+
+    $textarea.val(value);
+    $textarea.prop("selectionStart", (pre + text).length + 2);
+    $textarea.prop("selectionEnd", (pre + text).length + 2);
+
+    this._focusTextArea();
+  },
+
+  _addText(sel, text, options) {
+    const $textarea = $(this.element.querySelector("textarea.d-editor-input"));
+
+    if (options && options.ensureSpace) {
+      if ((sel.pre + "").length > 0) {
+        if (!sel.pre.match(/\s$/)) {
+          text = " " + text;
+        }
+      }
+      if ((sel.post + "").length > 0) {
+        if (!sel.post.match(/^\s/)) {
+          text = text + " ";
+        }
+      }
+    }
+
+    const insert = `${sel.pre}${text}`;
+    const value = `${insert}${sel.post}`;
+    this.set("value", value);
+    $textarea.val(value);
+    $textarea.prop("selectionStart", insert.length);
+    $textarea.prop("selectionEnd", insert.length);
+    next(() => $textarea.trigger("change"));
+    this._focusTextArea();
+  },
+
+  _extractTable(text) {
+    if (text.endsWith("\n")) {
+      text = text.substring(0, text.length - 1);
+    }
+
+    text = text.split("");
+    let cell = false;
+    text.forEach((char, index) => {
+      if (char === "\n" && cell) {
+        text[index] = "\r";
+      }
+      if (char === '"') {
+        text[index] = "";
+        cell = !cell;
+      }
+    });
+
+    let rows = text.join("").replace(/\r/g, "<br>").split("\n");
+
+    if (rows.length > 1) {
+      const columns = rows.map((r) => r.split("\t").length);
+      const isTable =
+        columns.reduce((a, b) => a && columns[0] === b && b > 1) &&
+        !(columns[0] === 2 && rows[0].split("\t")[0].match(/^•$|^\d+.$/)); // to skip tab delimited lists
+
+      if (isTable) {
+        const splitterRow = [...Array(columns[0])].map(() => "---").join("\t");
+        rows.splice(1, 0, splitterRow);
+
+        return (
+          "|" + rows.map((r) => r.split("\t").join("|")).join("|\n|") + "|\n"
+        );
+      }
+    }
+    return null;
+  },
+
+  _toggleDirection() {
+    const $textArea = $(".d-editor-input");
+    let currentDir = $textArea.attr("dir") ? $textArea.attr("dir") : siteDir(),
+      newDir = currentDir === "ltr" ? "rtl" : "ltr";
+
+    $textArea.attr("dir", newDir).focus();
+  },
+
+  paste(e) {
+    if (!$(".d-editor-input").is(":focus") && !isTesting()) {
+      return;
+    }
+
+    const isComposer = $("#reply-control .d-editor-input").is(":focus");
+    let { clipboard, canPasteHtml, canUpload } = clipboardHelpers(e, {
+      siteSettings: this.siteSettings,
+      canUpload: isComposer,
+    });
+
+    let plainText = clipboard.getData("text/plain");
+    let html = clipboard.getData("text/html");
+    let handled = false;
+
+    const { pre, lineVal } = this._getSelected(null, { lineVal: true });
+    const isInlinePasting = pre.match(/[^\n]$/);
+    const isCodeBlock = isInside(pre, /(^|\n)```/g);
+
+    if (
+      plainText &&
+      this.siteSettings.enable_rich_text_paste &&
+      !isInlinePasting &&
+      !isCodeBlock
     ) {
-      target = target.parentNode;
+      plainText = plainText.replace(/\r/g, "");
+      const table = this._extractTable(plainText);
+      if (table) {
+        this.appEvents.trigger("composer:insert-text", table);
+        handled = true;
+      }
     }
 
-    let focusable = target[siblingFinder];
-    if (focusable) {
-      while (
-        (focusable.tagName !== "BUTTON" &&
-          !focusable.classList.contains("select-kit")) ||
-        focusable.classList.contains("hidden")
-      ) {
-        focusable = focusable[siblingFinder];
+    if (canPasteHtml && plainText) {
+      if (isInlinePasting) {
+        canPasteHtml = !(
+          lineVal.match(/^```/) ||
+          isInside(pre, /`/g) ||
+          lineVal.match(/^    /)
+        );
+      } else {
+        canPasteHtml = !isCodeBlock;
       }
-
-      if (focusable?.tagName === "DETAILS") {
-        focusable = focusable.querySelector("summary");
-      }
-
-      focusable?.focus();
     }
 
-    return true;
+    if (canPasteHtml && !handled) {
+      let markdown = toMarkdown(html);
+
+      if (!plainText || plainText.length < markdown.length) {
+        if (isInlinePasting) {
+          markdown = markdown.replace(/^#+/, "").trim();
+          markdown = pre.match(/\S$/) ? ` ${markdown}` : markdown;
+        }
+
+        this.appEvents.trigger("composer:insert-text", markdown);
+        handled = true;
+      }
+    }
+
+    if (handled || (canUpload && !plainText)) {
+      e.preventDefault();
+    }
+  },
+
+  // ensures textarea scroll position is correct
+  _focusTextArea() {
+    schedule("afterRender", () => {
+      if (!this.element || this.isDestroying || this.isDestroyed) {
+        return;
+      }
+
+      const textarea = this.element.querySelector("textarea.d-editor-input");
+      if (!textarea) {
+        return;
+      }
+
+      textarea.blur();
+      textarea.focus();
+    });
   },
 
   actions: {
@@ -900,21 +1152,5 @@ export default Component.extend(TextareaTextManipulation, {
     focusOut() {
       this.set("isEditorFocused", false);
     },
-  },
-
-  _disablePreviewTabIndex() {
-    const observer = new MutationObserver(function () {
-      document.querySelectorAll(".d-editor-preview a").forEach((anchor) => {
-        anchor.setAttribute("tabindex", "-1");
-      });
-    });
-
-    observer.observe(document.querySelector(".d-editor-preview"), {
-      childList: true,
-      subtree: true,
-      attributes: false,
-    });
-
-    return observer;
   },
 });

@@ -27,16 +27,14 @@ export default Component.extend({
       data: data,
       options: {
         responsive: true,
-        plugins: {
-          tooltip: {
-            callbacks: {
-              title: (context) =>
-                moment(context[0].label, "YYYY-MM-DD").format("LL"),
-            },
+        tooltips: {
+          callbacks: {
+            title: (context) =>
+              moment(context[0].xLabel, "YYYY-MM-DD").format("LL"),
           },
         },
         scales: {
-          y: [
+          yAxes: [
             {
               display: true,
               ticks: {

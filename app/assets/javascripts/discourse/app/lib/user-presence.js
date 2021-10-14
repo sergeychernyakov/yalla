@@ -25,30 +25,8 @@ export default function (maxUnseenTime) {
   }
 }
 
-const callbacks = [];
-
-const MIN_DELTA = 60000;
-
 export function seenUser() {
-  let lastSeenTime = seenUserTime;
   seenUserTime = Date.now();
-  let delta = seenUserTime - lastSeenTime;
-
-  if (lastSeenTime && delta > MIN_DELTA) {
-    callbacks.forEach((info) => {
-      if (delta > info.unseenTime) {
-        info.callback();
-      }
-    });
-  }
-}
-
-// register a callback for cases where presence changed
-export function onPresenceChange({ unseenTime, callback }) {
-  if (unseenTime < MIN_DELTA) {
-    throw "unseenTime is too short";
-  }
-  callbacks.push({ unseenTime, callback });
 }
 
 // We could piggieback on the Scroll mixin, but it is not applied

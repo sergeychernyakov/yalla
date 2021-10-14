@@ -13,7 +13,7 @@ export default Component.extend({
     if (path === "faq" || path === "guidelines") {
       $(window).on("load.faq resize.faq scroll.faq", () => {
         const faqUnread = !currentUser.get("read_faq");
-        if (faqUnread && isElementInViewport($(".contents p").last()[0])) {
+        if (faqUnread && isElementInViewport($(".contents p").last())) {
           this.action();
         }
       });

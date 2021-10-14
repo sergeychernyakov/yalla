@@ -138,10 +138,7 @@ class UploadValidator < ActiveModel::Validator
     max_size_bytes = max_size_kb.kilobytes
 
     if upload.filesize > max_size_bytes
-      message = I18n.t(
-        "upload.#{type}s.too_large_humanized",
-        max_size: ActiveSupport::NumberHelper.number_to_human_size(max_size_bytes)
-      )
+      message = I18n.t("upload.#{type}s.too_large", max_size_kb: max_size_kb)
       upload.errors.add(:filesize, message)
     end
   end

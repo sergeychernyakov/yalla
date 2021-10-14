@@ -62,7 +62,7 @@ te:
       record_invalid: ! "సరిజూత విఫలమైంది: %{errors}"
       restrict_dependent_destroy:
         one: "రికార్డు తొలగించలేము. ఎందుకంటే ఆధారిత %{record} ఉంది"
-        other: "రికార్డు తొలగించలేము. ఎందుకంటే ఆధారిత %{record} ఉంది"
+        many: "రికార్డు తొలగించలేము. ఎందుకంటే ఆధారిత %{record} ఉంది"
       too_long:
         one: ఇది చాలా పొడుగు (గరిష్ట పరిమితి ఒక అక్షరం)
         other: ఇది చాలా పొడుగు. (గరిష్ట పరిమితి %{count} అక్షరాలు)
@@ -196,8 +196,16 @@ te:
       has_subcategories: "ఈ వర్గాన్ని తొలగించలేరు. ఎందుకంటే దీనికి ఉప వర్గాలు ఉన్నాయి."
       topic_exists_no_oldest: "ఈ వర్గాన్ని తొలగించలేరు. ఎందుకంటే దీనిలో %{count} విషయాలు ఉన్నాయి."
   trust_levels:
-    admin: "అధికారి"
-    staff: "సిబ్బంది"
+    newuser:
+      title: "కొత్త సభ్యుడు"
+    basic:
+      title: "ప్రాథమిక సభ్యుడు"
+    member:
+      title: "మెంబరు"
+    regular:
+      title: "రెగ్యులర్"
+    leader:
+      title: "లీడర్"
   rate_limiter:
     hours:
       one: "ఒక గంట"
@@ -583,6 +591,7 @@ te:
       topic: "ఫలితాలు"
       user: "సభ్యులు"
   original_poster: "మూల టపా రచయిత"
+  most_posts: "అధిక టపాలు"
   most_recent_poster: "ఇటీవలి పోస్టర్"
   frequent_poster: "తరచూ వచ్చే పోస్టర్"
   publish_page:
@@ -735,7 +744,9 @@ te:
             placeholder: "name@example.com"
       corporate:
         title: "సంస్థ"
-      styling:
+      colors:
+        title: "రంగులు"
+      homepage:
         fields:
           homepage_style:
             choices:
@@ -746,6 +757,8 @@ te:
     actions:
       agree_and_suspend:
         title: "సభ్యుడిని సస్పెండు చేయి"
+      delete_spammer:
+        title: "స్పామరును తొలగించు"
       delete_single:
         title: "తొలగించు"
       disagree:
@@ -757,7 +770,8 @@ te:
           title: "సభ్యుడిని తొలగించు"
       reject:
         title: "తిరస్కరించు"
-  fallback_username: "సభ్యుడు"
+      delete_user:
+        title: "సభ్యుడిని తొలగించు"
   activemodel:
     errors:
       <<: *errors

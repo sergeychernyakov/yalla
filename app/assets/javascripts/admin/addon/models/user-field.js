@@ -15,7 +15,6 @@ UserField.reopenClass({
         UserFieldType.create({ id: "text" }),
         UserFieldType.create({ id: "confirm" }),
         UserFieldType.create({ id: "dropdown", hasOptions: true }),
-        UserFieldType.create({ id: "multiselect", hasOptions: true }),
       ];
     }
 

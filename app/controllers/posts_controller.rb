@@ -61,7 +61,7 @@ class PostsController < ApplicationController
         .where('posts.id <= ?', last_post_id)
         .where('posts.id > ?', last_post_id - 50)
         .includes(topic: :category)
-        .includes(user: [:primary_group, :flair_group])
+        .includes(user: :primary_group)
         .includes(:reply_to_user)
         .limit(50)
       rss_description = I18n.t("rss_description.private_posts")
@@ -71,7 +71,7 @@ class PostsController < ApplicationController
         .where('posts.id <= ?', last_post_id)
         .where('posts.id > ?', last_post_id - 50)
         .includes(topic: :category)
-        .includes(user: [:primary_group, :flair_group])
+        .includes(user: :primary_group)
         .includes(:reply_to_user)
         .limit(50)
       rss_description = I18n.t("rss_description.posts")
@@ -247,7 +247,7 @@ class PostsController < ApplicationController
     return render_json_error(post) if post.errors.present?
     return render_json_error(topic) if topic.errors.present?
 
-    post_serializer = PostSerializer.new(post, scope: guardian, root: false, add_raw: true)
+    post_serializer = PostSerializer.new(post, scope: guardian, root: false)
     post_serializer.draft_sequence = DraftSequence.current(current_user, topic.draft_key)
     link_counts = TopicLink.counts_for(guardian, topic, [post])
     post_serializer.single_post_link_counts = link_counts[post.id] if link_counts.present?
@@ -303,24 +303,14 @@ class PostsController < ApplicationController
 
   def destroy
     post = find_post_from_params
-
-    force_destroy = false
-    if params[:force_destroy].present?
-      if !guardian.can_permanently_delete?(post)
-        return render_json_error post.cannot_permanently_delete_reason(current_user), status: 403
-      end
-
-      force_destroy = true
-    else
-      guardian.ensure_can_delete!(post)
-    end
+    guardian.ensure_can_delete!(post)
 
     unless guardian.can_moderate_topic?(post.topic)
       RateLimiter.new(current_user, "delete_post_per_min", SiteSetting.max_post_deletions_per_minute, 1.minute).performed!
       RateLimiter.new(current_user, "delete_post_per_day", SiteSetting.max_post_deletions_per_day, 1.day).performed!
     end
 
-    destroyer = PostDestroyer.new(current_user, post, context: params[:context], force_destroy: force_destroy)
+    destroyer = PostDestroyer.new(current_user, post, context: params[:context])
     destroyer.destroy
 
     render body: nil
@@ -565,11 +555,6 @@ class PostsController < ApplicationController
   end
 
   def flagged_posts
-    Discourse.deprecate(
-      'PostsController#flagged_posts is deprecated. Please use /review instead.',
-      since: '2.8.0.beta4', drop_from: '2.9'
-    )
-
     params.permit(:offset, :limit)
     guardian.ensure_can_see_flagged_posts!
 

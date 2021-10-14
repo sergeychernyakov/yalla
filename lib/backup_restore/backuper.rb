@@ -321,8 +321,9 @@ module BackupRestore
       log "Notifying '#{@user.username}' of the end of the backup..."
       status = @success ? :backup_succeeded : :backup_failed
 
-      logs = Discourse::Utils.logs_markdown(@logs, user: @user)
-      post = SystemMessage.create_from_system_user(@user, status, logs: logs)
+      post = SystemMessage.create_from_system_user(
+        @user, status, logs: Discourse::Utils.pretty_logs(@logs)
+      )
 
       if @user.id == Discourse::SYSTEM_USER_ID
         post.topic.invite_group(@user, Group[:admins])

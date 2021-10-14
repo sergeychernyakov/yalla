@@ -14,14 +14,7 @@ export default (type) => {
       if (this._isArchive()) {
         filter = `${filter}/archive`;
       }
-      return this.store.findFiltered("topicList", { filter }).then((model) => {
-        // andrei: we agreed that this is an anti pattern,
-        // it's better to avoid mutating a rest model like this
-        // this place we'll be refactored later
-        // see https://github.com/discourse/discourse/pull/14313#discussion_r708784704
-        model.set("emptyState", this.emptyState());
-        return model;
-      });
+      return this.store.findFiltered("topicList", { filter });
     },
 
     setupController() {
@@ -38,28 +31,10 @@ export default (type) => {
         hideCategory: true,
         showPosters: true,
       });
-
-      const currentUser = this.currentUser;
-      this.searchService.set("searchContext", {
-        type: "private_messages",
-        id: currentUser.get("username_lower"),
-        user: currentUser,
-      });
-    },
-
-    emptyState() {
-      return {
-        title: I18n.t("no_group_messages_title"),
-        body: "",
-      };
     },
 
     _isArchive() {
       return type === "archive";
-    },
-
-    deactivate() {
-      this.searchService.set("searchContext", null);
     },
   });
 };

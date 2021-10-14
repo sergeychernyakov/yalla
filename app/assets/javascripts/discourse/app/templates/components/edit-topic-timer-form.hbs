@@ -24,12 +24,12 @@
       onTimeSelected=onTimeSelected
       customOptions=customTimeShortcutOptions
       hiddenOptions=hiddenTimeShortcutOptions
-      _itsatrap=_itsatrap
+      mousetrap=_mousetrap
     }}
   {{/if}}
   {{#if useDuration}}
     <div class="controls">
-      <label class="control-label">{{i18n "topic.topic_status_update.duration"}}</label>
+      <label class="control-label">Duration</label>
       {{relative-time-picker onChange=(action "durationChanged") durationMinutes=(readonly topicTimer.duration_minutes)}}
     </div>
   {{/if}}

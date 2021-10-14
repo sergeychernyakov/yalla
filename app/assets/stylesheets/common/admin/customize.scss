@@ -1,4 +1,4 @@
-// Customize area
+// Customise area
 
 .email-template {
   input {
@@ -46,9 +46,6 @@
     input {
       margin-bottom: 0;
       font-size: $font-down-2;
-      .ios-device & {
-        font-size: var(--font-down-2);
-      }
     }
   }
 
@@ -87,7 +84,7 @@
       font-weight: bold;
       margin-bottom: 0.25em;
       display: flex;
-      align-items: center;
+      align-items: stretch;
 
       input {
         margin: 0;
@@ -155,13 +152,7 @@
     }
 
     &.color-scheme .admin-controls {
-      padding: 1em;
-      label {
-        margin-bottom: 0;
-        input[type="checkbox"] {
-          margin-top: 0;
-        }
-      }
+      padding: 0.5em;
     }
   }
   .add-component-button {
@@ -304,37 +295,6 @@
         width: 100%;
       }
     }
-
-    .themes-list-filter {
-      display: flex;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      background: var(--secondary);
-      z-index: z("base");
-      height: 3em;
-
-      .d-icon {
-        position: absolute;
-        padding-left: 0.5em;
-      }
-
-      .filter-input {
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        border: 0;
-        padding-left: 2em;
-
-        &:focus {
-          outline: 0;
-
-          ~ .d-icon {
-            color: var(--tertiary-hover);
-          }
-        }
-      }
-    }
   }
 
   .theme.settings {
@@ -345,15 +305,9 @@
       padding-bottom: 0;
       margin-top: 18px;
       min-height: 35px;
-
-      .input-setting-textarea {
-        height: unset;
-      }
     }
     .setting-label {
-      @include breakpoint(tablet, min-width) {
-        width: 25%;
-      }
+      width: 25%;
       word-wrap: break-word;
       h3 {
         margin-top: 0;
@@ -528,8 +482,7 @@
     .controls {
       display: flex;
       align-items: center;
-      margin-bottom: 1em;
-      button:not(:last-child),
+      button,
       a {
         margin-right: 10px;
       }
@@ -549,9 +502,6 @@
     }
     td.hex {
       width: 160px;
-      .color-picker {
-        display: inline-flex;
-      }
     }
     td.actions {
       width: 200px;
@@ -646,6 +596,7 @@
   }
   label input {
     width: auto;
+    margin: 3px 0;
   }
 }
 .public-key {
@@ -653,17 +604,7 @@
   textarea {
     cursor: auto;
     min-height: 220px;
-    margin-bottom: 0;
   }
-  button {
-    position: absolute;
-    top: 0;
-    right: 0;
-  }
-}
-
-.public-key-text-wrapper {
-  position: relative;
 }
 
 .public-key-note {
@@ -697,8 +638,23 @@
 }
 
 .permalink-form {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  @include breakpoint(tablet, min-width) {
+    align-items: center;
+    flex-direction: row;
+  }
+
   .select-kit {
-    max-width: 200px;
+    width: 200px;
+  }
+  input {
+    margin: 5px 0;
+    @include breakpoint(tablet, min-width) {
+      margin: 0 5px;
+    }
   }
 }
 

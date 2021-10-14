@@ -12,7 +12,7 @@ ru:
         tomorrow: Завтра %{time}
         yesterday: Вчера %{time}
         countdown:
-          passed: прошедшая дата
+          passed: дата прошла
       title: Дата / Время
       create:
         form:
@@ -40,4 +40,3 @@ ru:
             every_three_months: "Каждые три месяца"
             every_six_months: "Каждые шесть месяцев"
             every_year: "Каждый год"
-      default_title: "Событие на сайте %{site_name}"

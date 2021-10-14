@@ -31,6 +31,4 @@ export const NOTIFICATION_TYPES = {
   votes_released: 26,
   event_reminder: 27,
   event_invitation: 28,
-  chat_mention: 29,
-  chat_message: 30,
 };

@@ -352,10 +352,8 @@ describe StaffActionLogger do
 
       category.update!(attributes)
 
-      logger.log_category_settings_change(
-        category,
-        attributes,
-        old_permissions: { category_group.group_name => category_group.permission_type }
+      logger.log_category_settings_change(category, attributes,
+        category_group.group_name => category_group.permission_type
       )
 
       expect(UserHistory.count).to eq(2)
@@ -378,11 +376,7 @@ describe StaffActionLogger do
       old_permission = category.permissions_params
       category.update!(attributes)
 
-      logger.log_category_settings_change(
-        category,
-        attributes.merge(permissions: { "everyone" => 1 }),
-        old_permissions: old_permission
-      )
+      logger.log_category_settings_change(category, attributes.merge(permissions: { "everyone" => 1 }), old_permission)
 
       expect(UserHistory.count).to eq(1)
       expect(UserHistory.find_by_subject('name').category).to eq(category)
@@ -550,6 +544,7 @@ describe StaffActionLogger do
       expect(user_history.action).to eq(UserHistory.actions[:post_rejected])
       expect(user_history.details).to include(reviewable.payload['raw'])
     end
+
   end
 
   describe 'log_topic_closed' do
@@ -622,43 +617,4 @@ describe StaffActionLogger do
     end
   end
 
-  describe '#log_watched_words_creation' do
-    fab!(:watched_word) { Fabricate(:watched_word, action: WatchedWord.actions[:block]) }
-
-    it "raises an error when watched_word is missing" do
-      expect { logger.log_watched_words_creation(nil) }.to raise_error(Discourse::InvalidParameters)
-    end
-
-    it "creates a new UserHistory record" do
-      logger.log_watched_words_creation(watched_word)
-
-      expect(UserHistory.count).to eq(1)
-      user_history = UserHistory.last
-
-      expect(user_history.subject).to eq(nil)
-      expect(user_history.details).to include(watched_word.word)
-      expect(user_history.context).to eq("block")
-      expect(user_history.action).to eq(UserHistory.actions[:watched_word_create])
-    end
-  end
-
-  describe '#log_watched_words_deletion' do
-    fab!(:watched_word) { Fabricate(:watched_word, action: WatchedWord.actions[:block]) }
-
-    it "raises an error when watched_word is missing" do
-      expect { logger.log_watched_words_deletion(nil) }.to raise_error(Discourse::InvalidParameters)
-    end
-
-    it "creates a new UserHistory record" do
-      logger.log_watched_words_deletion(watched_word)
-
-      expect(UserHistory.count).to eq(1)
-      user_history = UserHistory.last
-
-      expect(user_history.subject).to eq(nil)
-      expect(user_history.details).to include(watched_word.word)
-      expect(user_history.context).to eq("block")
-      expect(user_history.action).to eq(UserHistory.actions[:watched_word_destroy])
-    end
-  end
 end

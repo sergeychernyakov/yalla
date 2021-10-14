@@ -128,7 +128,7 @@ function setupNotifications(appEvents) {
   appEvents.on("page:changed", resetIdle);
 }
 
-export function resetIdle() {
+function resetIdle() {
   lastAction = Date.now();
 }
 function isIdle() {
@@ -153,13 +153,11 @@ function onNotification(data, siteSettings, user) {
     return;
   }
 
-  const notificationTitle =
-    data.translated_title ||
-    I18n.t(i18nKey(data.notification_type), {
-      site_title: siteSettings.title,
-      topic: data.topic_title,
-      username: formatUsername(data.username),
-    });
+  const notificationTitle = I18n.t(i18nKey(data.notification_type), {
+    site_title: siteSettings.title,
+    topic: data.topic_title,
+    username: formatUsername(data.username),
+  });
 
   const notificationBody = data.excerpt;
 

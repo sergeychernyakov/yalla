@@ -19,12 +19,6 @@
 
       ]
     },
-    "tags": {
-      "type": "array",
-      "items": [
-
-      ]
-    },
     "groups": {
       "type": "array",
       "items": [
@@ -32,7 +26,7 @@
       ]
     },
     "grouped_search_result": {
-      "type": "object",
+      "type": ["object", "null"],
       "additionalProperties": false,
       "properties": {
         "more_posts": {
@@ -92,12 +86,6 @@
 
           ]
         },
-        "tag_ids": {
-          "type": "array",
-          "items": [
-
-          ]
-        },
         "group_ids": {
           "type": "array",
           "items": [
@@ -117,17 +105,11 @@
         "post_ids",
         "user_ids",
         "category_ids",
-        "tag_ids",
         "group_ids"
       ]
     }
   },
   "required": [
-    "posts",
-    "users",
-    "categories",
-    "tags",
-    "groups",
     "grouped_search_result"
   ]
 }

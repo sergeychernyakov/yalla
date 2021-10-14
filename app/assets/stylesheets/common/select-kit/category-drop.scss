@@ -74,6 +74,11 @@
           }
         }
       }
+
+      &.is-expanded .select-kit-wrapper,
+      .select-kit-wrapper {
+        display: none;
+      }
     }
   }
 }

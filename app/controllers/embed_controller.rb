@@ -5,12 +5,14 @@ class EmbedController < ApplicationController
 
   skip_before_action :check_xhr, :preload_json, :verify_authenticity_token
 
+  before_action :ensure_embeddable, except: [ :info, :topics ]
   before_action :prepare_embeddable, except: [ :info ]
   before_action :ensure_api_request, only: [ :info ]
 
   layout 'embed'
 
   rescue_from Discourse::InvalidAccess do
+    response.headers.delete('X-Frame-Options')
     if current_user.try(:admin?)
       @setup_url = "#{Discourse.base_url}/admin/customize/embedding"
       @show_reason = true
@@ -22,6 +24,7 @@ class EmbedController < ApplicationController
   def topics
     discourse_expires_in 1.minute
 
+    response.headers.delete('X-Frame-Options')
     unless SiteSetting.embed_topics_list?
       render 'embed_topics_error', status: 400
       return
@@ -57,13 +60,8 @@ class EmbedController < ApplicationController
     end
 
     topic_query = TopicQuery.new(current_user, list_options)
-    top_period = params[:top_period]
-    begin
-      TopTopic.validate_period(top_period)
-      valid_top_period = true
-    rescue Discourse::InvalidParameters
-      valid_top_period = false
-    end
+    top_period = params[:top_period]&.to_sym
+    valid_top_period = TopTopic.periods.include?(top_period)
 
     @list = if valid_top_period
       topic_query.list_top_for(top_period)
@@ -75,11 +73,6 @@ class EmbedController < ApplicationController
   def comments
     embed_url = params[:embed_url]
     embed_username = params[:discourse_username]
-    embed_topic_id = params[:topic_id]&.to_i
-
-    unless embed_topic_id || EmbeddableHost.url_allowed?(embed_url)
-      raise Discourse::InvalidAccess.new('invalid embed host')
-    end
 
     topic_id = nil
     if embed_url.present?
@@ -96,13 +89,17 @@ class EmbedController < ApplicationController
                                   exclude_first: true,
                                   exclude_deleted_users: true,
                                   exclude_hidden: true)
-      raise Discourse::NotFound if @topic_view.blank?
 
+      @second_post_url = "#{@topic_view.topic.url}/2" if @topic_view
       @posts_left = 0
-      @second_post_url = "#{@topic_view.topic.url}/2"
-      @reply_count = @topic_view.filtered_posts.count - 1
-      @reply_count = 0 if @reply_count < 0
-      @posts_left = @reply_count - SiteSetting.embed_post_limit if @reply_count > SiteSetting.embed_post_limit
+      if @topic_view && @topic_view.posts.size == SiteSetting.embed_post_limit
+        @posts_left = @topic_view.topic.posts_count - SiteSetting.embed_post_limit - 1
+      end
+
+      if @topic_view
+        @reply_count = @topic_view.topic.posts_count - 1
+        @reply_count = 0 if @reply_count < 0
+      end
     elsif embed_url.present?
       Jobs.enqueue(:retrieve_topic,
                       user_id: current_user.try(:id),
@@ -150,7 +147,6 @@ class EmbedController < ApplicationController
   private
 
   def prepare_embeddable
-    response.headers.delete('X-Frame-Options')
     @embeddable_css_class = ""
     embeddable_host = EmbeddableHost.record_for_url(request.referer)
     @embeddable_css_class = " class=\"#{embeddable_host.class_name}\"" if embeddable_host.present? && embeddable_host.class_name.present?
@@ -162,4 +158,19 @@ class EmbedController < ApplicationController
   def ensure_api_request
     raise Discourse::InvalidAccess.new('api key not set') if !is_api?
   end
+
+  def ensure_embeddable
+    if !(Rails.env.development? && current_user&.admin?)
+      referer = request.referer
+
+      unless referer && EmbeddableHost.url_allowed?(referer)
+        raise Discourse::InvalidAccess.new('invalid referer host')
+      end
+    end
+
+    response.headers.delete('X-Frame-Options')
+  rescue URI::Error
+    raise Discourse::InvalidAccess.new('invalid referer host')
+  end
+
 end

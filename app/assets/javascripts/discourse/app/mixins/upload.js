@@ -103,16 +103,12 @@ export default Mixin.create({
     });
 
     $upload.on("fileuploadprogressall", (e, data) => {
-      if (this.isDestroying || this.isDestroyed) {
-        return;
-      }
-
       const progress = parseInt((data.loaded / data.total) * 100, 10);
       this.set("uploadProgress", progress);
     });
 
     $upload.on("fileuploadfail", (e, data) => {
-      displayErrorForUpload(data, this.siteSettings, data.files[0].name);
+      displayErrorForUpload(data, this.siteSettings);
       reset();
     });
   }),

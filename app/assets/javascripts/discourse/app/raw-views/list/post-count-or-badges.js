@@ -1,10 +1,11 @@
-import { and } from "@ember/object/computed";
+import { and, or } from "@ember/object/computed";
 import EmberObject from "@ember/object";
 import I18n from "I18n";
 import discourseComputed from "discourse-common/utils/decorators";
 
 export default EmberObject.extend({
-  showBadges: and("postBadgesEnabled", "topic.unread_posts"),
+  postCountsPresent: or("topic.unread", "topic.displayNewPosts"),
+  showBadges: and("postBadgesEnabled", "postCountsPresent"),
 
   @discourseComputed
   newDotText() {

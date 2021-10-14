@@ -52,7 +52,6 @@ import { schedule } from "@ember/runloop";
       - headerClass: adds css class to the dropdown header
       - bodyClass: adds css class to the dropdown header
       - caret: adds a caret to visually enforce this is a dropdown
-      - disabled: adds disabled css class and lock dropdown
 */
 
 export const WidgetDropdownHeaderClass = {
@@ -123,12 +122,10 @@ export const WidgetDropdownItemClass = {
   },
 
   buildClasses(attrs) {
-    const classes = [
+    return [
       "widget-dropdown-item",
       attrs.item === "separator" ? "separator" : `item-${attrs.item.id}`,
-    ];
-    classes.push(attrs.item.disabled ? "disabled" : "");
-    return classes.join(" ");
+    ].join(" ");
   },
 
   keyDown(event) {
@@ -202,24 +199,21 @@ export const WidgetDropdownClass = {
     return { id: attrs.id };
   },
 
-  defaultState(attrs) {
+  defaultState() {
     return {
       opened: false,
-      disabled: (attrs.options && attrs.options.disabled) || false,
     };
   },
 
   buildClasses(attrs) {
     const classes = ["widget-dropdown"];
     classes.push(this.state.opened ? "opened" : "closed");
-    classes.push(this.state.disabled ? "disabled" : "");
     return classes.join(" ") + " " + (attrs.class || "");
   },
 
   transform(attrs) {
     return {
       options: attrs.options || {},
-      isDropdownVisible: !this.state.disabled && this.state.opened,
     };
   },
 
@@ -228,9 +222,6 @@ export const WidgetDropdownClass = {
   },
 
   _onChange(params) {
-    if (params.disabled) {
-      return;
-    }
     this.state.opened = false;
 
     if (this.attrs.onChange) {
@@ -273,7 +264,7 @@ export const WidgetDropdownClass = {
         }
 
         this._popper = createPopper(dropdownHeader, dropdownBody, {
-          strategy: "absolute",
+          strategy: "fixed",
           placement: "bottom-start",
           modifiers: [
             {
@@ -308,7 +299,7 @@ export const WidgetDropdownClass = {
         )
       }}
 
-      {{#if this.transformed.isDropdownVisible}}
+      {{#if this.state.opened}}
         {{attach
           widget="widget-dropdown-body"
           attrs=(hash

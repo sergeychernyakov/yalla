@@ -26,8 +26,7 @@ module Email
   class Sender
 
     def initialize(message, email_type, user = nil)
-      @message = message
-      @message_attachments_index = {}
+      @message =  message
       @email_type = email_type
       @user = user
     end
@@ -93,20 +92,11 @@ module Email
         user_id: user_id
       )
 
-      if cc_addresses.any?
-        email_log.cc_addresses = cc_addresses.join(";")
-        email_log.cc_user_ids = User.with_email(cc_addresses).pluck(:id)
-      end
-
       host = Email::Sender.host_for(Discourse.base_url)
 
       post_id   = header_value('X-Discourse-Post-Id')
       topic_id  = header_value('X-Discourse-Topic-Id')
-      reply_key = get_reply_key(post_id, user_id)
-      from_address = @message.from&.first
-      smtp_group_id = from_address.blank? ? nil : Group.where(
-        email_username: from_address, smtp_enabled: true
-      ).pluck_first(:id)
+      reply_key = set_reply_key(post_id, user_id)
 
       # always set a default Message ID from the host
       @message.header['Message-ID'] = "<#{SecureRandom.uuid}@#{host}>"
@@ -170,26 +160,22 @@ module Email
           list_id = "#{SiteSetting.title} <#{host}>"
         end
 
-        # When we are emailing people from a group inbox, we are having a PM
-        # conversation with them, as a support account would. In this case
-        # mailing list headers do not make sense. It is not like a forum topic
-        # where you may have tens or hundreds of participants -- it is a
-        # conversation between the group and a small handful of people
-        # directly contacting the group, often just one person.
-        if !smtp_group_id
+        # https://www.ietf.org/rfc/rfc3834.txt
+        @message.header['Precedence'] = 'list'
+        @message.header['List-ID']    = list_id
 
-          # https://www.ietf.org/rfc/rfc3834.txt
-          @message.header['Precedence'] = 'list'
-          @message.header['List-ID']    = list_id
-
-          if topic
-            if SiteSetting.private_email?
-              @message.header['List-Archive'] = "#{Discourse.base_url}#{topic.slugless_url}"
-            else
-              @message.header['List-Archive'] = topic.url
-            end
+        if topic
+          if SiteSetting.private_email?
+            @message.header['List-Archive'] = "#{Discourse.base_url}#{topic.slugless_url}"
+          else
+            @message.header['List-Archive'] = topic.url
           end
         end
+      end
+
+      if reply_key.present? && @message.header['Reply-To'].to_s =~ /\<([^\>]+)\>/
+        email = Regexp.last_match[1]
+        @message.header['List-Post'] = "<mailto:#{email}>"
       end
 
       if Email::Sender.bounceable_reply_address?
@@ -202,27 +188,13 @@ module Email
       end
 
       email_log.post_id = post_id if post_id.present?
-      email_log.topic_id = topic_id if topic_id.present?
 
       # Remove headers we don't need anymore
       @message.header['X-Discourse-Topic-Id'] = nil if topic_id.present?
       @message.header['X-Discourse-Post-Id']  = nil if post_id.present?
 
       if reply_key.present?
-        @message.header['Reply-To'] = header_value('Reply-To').gsub!("%{reply_key}", reply_key)
         @message.header[Email::MessageBuilder::ALLOW_REPLY_BY_EMAIL_HEADER] = nil
-      end
-
-      # Replace reply_key in custom headers or remove
-      MessageBuilder.custom_headers(SiteSetting.email_custom_headers).each do |key, _|
-        value = header_value(key)
-        if value&.include?('%{reply_key}')
-          # Delete old header first or else the same header will be added twice
-          @message.header[key] = nil
-          if reply_key.present?
-            @message.header[key] = value.gsub!('%{reply_key}', reply_key)
-          end
-        end
       end
 
       # pass the original message_id when using mailjet/mandrill/sparkpost
@@ -249,25 +221,12 @@ module Email
       # Embeds any of the secure images that have been attached inline,
       # removing the redaction notice.
       if SiteSetting.secure_media_allow_embed_images_in_emails
-        style.inline_secure_images(@message.attachments, @message_attachments_index)
+        style.inline_secure_images(@message.attachments)
       end
 
       @message.html_part.body = style.to_s
 
       email_log.message_id = @message.message_id
-
-      # Log when a message is being sent from a group SMTP address, so we
-      # can debug deliverability issues.
-      if smtp_group_id
-        email_log.smtp_group_id = smtp_group_id
-
-        # Store contents of all outgoing emails using group SMTP
-        # for greater visibility and debugging. If the size of this
-        # gets out of hand, we should look into a group-level setting
-        # to enable this; size should be kept in check by regular purging
-        # of EmailLog though.
-        email_log.raw = Email::Cleaner.new(@message).execute
-      end
 
       DiscourseEvent.trigger(:before_email_send, @message, @email_type)
 
@@ -291,12 +250,6 @@ module Email
         to = @message.try(:to)
         to = to.first if Array === to
         to.presence || "no_email_found"
-      end
-    end
-
-    def cc_addresses
-      @cc_addresses ||= begin
-        @message.try(:cc) || []
       end
     end
 
@@ -337,7 +290,6 @@ module Email
             Discourse.store.download(attached_upload).path
           end
 
-          @message_attachments_index[original_upload.sha1] = @message.attachments.size
           @message.attachments[original_upload.original_filename] = File.read(path)
           email_size += File.size(path)
         rescue => e
@@ -438,9 +390,7 @@ module Email
       @message.header[name] = data.to_json
     end
 
-    def get_reply_key(post_id, user_id)
-      # ALLOW_REPLY_BY_EMAIL_HEADER is only added if we are _not_ sending
-      # via group SMTP and if reply by email site settings are configured
+    def set_reply_key(post_id, user_id)
       return if !user_id || !post_id || !header_value(Email::MessageBuilder::ALLOW_REPLY_BY_EMAIL_HEADER).present?
 
       # use safe variant here cause we tend to see concurrency issue
@@ -448,6 +398,9 @@ module Email
         post_id: post_id,
         user_id: user_id
       ).reply_key
+
+      @message.header['Reply-To'] =
+        header_value('Reply-To').gsub!("%{reply_key}", reply_key)
     end
 
     def self.bounceable_reply_address?

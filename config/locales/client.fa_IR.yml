@@ -41,7 +41,6 @@ fa_IR:
       long_date_without_year_with_linebreak: "MMM D <br/>LT"
       long_date_with_year_with_linebreak: "MMM D, 'YY <br/>LT"
       wrap_ago: "%{date} پیش"
-      wrap_on: "در %{date}"
       tiny:
         half_a_minute: "1 دقیقه پیش"
         less_than_x_seconds:
@@ -116,8 +115,6 @@ fa_IR:
       previous_month: "ماه قبل"
       next_month: "ماه بعد"
       placeholder: تاریخ
-      from_placeholder: "از تاریخ"
-      to_placeholder: "تا تاریخ"
     share:
       topic_html: 'موضوع: <span class="topic-title">%{topicTitle}</span>'
       post: "ارسال #%{postNumber}"
@@ -172,7 +169,6 @@ fa_IR:
       regions:
         ap_northeast_1: "آسیا و اقیانوسیه (توکیو)"
         ap_northeast_2: "آسیا و اقیانوسیه (سئول)"
-        ap_east_1: "آسیا و اقیانوسیه (هنگ کنگ)"
         ap_south_1: "آسیا و اقیانوسیه (بمبئی)"
         ap_southeast_1: "آسیا و اقیانوسیه (سنگاپور)"
         ap_southeast_2: "آسیا و اقیانوسیه (سیدنی)"
@@ -200,6 +196,7 @@ fa_IR:
     submit: "ارسال"
     generic_error: "متأسفیم، خطایی روی داده."
     generic_error_with_reason: "خطایی روی داد: %{error}"
+    go_ahead: "ادامه دهید"
     sign_up: "ثبت نام"
     log_in: "ورود"
     age: "سن"
@@ -220,6 +217,7 @@ fa_IR:
     conduct: "دستورالعمل"
     mobile_view: "نمایش برای موبایل "
     desktop_view: "نمایش برای کامپیوتر"
+    you: "شما"
     or: "یا"
     now: "هم‌اکنون"
     read_more: "بیشتر بخوانید"
@@ -227,6 +225,7 @@ fa_IR:
     x_more:
       one: "%{count} بیشتر"
       other: "بیش از %{count}"
+    less: "کمتر"
     never: "هرگز"
     every_30_minutes: "هر 30 دقیقه"
     every_hour: "هر ساعت"
@@ -235,6 +234,7 @@ fa_IR:
     every_month: "هر ماه"
     every_six_months: "هر شش ماه"
     max_of_count: "حداکثر %{count}"
+    alternation: "یا"
     character_count:
       one: "%{count} نویسه"
       other: "%{count} نویسه"
@@ -265,13 +265,11 @@ fa_IR:
       contact_info: "در شرایط حساس و مسائل اضطراری مربوط به سایت٬‌ لطفا از طریق %{contact_info} با تماس بگیرید."
     bookmarked:
       title: "ذخیره"
-      edit_bookmark: "ویرایش نشانک"
       clear_bookmarks: "پاک کردن نشانک‌ها"
       help:
         bookmark: "کلیک کنید تا به اولین نوشته این موضوع نشانک بزنید"
-        edit_bookmark: "برای ویرایش نشانک مربوط به این موضوع کلیک کنید"
         unbookmark: "کلیک کنید تا همهٔ نشانک‌های این موضوع را حذف کنید"
-        unbookmark_with_reminder: "برای حذف همه نشانک‌ها و یادآورها در این موضوع کلیک کنید."
+        unbookmark_with_reminder: "برای حذف همه نشانک‌ها و یادآوری‌های این موضوع کلیک کنید. شما یک مجموعه یادآوری %{reminder_at} برای این موضوع دارید."
     bookmarks:
       created: "شما این نوشته را نشانک کردید. %{name}"
       not_bookmarked: "این نوشته را نشانک بزنید"
@@ -296,29 +294,20 @@ fa_IR:
         today_with_time: "امروز در %{time}"
         tomorrow_with_time: "فردا در %{time}"
         at_time: "در %{date_time}"
-        existing_reminder: "شما یک یادآور برای این نشانک دارید که در %{at_date_time} ارسال خواهد شد"
     copy_codeblock:
       copied: "کپی شد!"
     drafts:
-      label: "درفت"
-      label_with_count: "پیش‌نویس (%{count})"
       resume: "از سر گیری"
       remove: "پاک کردن"
       remove_confirmation: "آیا مطمئن هستید که می‌خواهید این پیش‌نویس را حذف کنید؟"
       new_topic: "درفت جدید برای مبحث"
-      new_private_message: "پیش‌نویس پیام شخصی جدید"
+      new_private_message: "درفت جدید برای پیام"
       topic_reply: "پاسخ درفت"
       abandon:
         confirm: "شما یک پاسخ ذخیره نیمه تمام در این تاپیک دارید. با آن چه می کنید؟"
         yes_value: "حذف"
         no_value: "ادامه"
-    topic_count_categories:
-      one: "%{count} موضوع تازه یا به‌ روز شده."
-      other: "%{count} موضوع تازه یا به‌ روز شده."
     topic_count_latest:
-      one: "%{count} موضوع تازه یا به‌ روز شده."
-      other: "%{count} موضوع تازه یا به‌ روز شده."
-    topic_count_unseen:
       one: "%{count} موضوع تازه یا به‌ روز شده."
       other: "%{count} موضوع تازه یا به‌ روز شده."
     topic_count_unread:
@@ -386,7 +375,6 @@ fa_IR:
         type_bonus:
           name: "امتیاز را وارد کنید"
           title: "موارد قابل بررسی خاص می توانند کارمندان دارای امتیاز شوند تا اولویت آن ها را بیشتر کند."
-      stale_help: "این موردِ قابل بررسی توسط <b>%{username}</b> حل شده است."
       claim_help:
         optional: "می‌توانید این مورد را درخواست کنید تا دیگران را از بازنگری آن بازنگه دارید."
         required: "شما قبل از بازنگری موارد باید آن‌ها را درخواست دهید ."
@@ -429,9 +417,6 @@ fa_IR:
         fields: "فیلدها"
         reject_reason: "دلیل"
       user_percentage:
-        summary:
-          one: "%{agreed}، %{disagreed}، %{ignored} (از پرچم آخر)"
-          other: "%{agreed}، %{disagreed}، %{ignored} (از %{count} پرچم آخر)"
         agreed:
           one: "%{count}% موافقت شده"
           other: "%{count}% موافقت شده"
@@ -547,14 +532,12 @@ fa_IR:
       later_today: "بعد از امروز"
       next_business_day: "روز کاری بعدی"
       tomorrow: "فردا"
+      next_week: "هفته بعد"
       post_local_date: "تاریخ در پست"
       later_this_week: "بعد از اين هفته"
-      this_weekend: "آخر هفته"
       start_of_next_business_week: "دوشنبه"
       start_of_next_business_week_alt: "دوشنبه بعدی"
-      two_weeks: "دو هفته"
       next_month: "ماه بعد"
-      six_months: "شش ماه"
       custom: "تاریخ و زمان سفارشی"
       relative: "زمان نسبی"
       none: "هیچکدام نیازی نیست"
@@ -594,11 +577,6 @@ fa_IR:
       total_rows:
         one: "%{count} کاربر"
         other: "%{count} کاربر"
-      edit_columns:
-        save: "ذخیره"
-        reset_to_default: "بازگردانی به پیش‌فرض"
-      group:
-        all: "همه گروه‌ها"
     group_histories:
       actions:
         change_group_setting: "تغییر تنظیمات گروه"
@@ -610,8 +588,10 @@ fa_IR:
       member_added: "اضافه شده"
       member_requested: "درخواست شده در"
       add_members:
-        usernames_placeholder: "نام های کاربری"
-        usernames_or_emails_placeholder: "نام‌کاربری یا ایمیل"
+        title: "اعضا را به %{group_name} اضافه کنید"
+        description: "شما همچنین قابلیت جداسازی در لیست با کاما را دارید."
+        usernames: "نام های کاربری یا آدرس ایمیل ها را وارد کنید"
+        input_placeholder: "نام‌کاربری یا ایمیل"
         notify_users: "اطلاع رسانی به کاربران"
       requests:
         title: "درخواست ها"
@@ -626,8 +606,7 @@ fa_IR:
         title: "مدیریت"
         name: "نام"
         full_name: "نام کامل"
-        add_members: "افزودن کاربران"
-        invite_members: "دعوت"
+        add_members: "افزودن اعضا"
         delete_member_confirm: "کاربر '%{username}' از گروه '%{group}' حذف شود؟"
         profile:
           title: مشخصات کاربر
@@ -637,14 +616,6 @@ fa_IR:
           notification: اعلان‌ها
         email:
           title: "ایمیل"
-          enable_smtp: "فعال کردن SMTP"
-          enable_imap: "فعال کردن IMAP"
-          save_settings: "ذخیره تنظیمات"
-          last_updated_by: "توسط"
-          smtp_title: "SMTP"
-          imap_title: "IMAP"
-          prefill:
-            gmail: "جی‌میل"
           credentials:
             title: "اطلاعات ورود"
             smtp_server: "سرور SMTP"
@@ -658,8 +629,7 @@ fa_IR:
           settings:
             title: "تنظیمات"
           mailboxes:
-            synchronized: "صندوق پستی همگام شده"
-            disabled: "غیرفعال"
+            disabled: "غیرفعال شده"
         membership:
           title: عضویت
           access: دسترسی
@@ -722,6 +692,8 @@ fa_IR:
         public: "عمومی"
         private: "خصوصی"
         public_groups: "گروههای عمومی"
+        automatic_group: گروه خودکار
+        close_group: بستن گروه
         my_groups: "گروههای من"
         group_type: "نوع گروه"
         is_group_user: "عضو"
@@ -784,8 +756,6 @@ fa_IR:
       flair_type:
         icon: "یک آیکون را انتخاب کنید"
         image: "تصویری را بارگذاری کنید"
-      default_notifications:
-        modal_yes: "بله"
     user_action_groups:
       "1": "پسندهای داده شده"
       "2": "پسندهای دریافت شده"
@@ -815,6 +785,7 @@ fa_IR:
       posts: "نوشته‌ها"
       topics: "موضوعات"
       latest: "آخرین"
+      toggle_ordering: "ضامن کنترل مرتب سازی"
       subcategories: "دسته‌‌بندی‌های فرزند"
       topic_sentence:
         one: "%{count} موضوع"
@@ -869,7 +840,6 @@ fa_IR:
           all: "همه"
           read: "خواندن"
           unread: "خوانده‌ نشده‌"
-          unseen: "دیده نشده"
         ignore_duration_username: "نام‌کاربری"
         ignore_duration_when: "مدت زمان:"
         ignore_duration_save: "چشم پوشی"
@@ -931,11 +901,8 @@ fa_IR:
       dismiss_notifications: "پنهان کردن همه"
       dismiss_notifications_tooltip: "علامت گذاری همه اطلاعیه های خوانده نشده به عنوان خوانده شده"
       no_messages_title: "پیامی ندارید"
-      no_bookmarks_search: "هیچ نشانکی با درخواست جستجوی شده یافت نشد."
       first_notification: "اولین پیام اطلاع‌رسانی شما! برای شروع آن‌را انتخاب کنید."
       dynamic_favicon: "نمایش تعداد در ایکون بروسر"
-      skip_new_user_tips:
-        read_later: "بعدا می‌خوانم"
       theme_default_on_all_devices: "این قالب، حالت پیش فرض در همه ی دستگاه های من باشد"
       color_schemes:
         undo: "بازنشانی"
@@ -1019,25 +986,17 @@ fa_IR:
         warnings_received: "هشدارها"
         rejected_posts: "پست های رد شده"
       messages:
+        all: "همه"
         inbox: "صندوق دریافت"
-        personal: "شخصی"
-        latest: "آخرین"
         sent: "ارسال شد"
-        unread: "خوانده‌ نشده‌"
-        unread_with_count:
-          one: " (%{count}) خوانده‌ نشده‌"
-          other: " (%{count}) خوانده‌ نشده‌"
-        new: "جدید"
-        new_with_count:
-          one: "(%{count}) جدید"
-          other: "(%{count}) جدید"
         archive: "بایگانی"
         groups: "گروه‌های من"
+        bulk_select: "انتخاب پیام‌ها"
         move_to_inbox: "انتقال به صندوق دریافت"
         move_to_archive: "بایگانی"
         failed_to_move: "انتقال پیام‌های انتخاب شده با اشکال مواجه شد (شاید اتصال شما در دسترس نیست)"
+        select_all: "انتخاب همه"
         tags: "برچسب‌ها"
-        warnings: "هشدارهای رسمی"
       preferences_nav:
         account: "حساب کاربری"
         security: "امنیت"
@@ -1203,6 +1162,7 @@ fa_IR:
         browser_active: '%{browser} | <span class="active"> فعال است</span>'
         browser_last_seen: "%{browser} | %{date}"
       last_posted: "آخرین نوشته"
+      last_emailed: "آخرین ایمیل فرستاده شده"
       last_seen: "مشاهده"
       created: "عضو شده"
       log_out: "خروج"
@@ -1326,16 +1286,22 @@ fa_IR:
         invite:
           new_title: "ایجاد دعوت‌نامه"
           edit_title: "ویرایش دعوت‌نامه"
-          instructions: "این لینک را برای ارائه دسترسی فوری به سایت٬ به اشتراک بگذارید"
+          instructions: "این لینک را برای ارائه دسترسی فوری به سایت٬ به اشتراک بگذارید:"
           copy_link: "کپی پیوند"
+          expires_in_time: "در %{time} منقضی می شود."
+          expired_at_time: "منقضی شده در %{time}."
           show_advanced: "نمایش تنظیمات پیشرفته"
           hide_advanced: "پنهان کردن تنظیمات پیشرفته"
-          add_to_groups: "افزودن به گروه‌ها"
-          expires_at: "انقضا بعد از"
+          max_redemptions_allowed: "حداکثر تعداد قابل استفاده:"
+          add_to_groups: "افزودن به گروه‌ها:"
+          invite_to_topic: "هدایت به موضوعی خاص بعد از اولین ورود:"
+          expires_at: "انقضا بعد از:"
+          custom_message: "پیام شخصی اختیاری"
           send_invite_email: "ذخیره و ارسال ایمیل"
           save_invite: "ذخیره دعوت‌نامه"
           invite_saved: "دعوتنامه ذخیره شد."
           invite_copied: "لینک دعوت کپی شد."
+          blank_email: "لینک دعوت کپی نشد. وارد کردن آدرس ایمیل اجباری است."
         bulk_invite:
           none: "دعوتنامه ای برای نمایش در این صفحه موجود نیست."
           text: "دعوت به تعداد بالا"
@@ -1409,8 +1375,6 @@ fa_IR:
         edit: "ویرایش تصویر پروفایل"
       title:
         title: "عنوان"
-        none: "(هیچی)"
-      flair:
         none: "(هیچی)"
       primary_group:
         title: "گروه اصلی"
@@ -1642,7 +1606,6 @@ fa_IR:
     conditional_loading_section:
       loading: بارگذاری...
     select_kit:
-      delete_item: "حذف %{name}"
       filter_by: "فیلتر توسط: %{name}"
       select_to_filter: "مقداری برای فیلتر کردن انتخاب کنید"
       default_header_text: انتخاب...
@@ -1733,6 +1696,7 @@ fa_IR:
       create_whisper: "زمزمه"
       create_shared_draft: "ایجاد پیش‌نویس مشترک"
       edit_shared_draft: "ویرایش درفت مشترک"
+      title: "یا Ctrl+Enter را بفشارید"
       users_placeholder: "افزودن یک کاربر"
       title_placeholder: "در یک جمله‌ی کوتاه بگویید که این موضوع در چه موردی است؟"
       title_or_link_placeholder: "عنوان را بنویسید،یا پیوند را بچسبانید"
@@ -1884,9 +1848,17 @@ fa_IR:
         liked_consolidated: "لایک جدید"
         post_approved: "نوشته تایید شده"
     upload_selector:
+      title: "افزودن تصویر"
+      title_with_attachments: "افزودن یک تصویر یا پرونده"
+      from_my_computer: "از دستگاه من"
+      from_the_web: "از وب"
+      remote_tip: "پیوند به تصویر"
+      local_tip: "عکس ها را از روی سیستم خود انتخاب کنید"
+      hint_for_supported_browsers: "شما همچنین میتوانید عکس ها را به داخل ویرایشگر بکشید و رها کنید یا کپی کنید"
       uploading: "در حال بروز‌رسانی "
       select_file: "انتخاب فایل"
       default_image_alt_text: تصویر
+      supported_formats: "فرمت‌های پشتیبانی شده"
     search:
       sort_by: "مرتب سازی بر اساس"
       relevance: "ارتباطات"
@@ -1897,8 +1869,8 @@ fa_IR:
       select_all: "انتخاب همه"
       clear_all: "پاک کردن همه"
       too_short: "کلمه جستجو شده بسیار کوتاه است"
-      title: "جستجو"
-      full_page_title: "جستجو"
+      title: "جستجوی موضوعات، نوشته‌ها، کاربران یا دسته‌‌بندی‌ها"
+      full_page_title: "جستجوی مبحث یا نوشته"
       no_results: "چیزی یافت نشد."
       no_more_results: "نتایجی بیشتری یافت نشد."
       post_format: "#%{post_number} توسط %{username}"
@@ -1910,17 +1882,13 @@ fa_IR:
       search_google: "به‌جای این، جست‌وجو با گوگل را امتحان کنید:"
       search_google_button: "گوگل"
       search_button: "جسنجو"
-      categories: "دسته‌بندی‌ها"
-      tags: "برچسب‌ها"
-      type:
-        users: "کاربران"
-        categories: "دسته‌بندی‌ها"
       context:
         user: "جستجوی نوشته‌ها با @%{username}"
         category: "جستجوی دسته‌بندی #%{category}"
         topic: "جستجوی این موضوع"
         private_messages: "جستجوی پیام‌ها"
       advanced:
+        title: جستجوی پیشرفته
         posted_by:
           label: فرستنده
         in_category:
@@ -1972,6 +1940,7 @@ fa_IR:
           placeholder: حداقل
         max_views:
           placeholder: حداکثر
+    hamburger_menu: "به فهرست مبحث یا دسته بندی دیگر بروید"
     new_item: "تازه"
     go_back: "برگردید"
     not_logged_in_user: "صفحه کاربر با خلاصه ای از فعالیت های و تنظیمات"
@@ -1993,9 +1962,11 @@ fa_IR:
         dismiss_new: "بستن جدید"
         toggle: "تغییر وضعیت انتخاب گروهی موضوعات"
         actions: "عملیات گروهی"
+        change_category: "تنظیم دسته‌بندی"
         close_topics: "بستن موضوعات"
         archive_topics: "بایگانی موضوعات"
         move_messages_to_inbox: "انتقال به صندوق دریافت"
+        notification_level: "اعلان‌ها"
         choose_new_category: "یک دسته‌بندی جدید برای موضوع انتخاب نمایید"
         selected:
           one: "شما <b>%{count}</b> موضوع را انتخاب کرده اید."
@@ -2013,6 +1984,7 @@ fa_IR:
         new: "شما هیچ موضوع تازه‌ای ندارید"
         read: "هنوز هیچ موضوعی را نخوانده‌اید."
         posted: "هنوز در هیچ موضوعی نوشته نگذاشته‌اید."
+        ready_to_create: "آماده به "
         bookmarks: "هنوز هیچ موضوع نشانک‌داری ندارید."
         category: "هیچ موضوعی در %{category} نیست."
         top: "موضوع برتری وجود ندارد."
@@ -2066,15 +2038,22 @@ fa_IR:
       not_found:
         title: "موضوع پیدا نشد"
         description: "متأسفیم، نتوانستیم آن موضوع را پیدا کنیم. شاید یکی از همکاران آن را پاک کرده؟"
-      unread_posts:
+      total_unread_posts:
         one: "شما %{count} نوشته‌ی خوانده نشده در این موضوع دارید"
         other: "شما %{count} نوشته‌ی خوانده نشده در این موضوع دارید"
+      unread_posts:
+        one: "شما %{count} نوشته‌ی خوانده نشده قدیمی در این موضوع دارید"
+        other: "شما %{count} نوشته‌ی خوانده نشده قدیمی در این موضوع دارید"
+      new_posts:
+        one: "%{count} نوشته‌ی جدید از آخرین خواندن شما در این موضوع وجود دارد"
+        other: "%{count} نوشته‌ی جدید از آخرین خواندن شما در این موضوع وجود دارد"
       likes:
         one: "%{count} پسند به این موضوع داده شده است"
         other: "%{count} پسند به این موضوع داده شده است"
       back_to_list: "بازگشت به فهرست موضوعات"
       options: "گزینه‌های موضوع"
       show_links: "نمایش پیوندهای درون این موضوع"
+      toggle_information: " تغییر وضعیت جزئیات موضوع"
       read_more_in_category: "می‌خواهید بیشتر بخوانید؟موضوعات دیگر را در %{catLink} یا %{latestLink} مرور کنید."
       read_more: "می‌خواهید بیشتر بخوانید؟ %{catLink} یا %{latestLink}."
       unread_indicator: "هیچ کاربری آخرین فرستهٔ این مبحث را نخوانده است."
@@ -2084,7 +2063,7 @@ fa_IR:
       jump_reply_down: رفتن به پاسخ بعدی
       deleted: "موضوع پاک شده است"
       slow_mode_update:
-        enable: "فعال کردن"
+        save: "فعال کردن"
         remove: "غیرفعال"
         hours: "ساعت:"
         minutes: "دقیقه:"
@@ -2131,6 +2110,8 @@ fa_IR:
         title: "زمان‌بندی انتشار"
       temp_open:
         title: "باز کردن موقتی"
+      auto_reopen:
+        title: "باز کردن خودکار موضوع"
       temp_close:
         title: "بستن موقتی"
       auto_close:
@@ -2231,16 +2212,21 @@ fa_IR:
         invisible: "خارج کردن از فهرست"
         visible: "وارد کردن به فهرست"
         reset_read: "تنظیم مجدد خواندن داده ها"
+        make_public: "ایجاد موضوع عمومی"
         make_private: "به پیام تبدیل کن"
         reset_bump_date: "تنظیم مجدد خواندن داده ها"
       feature:
         pin: "سنجاق زدن موضوع"
         unpin: "برداشتن سنجاق موضوع"
         pin_globally: "سنجاق کردن موضوع در سطح سراسری"
+        make_banner: "موضوع سرصفحه"
         remove_banner: "حذف موضوع سرصفحه"
       reply:
         title: "پاسخ"
         help: "شروع ارسال پاسخ به این موضوع"
+      clear_pin:
+        title: "برداشتن سنجاق"
+        help: "سنجاق وضعیت این موضوع را بردارید تا دیگر در بالای فهرست موضوعات شما دیده نشود."
       share:
         title: "اشتراک‌گذاری"
         extended_title: "اشتراک‌گذاری یک پیوند"
@@ -2389,7 +2375,6 @@ fa_IR:
           other: "شما <b>%{count}</b> نوشته انتخاب کرده اید"
     post:
       quote_reply: "نقل‌قول"
-      quote_edit: "ویرایش"
       quote_share: "اشتراک‌گذاری"
       edit_reason: "دلیل:"
       post_number: "نوشته %{number}"
@@ -2400,6 +2385,9 @@ fa_IR:
       follow_quote: "برو به نوشته ای که نقل‌قول شده"
       show_full: "نمایش کامل نوشته"
       show_hidden: "دیدن محتوای نادیده گرفته‌شد"
+      deleted_by_author:
+        one: "(نوشته های ارسال شده توسط نویسنده،بصورت خودکار در %{count} ساعت حذف می شود مگر اینکه پرچم شود)"
+        other: "(نوشته های ارسال شده توسط نویسنده،بصورت خودکار در %{count} ساعت حذف می شود مگر اینکه پرچم شود)"
       collapse: "جمع کردن"
       expand_collapse: "باز کردن/بستن"
       locked: "یکی از دست‌اندرکاران انجمن این پست را جهت جلوگیری از ویرایش قفل کرده است"
@@ -2434,6 +2422,8 @@ fa_IR:
       whisper: "این ارسال نجوای خصوصی برای مدیران است"
       wiki:
         about: "این نوشته یک دانشنامه است"
+      archetypes:
+        save: " ذخیره تنظیمات"
       few_likes_left: "با تشکر از علاقه شما! فقط امکان چند پسندیدن دیگر را برای امروز دارید."
       controls:
         reply: "آغاز ساخت یک پاسخ به این نوشته"
@@ -2459,6 +2449,8 @@ fa_IR:
         revert_to_regular: "حذف رنگ همکاران"
         rebake: "ساخت مجدد HTML"
         unhide: "آشکار کردن"
+        change_owner: "تغییر مالکیت"
+        grant_badge: "اعطای نشان"
         lock_post: "قفل کردن پست"
         lock_post_description: "ممانعت از ویرایش پست توسط فرستنده"
         unlock_post: "بازکردن پست"
@@ -2469,6 +2461,8 @@ fa_IR:
         delete_topic_confirm_modal_no: "خیر، این موضوع را نگه دار"
         delete_topic_error: "خطایی در هنگام حذف این موضوع رخ داده است."
         delete_topic: "حذف موضوع"
+        add_post_notice: "اطلاعیه کارکنان را اضافه کنید"
+        change_post_notice: "تغییر اطلاعیه همکاران"
         delete_post_notice: "حذف اطلاعیه همکاران"
         remove_timer: "حذف زمان‌سنج"
       actions:
@@ -2533,8 +2527,8 @@ fa_IR:
         updated: "به روز شده"
         name: "نام"
         set_reminder: "به من یادآوری کن"
-        options: "گزینه‌ها"
     category:
+      can: "can&hellip; "
       none: "(بدون دسته‌بندی)"
       all: "همه‌ی دسته‌بندی‌ها"
       edit: "ویرایش"
@@ -2560,6 +2554,7 @@ fa_IR:
       save_error: خطایی در ذخیره‌ی این دسته‌بندی روی داد.
       name: "نام دسته‌بندی"
       description: "توضیحات"
+      topic: "دسته‌بندی موضوع"
       logo: "تصویر لوگو برای دسته‌بندی"
       background_image: "تصویر پس‌زمینه برای دسته‌بندی"
       badge_colors: "رنگ نشان‌ها"
@@ -2865,6 +2860,7 @@ fa_IR:
         show_incoming_updated_topics: "%{shortcut} نمایش موضوعات به‌روز شده"
         search: "جستجو %{shortcut}"
         help: "%{shortcut} باز کردن کمک صفحه‌کلید"
+        dismiss_new_posts: "%{shortcut} بستن نوشته‌های جدید"
         dismiss_topics: "%{shortcut} بستن موضوعات"
         log_out: "%{shortcut} خروج"
       composing:
@@ -2931,8 +2927,6 @@ fa_IR:
           name: دیگر
         posting:
           name: در حال نوشتن
-    download_calendar:
-      download: "دانلود"
     tagging:
       all_tags: "تمام برچسب‌ها"
       other_tags: "برچسب‌های دیگر"
@@ -2985,12 +2979,13 @@ fa_IR:
           title: "خاموش"
       groups:
         title: "برچسب گروه‌ها"
+        about: "برای مدیریت راحت‌تر گروه‌ها به آن‌ها برچسب اضافه کنید."
         new: "گروه جدید"
-        tags_label: "برچسب‌های گروه"
-        parent_tag_label: "برچسب مادر"
+        tags_label: "برچسب‌های گروه:"
+        parent_tag_label: "برچسب مادر:"
+        parent_tag_description: "برچسب‌های این گروه تا زمانی که برچسب مادر وجود نداشته باشد، قابل استفاده نیستند."
         one_per_topic_label: "محدودیت یک برچسب به ازای هر موضوع در این گروه"
         new_name: "گروه برچسب جدید"
-        name_placeholder: "نام"
         save: "ذخیره"
         delete: "حذف"
         confirm_delete: "آیا از حذف گروه برچسب‌ها اطمینان دارید؟"
@@ -3025,16 +3020,6 @@ fa_IR:
         tomorrow: "تا فردا"
         custom: "سفارشی"
       set_schedule: "تنظیم زمان‌بندی آگاه‌سازی"
-    trust_levels:
-      names:
-        newuser: "کاربر جدید"
-        basic: "کاربر ساده"
-        member: "عضو"
-        regular: "عادی"
-        leader: "راهبر"
-    user_activity:
-      no_replies_others: "بدون پاسخ"
-      no_likes_others: "فرسته‌ی موردپسندیدی نیست."
   admin_js:
     type_to_filter: "بنویسید تا فیلتر کنید..."
     admin:
@@ -3125,6 +3110,9 @@ fa_IR:
               label: گروه
             category:
               label: دسته‌بندی
+      commits:
+        latest_changes: "آخرین تغییرات: لطفا بیشتر به‌روز‌رسانی کنید!"
+        by: "توسط"
       groups:
         new:
           title: "گروه جدید"
@@ -3136,6 +3124,8 @@ fa_IR:
             available: "نام گروه در دسترس است"
             not_available: "نام گروه در دسترس نیست"
             blank: "نام گروه نمی‌تواند خالی باشد"
+        add_members:
+          as_owner: "قراردادن کاربر(ها) به‌عنوان مالک(مالکان) این گروه"
         manage:
           interaction:
             email: ایمیل
@@ -3621,6 +3611,7 @@ fa_IR:
           details: "جزئیات"
           previous_value: "پیشین"
           new_value: "جدید"
+          diff: "تفاوت"
           show: "نمایش"
           modal_title: "جزئیات"
           no_previous: "هیچ مقدار قبلی وجود ندارد."
@@ -3721,7 +3712,7 @@ fa_IR:
           require_approval: "فرسته‌های دارای این واژه‌ها پیش از دیده شدن نیاز به تائید کارکنان دارند."
         form:
           tag_label: "برچسب"
-          link_placeholder: "https://example.com"
+          tag_placeholder: "برچسب۱,برچسب۲,برچسب۳"
           add: "افزودن"
           success: "موفقیت"
           upload_successful: "بارگذاری با موفقیت انجام شد. واژه‌ها اضافه شدند."
@@ -3779,6 +3770,8 @@ fa_IR:
         silence_reason: "دلیل"
         suspended_until: "(تا %{until})"
         cant_suspend: "این کاربر نمی‌تواند معلق شود."
+        delete_all_posts: "پاک کردن همه‌ی نوشته‌ها"
+        delete_posts_progress: "درحال حذف فرسته‌ها..."
         penalty_post_edit: "ویرایش فرسته"
         moderator: "مدیر؟ "
         admin: "مدیر ارشد؟"
@@ -3821,12 +3814,6 @@ fa_IR:
         anonymize_yes: "بله، حساب‌کاربری را بینام کن"
         anonymize_failed: "یک مشکل با حساب‌کاربری بینام وجود دارد"
         delete: "حذف کاربر"
-        delete_posts:
-          button: "پاک کردن همه‌ی نوشته‌ها"
-          progress:
-            description: "درحال حذف فرسته‌ها..."
-          confirmation:
-            cancel: "لغو کردن"
         merge:
           prompt:
             cancel: "لغو کردن"
@@ -3874,7 +3861,6 @@ fa_IR:
         trust_level_unlocked_tip: "سطح اعتماد باز شده است. سیستم قادر به ترفیع/تنزل درجه‌ی کاربر خواهد بود."
         lock_trust_level: "قفل سطح اعتماد"
         unlock_trust_level: "باز کردن سطح اعتماد"
-        suspended_count: "تعلیق شد "
         tl3_requirements:
           title: "شرایط لازم برای سطح اعتماد 3."
           table_title:
@@ -4028,7 +4014,7 @@ fa_IR:
         delete_confirm: آیا مطمئنید که می‌خواهید این نشان را حذف کنید؟
         revoke: ابطال
         reason: دلیل
-        expand: گستردن &hellip;
+        expand: گستردن hellip&;
         revoke_confirm: آیا مطمئنید که می‌خواهید این نشان را حذف کنید؟
         edit_badges: ویرایش نشان
         grant_badge: اعطای نشان
@@ -4054,6 +4040,7 @@ fa_IR:
           post_revision: "هنگامی که یک کاربر نوشته ای ویرایش می‌کند یا فرستد"
           trust_level_change: "هنگامی که کاربری سطح اعتماد را تغییر می‌دهد"
           user_change: "هنگامی که کاربری ویرایش یا ساخته می‌شود"
+          post_processed: "پس از پردازش یک نوشته"
         preview:
           link_text: "پیش‌نمایش نشان‌های اعطایی"
           plan_text: "پیش‌نمایش با طرح پرسش"

@@ -2,9 +2,7 @@
 
 {{#if bulkSelectEnabled}}
   <td class="bulk-select">
-    <label for="bulk-select-{{topic.id}}">
-      <input type="checkbox" class="bulk-select" id="bulk-select-{{topic.id}}">
-    </label>
+    <input type="checkbox" class="bulk-select">
   </td>
 {{/if}}
 
@@ -15,7 +13,7 @@
   This causes the topic-post-badge to be considered the same word as "text"
   at the end of the link, preventing it from line wrapping onto its own line.
 --}}
-<td class='main-link clearfix' colspan="1">
+<td class='main-link clearfix' colspan="1" role="rowheader">
   {{~raw-plugin-outlet name="topic-list-before-link"}}
   <span class='link-top-line'>
     {{~raw-plugin-outlet name="topic-list-before-status"}}
@@ -25,17 +23,16 @@
     {{~topic-featured-link topic}}
     {{~/if}}
     {{~raw-plugin-outlet name="topic-list-after-title"}}
-    {{~raw "list/unread-indicator" includeUnreadIndicator=includeUnreadIndicator
-                                   topicId=topic.id
+    {{~raw "list/unread-indicator" includeUnreadIndicator=includeUnreadIndicator 
+                                   topicId=topic.id 
                                    unreadClass=unreadClass~}}
     {{~#if showTopicPostBadges}}
-    {{~raw "topic-post-badges" unreadPosts=topic.unread_posts unseen=topic.unseen url=topic.lastUnreadUrl newDotText=newDotText}}
+    {{~raw "topic-post-badges" unread=topic.unread newPosts=topic.displayNewPosts unseen=topic.unseen url=topic.lastUnreadUrl newDotText=newDotText}}
     {{~/if}}
   </span>
   <div class="link-bottom-line">
     {{#unless hideCategory}}
       {{#unless topic.isPinnedUncategorized}}
-        {{~raw-plugin-outlet name="topic-list-before-category"}}
         {{category-link topic.category}}
       {{/unless}}
     {{/unless}}

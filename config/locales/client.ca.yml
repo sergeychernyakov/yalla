@@ -115,7 +115,6 @@ ca:
       previous_month: "Mes anterior"
       next_month: "Mes següent"
       placeholder: data
-      to_placeholder: "fins a la data"
     share:
       topic_html: 'Tema: <span class="topic-title">%{topicTitle}</span>'
       post: "publicació #%{postNumber}"
@@ -123,7 +122,6 @@ ca:
       twitter: "Comparteix en Twitter"
       facebook: "Comparteix en Facebook"
       email: "Envia per correu electrònic"
-      url: "Copiar i compartir URL"
     action_codes:
       public_topic: "tema fet públic %{when}"
       private_topic: "s'ha convertit el tema en un missatge personal %{when}"
@@ -187,7 +185,6 @@ ca:
         us_gov_west_1: "AWS GovCloud (oest dels EUA)"
         us_west_1: "EUA Oest (N. Califòrnia)"
         us_west_2: "EUA Oest (Oregon)"
-    clear_input: "Esborra l'entrada"
     edit: "edita el títol i la categoria d'aquest tema"
     expand: "Expandeix"
     not_implemented: "Ho sentim! Aquesta funcionalitat encara no s'ha implementat."
@@ -196,6 +193,7 @@ ca:
     submit: "Envia"
     generic_error: "Ho sentim, s'ha produït un error."
     generic_error_with_reason: "Hi ha hagut un error: %{error}"
+    go_ahead: "Avant"
     sign_up: "Registre"
     log_in: "Inicia sessió"
     age: "Edat"
@@ -216,6 +214,7 @@ ca:
     conduct: "Codi de Conducta"
     mobile_view: "Vista mòbil"
     desktop_view: "Vista d'escriptori"
+    you: "Vós"
     or: "o"
     now: "ara mateix"
     read_more: "llegeix més"
@@ -223,6 +222,7 @@ ca:
     x_more:
       one: "%{count} Més"
       other: "%{count} Més"
+    less: "Menys"
     never: "mai"
     every_30_minutes: "cada 30 minuts"
     every_hour: "cada hora"
@@ -231,6 +231,7 @@ ca:
     every_month: "cada mes"
     every_six_months: "cada sis mesos"
     max_of_count: "màxim de %{count}"
+    alternation: "o"
     character_count:
       one: "%{count} caràcter"
       other: "%{count} caràcters"
@@ -249,9 +250,6 @@ ca:
       moderators: "Moderadors"
       stat:
         all_time: "Sempre"
-        last_day: "Últimes 24 hores"
-        last_7_days: "Els darrers 7 dies"
-        last_30_days: "Els darrers 30 dies"
       like_count: "'M'agrada'"
       topic_count: "Temes"
       post_count: "Publicacions"
@@ -261,20 +259,15 @@ ca:
       contact_info: "En cas d'una qüestió urgent o greu que afecti aquest lloc web, contacteu amb nosaltres en: %{contact_info}."
     bookmarked:
       title: "Preferit"
-      edit_bookmark: "Edita el marcador"
       clear_bookmarks: "Neteja preferits"
       help:
         bookmark: "Feu clic per a marcar com a preferit la primera publicació d'aquest tema"
-        edit_bookmark: "Feu clic per editar el marcador sobre aquest tema"
         unbookmark: "Feu clic per a eliminar tots els preferits d'aquest tema"
-        unbookmark_with_reminder: "Feu clic per eliminar tots els marcadors i recordatoris d’aquest tema."
+        unbookmark_with_reminder: "Feu clic per a eliminar tots els marcadors i recordatoris d’aquest tema. Teniu un recordatori establert %{reminder_at} per a aquest tema."
     bookmarks:
       created: "Heu marcat com a preferida aquesta publicació. %{name}"
       not_bookmarked: "marca aquesta publicació com a preferit"
-      created_with_reminder: "Heu marcat aquesta publicació amb un recordatori de %{date}. %{name}"
       remove: "Elimina preferit"
-      delete: "Suprimeix el marcador"
-      confirm_delete: "Esteu segur que voleu suprimir aquest marcador? El recordatori també se suprimirà."
       confirm_clear: "Esteu segur que voleu eliminar tots els preferits d'aquest tema?"
       save: "Desa"
       no_user_bookmarks: "No teniu publicacions en els preferits. Els preferits us permeten referir-vos fàcilment a publicacions específiques. "
@@ -292,20 +285,14 @@ ca:
     copy_codeblock:
       copied: "copiat!"
     drafts:
-      label: "Esborranys"
       resume: "Reprèn"
       remove: "Elimina"
       new_topic: "Esborrany de tema nou"
+      new_private_message: "Esborrany de nou missatge privat"
       topic_reply: "Esborrany de resposta"
       abandon:
         yes_value: "Descarta"
-    topic_count_categories:
-      one: "Vegeu %{count} tema nou o actualitzat"
-      other: "Vegeu %{count} temes nous o actualitzats"
     topic_count_latest:
-      one: "Vegeu %{count} tema nou o actualitzat"
-      other: "Vegeu %{count} temes nous o actualitzats"
-    topic_count_unseen:
       one: "Vegeu %{count} tema nou o actualitzat"
       other: "Vegeu %{count} temes nous o actualitzats"
     topic_count_unread:
@@ -512,8 +499,8 @@ ca:
       later_today: "Més tard avui"
       next_business_day: "El pròxim dia feiner"
       tomorrow: "Demà"
+      next_week: "La setmana que ve"
       later_this_week: "Més avant aquesta setmana"
-      this_weekend: "Aquest cap de setmana"
       start_of_next_business_week: "Dilluns"
       start_of_next_business_week_alt: "Dilluns vinent"
       next_month: "El mes que ve"
@@ -554,11 +541,6 @@ ca:
       total_rows:
         one: "%{count} usuari"
         other: "%{count} usuaris"
-      edit_columns:
-        save: "Desa"
-        reset_to_default: "Restableix el valor predeterminat"
-      group:
-        all: "tots els grups"
     group_histories:
       actions:
         change_group_setting: "Canvia la configuració del grup"
@@ -570,8 +552,10 @@ ca:
       member_added: "Afegit"
       member_requested: "Sol·licitat"
       add_members:
-        usernames_placeholder: "noms d'usuari"
-        usernames_or_emails_placeholder: "noms d’usuari o correus electrònics"
+        title: "Afegeix membres a %{group_name}"
+        description: "També podeu enganxar una llista separada per comes."
+        usernames: "Introduïu noms d’usuari o adreces de correu electrònic"
+        input_placeholder: "Noms d’usuari o correus electrònics"
         notify_users: "Notifiqueu els usuaris"
       requests:
         title: "Sol·licituds"
@@ -586,7 +570,7 @@ ca:
         title: "Gestiona"
         name: "Nom"
         full_name: "Nom complet"
-        invite_members: "Convida"
+        add_members: "Afegeix membres"
         delete_member_confirm: "Voleu eliminar '%{username}' del grup '%{group}'?"
         profile:
           title: Perfil
@@ -596,7 +580,6 @@ ca:
           notification: Notificació
         email:
           title: "Correu electrònic"
-          last_updated_by: "per"
           credentials:
             title: "Credencials"
             smtp_server: "Servidor SMTP"
@@ -610,7 +593,7 @@ ca:
           settings:
             title: "Configuració"
           mailboxes:
-            disabled: "Desactivat"
+            disabled: "desactivat"
         membership:
           title: Membres
           access: Accés
@@ -671,6 +654,8 @@ ca:
         public: "Públic"
         private: "Privat"
         public_groups: "Grups públics"
+        automatic_group: Grup automàtic
+        close_group: Tanca el grup
         my_groups: "Els meus grups"
         group_type: "Tipus de grup"
         is_group_user: "Membre"
@@ -728,10 +713,6 @@ ca:
       flair_color_placeholder: "(Opcional) Valor de color hexadecimal"
       flair_preview_icon: "Previsualitza la icona"
       flair_preview_image: "Previsualitza la imatge"
-      default_notifications:
-        modal_description: "Voleu aplicar històricament aquest canvi? Això canviarà les preferències per a %{count} usuaris existents."
-        modal_yes: "Sí"
-        modal_no: "No, aplica el canvi només en el futur"
     user_action_groups:
       "1": "'M'agrada'"
       "2": "'M'agrada'"
@@ -761,6 +742,7 @@ ca:
       posts: "Publicacions"
       topics: "Temes"
       latest: "Més recents"
+      toggle_ordering: "commuta el control de l'ordre"
       subcategories: "Subcategories"
       topic_sentence:
         one: "%{count} tema"
@@ -945,22 +927,16 @@ ca:
         suspensions: "suspensions"
         warnings_received: "avisos"
       messages:
+        all: "Tot"
         inbox: "Safata d'entrada"
-        latest: "Més recents"
         sent: "Enviat"
-        unread: "No llegits"
-        unread_with_count:
-          one: "No llegit (%{count})"
-          other: "No llegit (%{count})"
-        new: "Nous"
-        new_with_count:
-          one: "Nou (%{count})"
-          other: "Nou (%{count})"
         archive: "Arxiva"
         groups: "Els meus grups"
+        bulk_select: "Selecciona missatges"
         move_to_inbox: "Mou a la safata d'entrada"
         move_to_archive: "Arxiva"
         failed_to_move: "Error en moure els missatges seleccionats (potser ha caigut la xarxa)."
+        select_all: "Selecciona-ho tot"
         tags: "Etiquetes"
       preferences_nav:
         account: "Compte"
@@ -1124,6 +1100,7 @@ ca:
         secure_account: "Fes segur el meu compte"
         latest_post: "L'última cosa que heu publicat..."
       last_posted: "Darrer missatge"
+      last_emailed: "Darrer correu"
       last_seen: "Vist"
       created: "Registrat"
       log_out: "Tanca la sessió"
@@ -1291,8 +1268,6 @@ ca:
         header_title: "perfil, missatges, preferits i preferències"
       title:
         title: "Títol"
-        none: "(cap)"
-      flair:
         none: "(cap)"
       primary_group:
         title: "Grup primari"
@@ -1504,7 +1479,6 @@ ca:
     conditional_loading_section:
       loading: Carregant...
     select_kit:
-      delete_item: "Suprimeix %{name}"
       default_header_text: Selecciona...
       no_content: No s'han trobat coincidències
       filter_placeholder: Cerca...
@@ -1583,6 +1557,7 @@ ca:
       create_whisper: "Xiuxiueig"
       create_shared_draft: "Crea un esborrany compartit"
       edit_shared_draft: "Edita l'esborrany compartit"
+      title: "O prem Ctrl+Retorn"
       users_placeholder: "Afegeix un usuari"
       title_placeholder: "De què tracta aquesta discussió (en una frase curta)?"
       title_or_link_placeholder: "Escriviu aquí el títol o enganxeu-hi un enllaç"
@@ -1736,6 +1711,13 @@ ca:
         liked_consolidated: "nous 'm'agrada'"
         post_approved: "publicació aprovada"
     upload_selector:
+      title: "Afegeix una imatge"
+      title_with_attachments: "Afegeix una imatge o un fitxer"
+      from_my_computer: "Des del meu dispositiu"
+      from_the_web: "Des de la web"
+      remote_tip: "enllaç a imatge"
+      local_tip: "seleccioneu imatges des del vostre dispositiu"
+      hint_for_supported_browsers: "també podeu arrossegar i deixar anar o enganxar imatges en l'editor"
       uploading: "Carregant"
       select_file: "Tria un fitxer"
       default_image_alt_text: imatge
@@ -1752,8 +1734,8 @@ ca:
       result_count:
         one: "<span>%{count} resultat per a </span><span class='term'>%{term}</span>"
         other: "<span>%{count}%{plus} resultats per a</span><span class='term'>%{term}</span>"
-      title: "Cerca"
-      full_page_title: "Cerca"
+      title: "cerca temes, publicacions, usuaris o categories"
+      full_page_title: "cerca temes o publicacions"
       no_results: "No hi ha resultats."
       no_more_results: "No s'han trobat més resultats."
       post_format: "#%{post_number} per %{username}"
@@ -1765,11 +1747,6 @@ ca:
       search_google: "Prova de cercar amb Google:"
       search_google_button: "Google"
       search_button: "Cerca"
-      categories: "Categories"
-      tags: "Etiquetes"
-      type:
-        users: "Usuaris"
-        categories: "Categories"
       context:
         user: "Cerca publicacions de @%{username}"
         category: "Cerca en la categoria #%{category} "
@@ -1777,6 +1754,7 @@ ca:
         topic: "Cerca en aquest tema"
         private_messages: "Cerca missatges"
       advanced:
+        title: Cerca avançada
         posted_by:
           label: Publicat per
         in_category:
@@ -1819,6 +1797,7 @@ ca:
             after: després de
         views:
           label: Vistes
+    hamburger_menu: "vés a una altra llista de temes o categories"
     new_item: "nous"
     go_back: "vés enrere"
     not_logged_in_user: "pàgina d'usuari amb resum de l'activitat actual i preferències "
@@ -1840,9 +1819,11 @@ ca:
         dismiss_new: "Descarta'n els nous"
         toggle: "commuta la selecció massiva de temes"
         actions: "Accions massives"
+        change_category: "Defineix categoria"
         close_topics: "Tanca temes"
         archive_topics: "Arxiva temes"
         move_messages_to_inbox: "Mou a la safata d'entrada"
+        notification_level: "Notificacions"
         choose_new_category: "Seleccioneu la categoria nova per als temes:"
         selected:
           one: "He seleccionat <b>%{count}</b> tema."
@@ -1910,15 +1891,22 @@ ca:
       not_found:
         title: "Tema no trobat"
         description: "No hem pogut trobar aquest tema. Potser ha estat eliminat per un moderador."
-      unread_posts:
+      total_unread_posts:
         one: "teniu %{count} missatge no llegit en aquest tema"
         other: "teniu %{count} missatges no llegits en aquest tema"
+      unread_posts:
+        one: "teniu %{count} publicació antiga no llegida en aquest tema"
+        other: "teniu %{count} publicacions antigues no llegides en aquest tema"
+      new_posts:
+        one: "hi ha %{count} publicació nova en aquest tema des de la vostra darrera lectura"
+        other: "hi ha %{count} publicacions noves en aquest tema des de la vostra darrera lectura"
       likes:
         one: "hi ha %{count} 'M'agrada' en aquest tema"
         other: "hi ha %{count} 'M'agrada' en aquest tema"
       back_to_list: "Torna a la llista de temes"
       options: "Opcions del tema"
       show_links: "mostra enllaços dins d'aquest tema"
+      toggle_information: "commuta els detalls del tema"
       read_more_in_category: "Voleu llegir-ne més? Navegueu per altres temes a %{catLink} o %{latestLink}."
       read_more: "Voleu llegir-ne més? %{catLink} o %{latestLink}."
       unread_indicator: "Cap membre encara no ha llegit la darrera publicació d'aquest tema."
@@ -1928,7 +1916,7 @@ ca:
       jump_reply_down: salta a la resposta posterior
       deleted: "El tema ha estat suprimit"
       slow_mode_update:
-        enable: "Activa"
+        save: "Activa"
         remove: "Desactiva"
       topic_status_update:
         title: "Temporitzador de tema"
@@ -1953,6 +1941,8 @@ ca:
         title: "Programa la publicació"
       temp_open:
         title: "Obre temporalment"
+      auto_reopen:
+        title: "Obre automàticament el tema"
       temp_close:
         title: "Tanca temporalment"
       auto_close:
@@ -2052,16 +2042,21 @@ ca:
         invisible: "Fes invisible"
         visible: "Fes visible"
         reset_read: "Restableix data de lectura"
+        make_public: "Fes públic el tema"
         make_private: "Converteix en missatge personal"
         reset_bump_date: "Restableix la data d'elevació"
       feature:
         pin: "Afixa tema"
         unpin: "Desafixa tema"
         pin_globally: "Afixa tema globalment"
+        make_banner: "Converteix tema en bàner"
         remove_banner: "Elimina el bàner de tema"
       reply:
         title: "Respon"
         help: "comença a redactar una resposta al tema"
+      clear_pin:
+        title: "Neteja afixat"
+        help: "Neteja l'estat afixat del tema perquè no torni a aparèixer al principi de la vostra llista de temes"
       share:
         title: "Comparteix"
         extended_title: "Comparteix un enllaç"
@@ -2214,9 +2209,11 @@ ca:
         description:
           one: Heu seleccionat <b>%{count}</b> publicació
           other: "Heu seleccionat <b>%{count}</b> publicacions."
+      deleted_by_author:
+        one: "(tema abandonat per l'autor, serà suprimit automàticament en %{count}hora llevat que sigui senyalat amb bandera)"
+        other: "(tema abandonat per l'autor, serà suprimit automàticament en %{count} hores llevat que sigui senyalat amb bandera)"
     post:
       quote_reply: "Cita"
-      quote_edit: "Edita"
       quote_share: "Comparteix"
       edit_reason: "Motiu:"
       post_number: "publicació %{number}"
@@ -2227,6 +2224,9 @@ ca:
       follow_quote: "vés a la publicació citada"
       show_full: "Mostra la publicació sencera"
       show_hidden: "Mira el contingut ignorat"
+      deleted_by_author:
+        one: "(publicació retirada per l'autor, se suprimirà automàticament en %{count} hora, si no és marcada amb bandera)"
+        other: "(publicació retirada per l'autor, se suprimirà automàticament en %{count} hores, si no és marcada amb bandera)"
       collapse: "redueix"
       expand_collapse: "expandeix/contrau"
       locked: "un membre de l'equip responsable ha blocat l'edició d'aquesta publicació "
@@ -2264,6 +2264,8 @@ ca:
       whisper: "aquesta publicació és un xiuxiueig privat per a moderadors"
       wiki:
         about: "aquesta publicació és una wiki"
+      archetypes:
+        save: "Desa opcions"
       few_likes_left: "Gràcies per compartir l'amor! Us queden uns quants 'm'agrada' per donar avui."
       controls:
         reply: "comença a redactar una resposta a aquesta publicació"
@@ -2295,6 +2297,8 @@ ca:
         revert_to_regular: "Elimina el color de l'equip responsable"
         rebake: "Refés HTML"
         unhide: "Desfés amagar"
+        change_owner: "Canvia la propietat"
+        grant_badge: "Atorga insígnia"
         lock_post: "Bloca la publicació"
         lock_post_description: "impedeix que l'autor editi aquesta publicació"
         unlock_post: "Desbloca la publicació"
@@ -2302,6 +2306,7 @@ ca:
         delete_topic_disallowed_modal: "No teniu permís per a suprimir aquest tema. Si realment voleu que se suprimeixi, envieu una bandera perquè un moderador hi pari atenció juntament amb una argumentació."
         delete_topic_disallowed: "no teniu permís per a suprimir aquest tema"
         delete_topic: "suprimeix el tema"
+        add_post_notice: "Afegeix un avís a l'equip responsable"
         remove_timer: "elimina el temporitzador"
       actions:
         people:
@@ -2361,8 +2366,8 @@ ca:
         created: "Creat"
         updated: "Actualitzat"
         name: "Nom"
-        options: "Opcions"
     category:
+      can: "pot&hellip; "
       none: "(sense categoria)"
       all: "Totes les categories"
       choose: "categoria&hellip;"
@@ -2393,6 +2398,7 @@ ca:
       save_error: Hi ha hagut un error en desar la categoria.
       name: "Nom de la categoria"
       description: "Descripció"
+      topic: "tema de la categoria"
       logo: "Imatge del logo de la categoria"
       background_image: "Imatge de fons de la categoria"
       badge_colors: "Colors d'insígnies"
@@ -2709,6 +2715,7 @@ ca:
         show_incoming_updated_topics: "%{shortcut} Mostra temes actualitzats"
         search: "%{shortcut} Cerca"
         help: "%{shortcut} Obre l'ajuda de teclat"
+        dismiss_new_posts: "%{shortcut} Descarta publicacions noves"
         dismiss_topics: "%{shortcut} Descarta temes"
         log_out: "%{shortcut} Tanca la sessió"
       composing:
@@ -2768,8 +2775,6 @@ ca:
           name: Altres
         posting:
           name: Publicant
-    download_calendar:
-      download: "Descarrega"
     tagging:
       all_tags: "Totes les etiquetes"
       other_tags: "Altres etiquetes"
@@ -2827,12 +2832,14 @@ ca:
           description: "No sereu notificat de res sobre temes nous amb aquesta etiqueta, i no apareixeran en la pestanya de no llegits."
       groups:
         title: "Grups d'etiquetes"
+        about: "Afegeix etiquetes a grups per a gestionar-los més fàcilment."
         new: "Nou grup"
-        tags_label: "Etiquetes en aquest grup"
-        parent_tag_label: "Etiqueta primària"
+        tags_label: "Etiquetes en aquest grup:"
+        parent_tag_label: "Etiqueta primària:"
+        parent_tag_description: "Les etiquetes d'aquest grup no es poden fer servir si no hi és l'etiqueta primària."
         one_per_topic_label: "Limita a una etiqueta per cada tema d'aquest grup"
         new_name: "Nou grup d'etiquetes"
-        name_placeholder: "Nom"
+        name_placeholder: "Nom del grup d’etiquetes"
         save: "Desa"
         delete: "Suprimeix"
         confirm_delete: "Esteu segur que voleu suprimir aquest grup d'etiquetes?"
@@ -2862,17 +2869,6 @@ ca:
       remaining: "%{remaining} restant"
       options:
         custom: "Personalitzat"
-    trust_levels:
-      names:
-        newuser: "usuari nou"
-        basic: "usuari bàsic"
-        member: "membre"
-        regular: "habitual"
-        leader: "líder"
-    user_activity:
-      no_activity_others: "No hi ha activitat."
-      no_replies_others: "No hi ha respostes."
-      no_likes_others: "Publicacions sense 'm'agrada'."
   admin_js:
     type_to_filter: "escriu per a filtrar..."
     admin:
@@ -2973,6 +2969,9 @@ ca:
               label: Grup
             category:
               label: Categoria
+      commits:
+        latest_changes: "Canvis més recents: actualitzeu sovint!"
+        by: "per"
       groups:
         new:
           title: "Grup nou"
@@ -2984,6 +2983,8 @@ ca:
             available: "El nom de grup és disponible"
             not_available: "El nom de grup no és disponible"
             blank: "El nom de grup no pot restar en blanc"
+        add_members:
+          as_owner: "Estableix usuaris com a propietaris d'aquest grup"
         manage:
           interaction:
             email: Correu electrònic
@@ -2998,6 +2999,7 @@ ca:
               description: "Els administradors poden veure tots els grups."
             members_visibility_levels:
               title: "Qui pot veure els membres d’aquest grup?"
+              description: "Els administradors poden veure membres de tots els grups."
             publish_read_state: "En els missatges de grup publica l'estat de lectura del grup"
           membership:
             automatic: Automàtic
@@ -3553,6 +3555,7 @@ ca:
           details: "Detalls"
           previous_value: "Previ"
           new_value: "Nou"
+          diff: "Diferències"
           show: "Mostra"
           modal_title: "Detalls"
           no_previous: "No hi ha valor previ."
@@ -3685,7 +3688,6 @@ ca:
           require_approval: "Requereix aprovació"
           flag: "Bandera"
           replace: "Reemplaça"
-          silence: "Silencia"
         action_descriptions:
           block: "Impedeix que es publiquin texts que continguin aquestes paraules. L'usuari veurà un missatge d'error quan intenti enviar la publicació. "
           censor: "Permet publicacions que contenen aquestes paraules, però reemplaça-les amb caràcters que amaguin les paraules censurades."
@@ -3693,7 +3695,6 @@ ca:
           flag: "Permet publicacions que contenen aquestes paraules, però senyala-les amb bandera com a inapropiades de manera que els moderadors puguin revisar-les"
         form:
           placeholder_regexp: "expressió regular"
-          link_placeholder: "https://example.com"
           add: "Afegeix"
           success: "Èxit"
           exists: "Ja existeix"
@@ -3701,6 +3702,7 @@ ca:
           upload_successful: "Càrrega feta amb èxit. S'han afegit paraules."
         test:
           button_label: "Test"
+          modal_title: "Prova les paraules vigilades '%{action}'"
           description: "Introduïu un text per a comprovar coincidències amb paraules vigilades."
           found_matches: "Coincidències trobades:"
           no_matches: "No s'han trobat coincidències"
@@ -3768,8 +3770,9 @@ ca:
         silence_message_placeholder: "(deixeu-ho en blanc per a enviar el missatge per defecte)"
         suspended_until: "(fins a %{until})"
         cant_suspend: "Aquest usuari no pot ser suspès."
+        delete_all_posts: "Suprimeix totes les publicacions"
+        delete_posts_progress: "Suprimint publicacions..."
         delete_posts_failed: "Hi ha hagut un problema suprimint les publicacions."
-        post_edits: "Edicions de la publicació"
         penalty_post_actions: "Què voleu fer amb la publicació associada?"
         penalty_post_delete: "Suprimeix la publicació"
         penalty_post_delete_replies: "Suprimeix la publicació i qualsevol resposta"
@@ -3821,18 +3824,11 @@ ca:
         approve_success: "Usuari aprovat i correu enviat amb instruccions d'activació"
         approve_bulk_success: "Èxit! Tots els usuaris seleccionats han estat aprovats i avisats. "
         time_read: "Temps de lectura"
-        post_edits_count: "Edicions de la publicació"
         anonymize: "Fes anònim l'usuari"
         anonymize_confirm: "Esteu segur que voleu fer anònim aquest compte? Això canviarà el nom d'usuari i el correu electrònic, i restablirà tota la informació de perfil."
         anonymize_yes: "Sí, fes anònim aquest compte"
         anonymize_failed: "Hi ha hagut un problema en fer anònim aquest compte."
         delete: "Suprimeix l'usuari"
-        delete_posts:
-          button: "Suprimeix totes les publicacions"
-          progress:
-            description: "Suprimint publicacions..."
-          confirmation:
-            cancel: "Cancel·la"
         merge:
           prompt:
             cancel: "Cancel·la"
@@ -3887,8 +3883,6 @@ ca:
         trust_level_unlocked_tip: "el nivell de confiança està desblocat, el sistema pot promoure o degradar l'usuari"
         lock_trust_level: "Bloca el nivell de confiança"
         unlock_trust_level: "Desbloca el nivell de confiança"
-        silenced_count: "Silenciat"
-        suspended_count: "Suspesos"
         tl3_requirements:
           title: "Requisits per al nivell de confiança 3"
           table_title:
@@ -4072,6 +4066,7 @@ ca:
           post_revision: "Quan un usuari edita o crea una publicació"
           trust_level_change: "Quan un usuari canvia de nivell de confiança"
           user_change: "Quan s'edita o es crea un usuari"
+          post_processed: "Després de processar una publicació "
         preview:
           link_text: "Previsualitza les insígnies concedides"
           plan_text: "Previsualitza amb pla de consulta"
@@ -4171,5 +4166,6 @@ ca:
           moderator: "Moderador"
           regular: "Usuari habitual"
       previews:
+        topic_title: "Tema de discussió"
         share_button: "Comparteix"
         reply_button: "Respon"

@@ -1,4 +1,8 @@
-import { acceptance, exists } from "discourse/tests/helpers/qunit-helpers";
+import {
+  acceptance,
+  exists,
+  queryAll,
+} from "discourse/tests/helpers/qunit-helpers";
 import { click, fillIn, visit } from "@ember/test-helpers";
 import selectKit from "discourse/tests/helpers/select-kit-helper";
 import { test } from "qunit";
@@ -35,7 +39,7 @@ acceptance(
       await categoryChooser.selectRowByValue(2);
 
       assert.ok(
-        !exists(".d-editor-textarea-wrapper.disabled"),
+        queryAll(".d-editor-textarea-wrapper.disabled").length === 0,
         "textarea is enabled"
       );
 
@@ -44,7 +48,7 @@ acceptance(
       await categoryChooser.selectRowByIndex(0);
 
       assert.ok(
-        !exists(".d-editor-textarea-wrapper.disabled"),
+        queryAll(".d-editor-textarea-wrapper.disabled").length === 0,
         "textarea is still enabled"
       );
     });
@@ -87,7 +91,7 @@ acceptance(
         "category errors are hidden by default"
       );
       assert.ok(
-        !exists(".d-editor-textarea-wrapper.disabled"),
+        queryAll(".d-editor-textarea-wrapper.disabled").length === 0,
         "textarea is enabled"
       );
 

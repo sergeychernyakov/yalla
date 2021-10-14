@@ -31,7 +31,6 @@
   .user-content {
     min-width: 100%;
   }
-
   .user-additional-controls + .user-content,
   .user-secondary-navigation + .user-content {
     grid-column-start: 2;
@@ -66,7 +65,7 @@
     color: var(--love);
   }
 
-  .user-notifications-filter {
+  .user-notifications-filter-select-kit {
     display: block;
     width: 100%;
     border-bottom: 0.5px solid var(--primary-low);
@@ -214,7 +213,10 @@
     .controls {
       ul {
         list-style-type: none;
-        margin-top: 0;
+      }
+
+      .btn {
+        margin-bottom: 10px;
       }
     }
 
@@ -358,13 +360,6 @@
   .collapsed-info & {
     display: none;
   }
-
-  .user-field-value-list-item:not(:last-of-type) {
-    &:after {
-      // create comma separated list
-      content: ",";
-    }
-  }
 }
 
 .avatar-selector {
@@ -422,10 +417,6 @@
     display: flex;
     flex-wrap: wrap;
   }
-}
-
-.user-badges {
-  margin-bottom: 2em;
 }
 
 .stats-title {
@@ -798,6 +789,11 @@
 }
 
 .user-invites-page {
+  .user-invite-search {
+    clear: both;
+    margin: 15px 0px -15px 0px;
+  }
+
   .invite-error {
     grid-column: 1 / span 2;
   }

@@ -11,7 +11,7 @@ def process_popmail(popmail)
   end
 end
 
-desc "use this task to import a mailbox into Discourse"
+desc "use this task to import a mailbox into Disourse"
 task "emails:import" => :environment do
   begin
     unless SiteSetting.email_in
@@ -72,7 +72,7 @@ task 'emails:test', [:email] => [:environment] do |_, args|
         Sending mail with Gmail is a violation of their terms of service.
 
         Sending with G Suite might work, but it is not recommended. For information see:
-        https://meta.discourse.org/t/discourse-aws-ec2-g-suite-troubleshooting/62931?u=pfaffman
+        https://meta.discourse.org/t/dscourse-aws-ec2-g-suite-troubleshoting/62931?u=pfaffman
 
         ========================= CONTINUING TEST ============================
       STR
@@ -111,7 +111,7 @@ task 'emails:test', [:email] => [:environment] do |_, args|
       STR
 
     elsif e.to_s.match(/530.*STARTTLS/)
-      # We can't run a preliminary test with STARTTLS, we'll just try sending the test email.
+      # We can't run a prelimary test with STARTTLS, we'll just try sending the test email.
       message = "OK"
 
     elsif e.to_s.match(/535/)
@@ -179,51 +179,20 @@ task 'emails:test', [:email] => [:environment] do |_, args|
   end
   begin
     puts "Sending to #{email}. . . "
-    email_log = Email::Sender.new(TestMailer.send_test(email), :test_message).send
-    case email_log
-    when SkippedEmailLog
-      puts <<~STR
-        Mail was not sent.
-
-        Reason: #{email_log.reason}
-      STR
-    when EmailLog
-      puts <<~STR
-        Mail accepted by SMTP server.
-        Message-ID: #{email_log.message_id}
-
-        If you do not receive the message, check your SPAM folder
-        or test again using a service like http://www.mail-tester.com/.
-
-        If the message is not delivered it is not a problem with Discourse.
-        Check the SMTP server logs for the above Message ID to see why it
-        failed to deliver the message.
-      STR
-    when nil
-      puts <<~STR
-        Mail was not sent.
-
-        Verify the status of the `disable_emails` site setting.
-      STR
-    else
-      puts <<~STR
-        SCRIPT BUG: Got back a #{email_log.class}
-        #{email_log.inspect}
-
-        Mail may or may not have been sent. Check the destination mailbox.
-      STR
-    end
+    Email::Sender.new(TestMailer.send_test(email), :test_message).send
   rescue => error
     puts "Sending mail failed."
     puts error.message
-  end
-
-  if SiteSetting.disable_emails != 'no'
+  else
     puts <<~STR
+      Mail accepted by SMTP server.
 
-      ### WARNING
-      The `disable_emails` site setting is currently set to #{SiteSetting.disable_emails}.
-      Consider changing it to 'no' before performing any further troubleshooting.
+      If you do not receive the message, check your SPAM folder
+      or test again using a service like http://www.mail-tester.com/.
+
+      If the message is not delivered it is not a problem with Discourse.
+
+      Check the SMTP server logs to see why it failed to deliver the message.
     STR
   end
 end

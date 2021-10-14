@@ -35,9 +35,6 @@ class Admin::UserFieldsController < Admin::AdminController
     update_options(field)
 
     if field.save
-      if !field.show_on_profile && !field.show_on_user_card
-        DirectoryColumn.where(user_field_id: field.id).destroy_all
-      end
       render_serialized(field, UserFieldSerializer, root: 'user_field')
     else
       render_json_error(field)

@@ -10,7 +10,6 @@ describe DiscourseSingleSignOn do
     SiteSetting.discourse_connect_url = @discourse_connect_url
     SiteSetting.enable_discourse_connect = true
     SiteSetting.discourse_connect_secret = @discourse_connect_secret
-    SiteSetting.reserved_usernames = ''
     Jobs.run_immediately!
   end
 
@@ -347,78 +346,6 @@ describe DiscourseSingleSignOn do
     expect(admin.name).to eq "Louis C.K."
   end
 
-  it "doesn't use email as a source for username suggestions" do
-    sso = new_discourse_sso
-    sso.external_id = "100"
-
-    # set username and name to nil, so they cannot be used as a source for suggestions
-    sso.username = nil
-    sso.name = nil
-    sso.email = "mail@mail.com"
-
-    user = sso.lookup_or_create_user(ip_address)
-    expect(user.username).to eq I18n.t('fallback_username')
-  end
-
-  it "doesn't use email as a source for name suggestions" do
-    sso = new_discourse_sso
-    sso.external_id = "100"
-
-    # set username and name to nil, so they cannot be used as a source for suggestions
-    sso.username = nil
-    sso.name = nil
-    sso.email = "mail@mail.com"
-
-    user = sso.lookup_or_create_user(ip_address)
-    expect(user.name).to eq ""
-  end
-
-  it "can override username with a number at the end to a simpler username without a number" do
-    SiteSetting.auth_overrides_username = true
-
-    user = Fabricate(:user)
-    sso = new_discourse_sso
-    sso.external_id = "A"
-    sso.email = user.email
-
-    username_with_number = "bob1"
-    username_without_number = "bob"
-
-    sso.username = username_with_number
-    sso.lookup_or_create_user(ip_address)
-    user.reload
-    expect(user.username).to eq username_with_number
-
-    sso.username = username_without_number
-    sso.lookup_or_create_user(ip_address)
-    user.reload
-    expect(user.username).to eq username_without_number
-  end
-
-  it "can override username after min_username_length was made smaller" do
-    SiteSetting.auth_overrides_username = true
-
-    user = Fabricate(:user)
-    sso = new_discourse_sso
-    sso.external_id = "A"
-    sso.email = user.email
-
-    long_username = "bob"
-    short_username = "bo"
-
-    SiteSetting.min_username_length = 3
-    sso.username = long_username
-    sso.lookup_or_create_user(ip_address)
-    user.reload
-    expect(user.username).to eq long_username
-
-    SiteSetting.min_username_length = 2
-    sso.username = short_username
-    sso.lookup_or_create_user(ip_address)
-    user.reload
-    expect(user.username).to eq short_username
-  end
-
   it "can fill in data on way back" do
     sso = make_sso
 
@@ -477,28 +404,6 @@ describe DiscourseSingleSignOn do
 
     sso = DiscourseSingleSignOn.parse(payload, secure_session: secure_session)
     expect(sso.nonce).to_not be_nil
-  end
-
-  context 'nonce error' do
-    it "generates correct error message when nonce has already been used" do
-      _ , payload = DiscourseSingleSignOn.generate_url(secure_session: secure_session).split("?")
-
-      sso = DiscourseSingleSignOn.parse(payload, secure_session: secure_session)
-      expect(sso.nonce_valid?).to eq true
-
-      sso.expire_nonce!
-      expect(sso.nonce_error).to eq("Nonce has already been used")
-    end
-
-    it "generates correct error message when nonce is expired" do
-      _ , payload = DiscourseSingleSignOn.generate_url(secure_session: secure_session).split("?")
-
-      sso = DiscourseSingleSignOn.parse(payload, secure_session: secure_session)
-      expect(sso.nonce_valid?).to eq true
-
-      Discourse.cache.delete(sso.used_nonce_key)
-      expect(sso.nonce_error).to eq("Nonce has expired")
-    end
   end
 
   context 'user locale' do

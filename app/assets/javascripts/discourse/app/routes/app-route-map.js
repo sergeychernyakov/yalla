@@ -27,7 +27,14 @@ export default function () {
   });
 
   this.route("discovery", { path: "/", resetNamespace: true }, function () {
-    // top by periods - legacy route
+    // top
+    this.route("top");
+    this.route("topCategoryNone", {
+      path: "/c/*category_slug_path_with_id/none/l/top",
+    });
+    this.route("topCategory", { path: "/c/*category_slug_path_with_id/l/top" });
+
+    // top by periods
     Site.currentProp("periods").forEach((period) => {
       const top = "top" + period.capitalize();
 
@@ -40,7 +47,7 @@ export default function () {
       });
     });
 
-    // filters (e.g. bookmarks, posted, read, unread, latest, top)
+    // filters (e.g. bookmarks, posted, read, unread, latest)
     Site.currentProp("filters").forEach((filter) => {
       this.route(filter, { path: "/" + filter });
       this.route(filter + "CategoryNone", {
@@ -140,15 +147,10 @@ export default function () {
         "userPrivateMessages",
         { path: "/messages", resetNamespace: true },
         function () {
-          this.route("new");
-          this.route("unread");
-          this.route("archive");
           this.route("sent");
-          this.route("warnings");
+          this.route("archive");
           this.route("group", { path: "group/:name" });
           this.route("groupArchive", { path: "group/:name/archive" });
-          this.route("groupNew", { path: "group/:name/new" });
-          this.route("groupUnread", { path: "group/:name/unread" });
           this.route("tags");
           this.route("tagsShow", { path: "tags/:id" });
         }

@@ -1,6 +1,8 @@
-import { computed } from "@ember/object";
-import { getOwner } from "@ember/application";
-import { dasherize } from "@ember/string";
+const {
+  computed,
+  getOwner,
+  String: { dasherize },
+} = Ember;
 
 export default function (name) {
   return computed(function (defaultName) {

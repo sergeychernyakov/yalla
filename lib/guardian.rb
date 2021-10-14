@@ -172,10 +172,6 @@ class Guardian
     can_do?(:delete, obj)
   end
 
-  def can_permanently_delete?(obj)
-    can_do?(:permanently_delete, obj)
-  end
-
   def can_moderate?(obj)
     obj && authenticated? && !is_silenced? && (
       is_staff? ||
@@ -327,12 +323,6 @@ class Guardian
     (group ? !group.automatic : false)
   end
 
-  def can_use_flair_group?(user, group_id = nil)
-    return false if !user || !group_id || !user.group_ids.include?(group_id.to_i)
-    flair_icon, flair_upload_id = Group.where(id: group_id.to_i).pluck_first(:flair_icon, :flair_upload_id)
-    flair_icon.present? || flair_upload_id.present?
-  end
-
   def can_change_primary_group?(user)
     user && is_staff?
   end
@@ -361,19 +351,33 @@ class Guardian
   end
 
   def can_invite_to_forum?(groups = nil)
-    authenticated? &&
-    (is_staff? || !SiteSetting.must_approve_users?) &&
-    (is_staff? || SiteSetting.max_invites_per_day.to_i.positive?) &&
-    (is_staff? || @user.has_trust_level?(SiteSetting.min_trust_level_to_allow_invite.to_i)) &&
-    (is_admin? || groups.blank? || groups.all? { |g| can_edit_group?(g) })
+    return false if !authenticated?
+
+    invites_available = SiteSetting.max_invites_per_day.to_i.positive?
+    trust_level_requirement_met = !SiteSetting.must_approve_users? && @user.has_trust_level?(SiteSetting.min_trust_level_to_allow_invite.to_i)
+
+    if !is_staff?
+      return false if !invites_available
+      return false if !trust_level_requirement_met
+    end
+
+    if groups.present?
+      return is_admin? || groups.all? { |g| can_edit_group?(g) }
+    end
+
+    true
   end
 
   def can_invite_to?(object, groups = nil)
-    return false if !authenticated?
-    return false if !object.is_a?(Topic) || !can_see?(object)
+    return false unless authenticated?
+    is_topic = object.is_a?(Topic)
+    return true if is_admin? && !is_topic
+    return false if SiteSetting.max_invites_per_day.to_i == 0 && !is_staff?
+    return false if SiteSetting.must_approve_users? && !is_staff?
+    return false unless can_see?(object)
     return false if groups.present?
 
-    if object.is_a?(Topic)
+    if is_topic
       if object.private_message?
         return true if is_admin?
         return false unless SiteSetting.enable_personal_messages?
@@ -381,17 +385,19 @@ class Guardian
       end
 
       if (category = object.category) && category.read_restricted
-        return category.groups&.where(automatic: false).any? { |g| can_edit_group?(g) }
+        if (groups = category.groups&.where(automatic: false))&.any?
+          return groups.any? { |g| can_edit_group?(g) } ? true : false
+        else
+          return false
+        end
       end
     end
 
-    true
+    user.has_trust_level?(SiteSetting.min_trust_level_to_allow_invite.to_i)
   end
 
   def can_invite_via_email?(object)
-    return false if !can_invite_to_forum?
-    return false if !can_invite_to?(object)
-
+    return false unless can_invite_to?(object)
     (SiteSetting.enable_local_logins || SiteSetting.enable_discourse_connect) &&
       (!SiteSetting.must_approve_users? || is_staff?)
   end
@@ -433,7 +439,7 @@ class Guardian
     # Can't send PMs to suspended users
     (is_staff? || is_group || !target.suspended?) &&
     # Check group messageable level
-    (is_staff? || is_user || Group.messageable(@user).where(id: target.id).exists? || notify_moderators) &&
+    (is_staff? || is_user || Group.messageable(@user).where(id: target.id).exists?) &&
     # Silenced users can only send PM to staff
     (!is_silenced? || target.staff?)
   end
@@ -522,10 +528,6 @@ class Guardian
 
   def can_see_about_stats?
     true
-  end
-
-  def can_see_site_contact_details?
-    !SiteSetting.login_required? || authenticated?
   end
 
   def auth_token

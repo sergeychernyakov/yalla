@@ -1,6 +1,5 @@
 import {
   acceptance,
-  count,
   exists,
   queryAll,
 } from "discourse/tests/helpers/qunit-helpers";
@@ -65,12 +64,12 @@ acceptance("Signing In", function () {
     await click(".modal-footer button.edit-email");
     assert.equal(queryAll(".activate-new-email").val(), "current@example.com");
     assert.equal(
-      count(".modal-footer .btn-primary:disabled"),
+      queryAll(".modal-footer .btn-primary:disabled").length,
       1,
       "must change email"
     );
     await fillIn(".activate-new-email", "different@example.com");
-    assert.ok(!exists(".modal-footer .btn-primary:disabled"));
+    assert.equal(queryAll(".modal-footer .btn-primary:disabled").length, 0);
     await click(".modal-footer .btn-primary");
     assert.equal(queryAll(".modal-body b").text(), "different@example.com");
   });

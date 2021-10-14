@@ -63,9 +63,15 @@ discourseModule(
       async test(assert) {
         await this.subject.expand();
 
-        assert.equal(this.subject.rowByIndex(0).title(), "feature");
+        assert.equal(
+          this.subject.rowByIndex(0).title(),
+          "Discussion about features or potential features of Discourse: how they work, why they work, etc."
+        );
         assert.equal(this.subject.rowByIndex(0).value(), 2);
-        assert.equal(this.subject.rowByIndex(1).title(), "spec");
+        assert.equal(
+          this.subject.rowByIndex(1).title(),
+          "My idea here is to have mini specs for features we would like built but have no bandwidth to build"
+        );
         assert.equal(this.subject.rowByIndex(1).value(), 26);
         assert.equal(
           this.subject.rows().length,
@@ -79,44 +85,6 @@ discourseModule(
           this.subject.rowByIndex(0).name(),
           "bug",
           "search finds outside of scope"
-        );
-      },
-    });
-
-    componentTest("with prioritizedCategoryId", {
-      template: hbs`
-        {{category-chooser
-          value=value
-          options=(hash
-            prioritizedCategoryId=5
-          )
-        }}
-      `,
-
-      async test(assert) {
-        await this.subject.expand();
-
-        // The prioritized category
-        assert.equal(this.subject.rowByIndex(0).value(), 5);
-        // The prioritized category's child
-        assert.equal(this.subject.rowByIndex(1).value(), 22);
-        // Other categories in the default order
-        assert.equal(this.subject.rowByIndex(2).value(), 6);
-        assert.equal(this.subject.rowByIndex(3).value(), 21);
-        assert.equal(this.subject.rowByIndex(4).value(), 1);
-
-        assert.equal(
-          this.subject.rows().length,
-          21,
-          "all categories are visible"
-        );
-
-        await this.subject.fillInFilter("bug");
-
-        assert.equal(
-          this.subject.rowByIndex(0).name(),
-          "bug",
-          "search still finds categories"
         );
       },
     });
@@ -314,8 +282,7 @@ discourseModule(
         await this.subject.expand();
 
         assert.equal(
-          this.subject.rowByIndex(0).el()[0].querySelector(".category-desc")
-            .innerText,
+          this.subject.rowByIndex(0).el()[0].title,
           'baz "bar ‘foo’'
         );
       },

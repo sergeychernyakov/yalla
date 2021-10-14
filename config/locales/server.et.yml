@@ -97,7 +97,7 @@ et:
       record_invalid: ! "Valideerimine ebaõnnestus: %{errors}"
       restrict_dependent_destroy:
         one: "Kirjet ei saa kustutada, kuna leiti seotud kirje %{record}"
-        other: "Kirjet ei saa kustutada, kuna leiti seotud kirje %{record}"
+        many: "Kirjet ei saa kustutada, kuna leiti seotud kirje %{record}"
       too_long:
         one: on liiga pikk (maksimum on %{count} tähemärk)
         other: on liiga pikk (maksimum on %{count} tähemärki)
@@ -129,6 +129,9 @@ et:
     backup_file_should_be_tar_gz: "Varukoopia peab olema .tar.gz arhiivifail."
     not_enough_space_on_disk: "Varukoopia üleslaadimiseks pole piisavalt kettaruumi."
     invalid_filename: "Varundusfaili nimi sisaldab keelatud sümboleid. Lubatud sümbolid on a-z 0-9 . - _."
+    location:
+      local: "Kohalik"
+      s3: "Amazon S3"
   not_logged_in: "Selleks peate olema sisse logitud."
   not_found: "Päritud URLi või ressurssi ei leitud."
   invalid_access: "Päritud ressursi vaatamiseks puuduvad õigused."
@@ -255,6 +258,7 @@ et:
               no_user_selected: "Pead valima sobiva kasutaja."
             featured_link:
               invalid: "on vigane. URL peab sisaldama http:// või https://."
+              invalid_category: "ei saa selles foorumis redigeerida."
         user:
           attributes:
             password:
@@ -317,8 +321,16 @@ et:
       topic_exists_no_oldest: "Seda foorumit ei saa kustutada, kuna teemade arv on %{count}."
     uncategorized_description: "Teemad, mis ei vaja või mida ei saa liigitada ühegi olemasoleva foorumi alla."
   trust_levels:
-    admin: "Admin"
-    staff: "Meeskond"
+    newuser:
+      title: "uus kasutaja"
+    basic:
+      title: "baaskasutaja"
+    member:
+      title: "liige"
+    regular:
+      title: "tavaline"
+    leader:
+      title: "juht"
     change_failed_explanation: "Üritasid alandada %{user_name} tasemele '%{new_trust_level}'. Samas on tal juba tase'%{current_trust_level}'. %{user_name} jääb tasemele '%{current_trust_level}' - kui soovid alandada kasutaja taset, siis lukusta kõigepealt usaldustase."
   post:
     image_placeholder:
@@ -482,9 +494,16 @@ et:
       description: "Laigi seda postitust"
       short_description: "Laigi seda postitust"
   user_activity:
+    no_default:
+      others: "Tegevusi pole."
     no_bookmarks:
       self: "Sul pole järjehoidjatesse lisatud postitusi; järjehoidjad võimaldavad kiiresti konkreetsetele postitustele viidata."
       others: "Järjehoidjad puuduvad."
+    no_likes_given:
+      self: "Sa pole oma meeldimist ühelegi postitusele andnud."
+      others: "Meeldimisega postitusi veel pole."
+    no_replies:
+      others: "Vastuseid pole."
   topic_flag_types:
     spam:
       title: "Spämm"
@@ -731,7 +750,6 @@ et:
   dashboard:
     host_names_warning: "Sinu config/database.yml fail kasutab vaikimisi hostinime localhost. Kirjuta sinna oma saidi hostinimi."
   site_settings:
-    disabled: "välja lülitatud"
     min_post_length: "Lühim lubatud postituse pikkus"
     max_post_length: "Maksimaalne lubatud postituse pikkus tähemärkides"
     min_topic_title_length: "Lühim lubatud teema pealkirja pikkus tähemärkides"
@@ -764,6 +782,7 @@ et:
       category: "Liigid"
       user: "Kasutajad"
   original_poster: "Esialgne postitaja"
+  most_posts: "Enamus postitusi"
   most_recent_poster: "Viimane postitaja"
   frequent_poster: "Tihedam postitaja"
   publish_page:
@@ -899,7 +918,6 @@ et:
       description: Olnud aktiivne kasutaja vähemalt aasta, postitanud vähemalt ühe korra
     nice_post:
       name: Mõnus vastus
-      description: Kogus vastusele 10 like'i
     good_post:
       name: Hea vastus
       description: Kogus vastusele 25 like'i
@@ -1054,20 +1072,12 @@ et:
             label: "Automaatsed sõnumid"
       corporate:
         title: "Organisatsioon"
-      styling:
+      colors:
+        title: "Värvid"
+      fonts:
         fields:
-          styling_preview:
+          font_preview:
             label: "Eelvaade"
-          homepage_style:
-            choices:
-              latest:
-                label: "Viimased teemad"
-              categories_only:
-                label: "Ainult foorumid"
-              categories_with_featured_topics:
-                label: "Foorumid esiletõstetud teemadega"
-              categories_and_latest_topics:
-                label: "Foorumid ja viimased teemad"
       logos:
         title: "Logod"
         fields:
@@ -1078,6 +1088,19 @@ et:
         fields:
           large_icon:
             label: "Suur ikoon"
+      homepage:
+        title: "Avaleht"
+        fields:
+          homepage_style:
+            choices:
+              latest:
+                label: "Viimased teemad"
+              categories_only:
+                label: "Ainult foorumid"
+              categories_with_featured_topics:
+                label: "Foorumid esiletõstetud teemadega"
+              categories_and_latest_topics:
+                label: "Foorumid ja viimased teemad"
       invites:
         title: "Kutsu meeskonda"
       finished:
@@ -1109,6 +1132,8 @@ et:
         title: "Vaigista kasutaja"
       agree_and_hide:
         title: "Peida postitus"
+      delete_spammer:
+        title: "Kustuta spämmija"
       delete_single:
         title: "Kustuta"
       disagree:
@@ -1124,7 +1149,8 @@ et:
           title: "Kustuta kasutaja"
       reject:
         title: "Lükka tagasi"
-  fallback_username: "kasutaja"
+      delete_user:
+        title: "Kustuta kasutaja"
   activemodel:
     errors:
       <<: *errors

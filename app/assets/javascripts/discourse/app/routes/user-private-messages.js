@@ -11,16 +11,10 @@ export default DiscourseRoute.extend({
     return this.modelFor("user");
   },
 
-  afterModel() {
-    return this.pmTopicTrackingState.startTracking();
-  },
-
-  setupController(controller, model) {
-    controller.set("model", model);
-
+  setupController(controller, user) {
+    const composerController = this.controllerFor("composer");
+    controller.set("model", user);
     if (this.currentUser) {
-      const composerController = this.controllerFor("composer");
-
       Draft.get("new_private_message").then((data) => {
         if (data.draft) {
           composerController.open({

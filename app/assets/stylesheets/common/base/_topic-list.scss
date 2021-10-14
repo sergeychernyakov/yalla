@@ -1,9 +1,15 @@
 // Topic list navigation & controls
 
 .list-controls {
+  margin-bottom: 0.25em;
+
   .btn {
     &:not(:first-child) {
       margin-left: 0.5em;
+    }
+    .d-button-label {
+      font-size: $font-up-1;
+      font-weight: normal;
     }
   }
 
@@ -57,8 +63,7 @@
 #navigation-bar {
   display: flex;
   flex-wrap: wrap;
-  margin: 0;
-  margin-bottom: var(--nav-space);
+  margin: 0 0 var(--nav-space);
   margin-right: auto;
 }
 
@@ -68,6 +73,17 @@
   margin-bottom: var(--nav-space);
   > * {
     white-space: nowrap;
+  }
+  .select-kit button {
+    height: 100%; // ensures nested select-kit button matches height of button siblings
+  }
+  .btn {
+    // need to reduce vertical padding for consistent height
+    padding-top: 0.3em;
+    padding-bottom: 0.3em;
+    @include breakpoint(mobile-medium) {
+      font-size: var(--font-down-1);
+    }
   }
   @include breakpoint(mobile-large) {
     .edit-category {
@@ -146,7 +162,6 @@
     margin-top: 0.5em;
     margin-bottom: 0.5em;
     font-size: $font-down-2;
-    word-break: break-word;
   }
 }
 
@@ -167,13 +182,6 @@
   a.title.visited:not(.badge-notification) {
     color: var(--primary-medium);
   }
-}
-
-.sticky-header thead {
-  @include sticky;
-  top: var(--header-offset, 60px);
-  background: var(--secondary);
-  z-index: 2;
 }
 
 .topic-list {
@@ -206,7 +214,6 @@
     }
 
     td span {
-      position: relative; // Chrome needs this, otherwise the line is above the text
       background-color: var(--secondary);
       color: var(--danger-medium);
       padding: 0 8px;
@@ -220,8 +227,10 @@
     text-align: left;
     vertical-align: middle;
   }
-  th .btn-flat .d-icon {
-    color: currentColor;
+  th {
+    button .d-icon {
+      color: var(--primary-medium);
+    }
   }
   td {
     color: var(--primary-medium);
@@ -270,13 +279,15 @@
   }
 
   .topic-excerpt {
-    display: block;
     font-size: $font-down-1;
-    margin-top: 0.33em;
+    margin-top: 5px;
     color: var(--primary-high);
     word-wrap: break-word;
     line-height: $line-height-large;
     padding-right: 20px;
+  }
+  .topic-statuses:empty {
+    display: none;
   }
 
   .num {
@@ -369,10 +380,9 @@
 }
 
 .top-title-buttons {
-  display: flex;
-  margin: 0.5em 0;
+  display: inline-flex;
+  margin: 0.25em 0;
   flex-wrap: wrap;
-  font-size: var(--font-0-rem);
 
   button {
     margin-right: 0.5em;
@@ -386,7 +396,7 @@ div.education {
   border-top: 3px solid var(--primary-low);
   border-bottom: 1px solid var(--primary-low);
 
-  .badge-notification.unread-posts {
+  .badge-notification.new-posts {
     vertical-align: text-bottom;
   }
 }

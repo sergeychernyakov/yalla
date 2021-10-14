@@ -13,12 +13,16 @@
   $hover-bg-color: var(--primary-medium),
   $hover-icon-color: var(--primary-low)
 ) {
-  @include form-item-sizing;
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   margin: 0;
+  padding: 0.53em 0.8em;
+  border: none;
   font-weight: normal;
+  font-size: $font-0;
+  line-height: normal;
   color: $text-color;
   background: $bg-color;
   cursor: pointer;
@@ -31,6 +35,7 @@
   &.no-text {
     .d-icon {
       margin-right: 0;
+      min-height: 17px;
     }
   }
   @include hover {
@@ -54,13 +59,10 @@
   &:active,
   &.btn-active {
     @include linear-gradient($hover-bg-color 0%, $bg-color 100%);
-    border-bottom-color: $bg-color;
   }
   &[disabled],
   &.disabled {
-    &:not(.is-loading) {
-      opacity: 0.4;
-    }
+    opacity: 0.4;
     &:hover {
       color: $text-color;
       background: $bg-color;
@@ -176,10 +178,6 @@
     margin-right: 9px;
     font-size: $font-0;
   }
-  .d-icon,
-  &.btn:hover .d-icon {
-    color: #000;
-  }
   &.google_oauth2 {
     background: var(--google);
     color: #333;
@@ -251,14 +249,20 @@
 // Small
 
 .btn-small {
-  font-size: var(--font-down-1);
+  padding: 6px;
+  font-size: $font-down-1;
   min-height: 20px;
+  .d-icon {
+    max-height: 0.87em;
+  }
 }
 
 // Large
 
 .btn-large {
-  font-size: var(--font-up-1);
+  padding: 9px 18px;
+  font-size: $font-up-1;
+  line-height: $line-height-small;
 }
 
 // Bonus Buttons
@@ -279,8 +283,9 @@
   }
   &.close {
     padding: 0;
+    min-height: unset;
     background: transparent;
-    font-size: var(--font-up-3);
+    font-size: $font-up-3;
     .d-icon {
       color: var(--primary-high);
     }

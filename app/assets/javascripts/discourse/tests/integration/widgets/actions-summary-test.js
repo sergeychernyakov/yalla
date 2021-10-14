@@ -1,7 +1,10 @@
 import componentTest, {
   setupRenderingTest,
 } from "discourse/tests/helpers/component-test";
-import { count, discourseModule } from "discourse/tests/helpers/qunit-helpers";
+import {
+  discourseModule,
+  queryAll,
+} from "discourse/tests/helpers/qunit-helpers";
 import hbs from "htmlbars-inline-precompile";
 
 discourseModule(
@@ -19,14 +22,12 @@ discourseModule(
         });
       },
       test(assert) {
-        assert.equal(
-          count(".post-action .d-icon-far-trash-alt"),
-          1,
+        assert.ok(
+          queryAll(".post-action .d-icon-far-trash-alt").length === 1,
           "it has the deleted icon"
         );
-        assert.equal(
-          count(".avatar[title=eviltrout]"),
-          1,
+        assert.ok(
+          queryAll(".avatar[title=eviltrout]").length === 1,
           "it has the deleted by avatar"
         );
       },

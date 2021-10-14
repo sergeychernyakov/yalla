@@ -33,7 +33,7 @@ class Search
   end
 
   def self.facets
-    %w(topic category user private_messages tags all_topics exclude_topics)
+    %w(topic category user private_messages tags all_topics)
   end
 
   def self.ts_config(locale = SiteSetting.default_locale)
@@ -76,7 +76,7 @@ class Search
     data.force_encoding("UTF-8")
     if purpose != :topic
       # TODO cppjieba_rb is designed for chinese, we need something else for Japanese
-      # Korean appears to be safe cause words are already space separated
+      # Korean appears to be safe cause words are already space seperated
       # For Japanese we should investigate using kakasi
       if segment_cjk?
         require 'cppjieba_rb' unless defined? CppjiebaRb
@@ -230,7 +230,7 @@ class Search
   end
 
   def limit
-    if @opts[:type_filter].present? && @opts[:type_filter] != "exclude_topics"
+    if @opts[:type_filter].present?
       Search.per_filter + 1
     else
       Search.per_facet + 1
@@ -452,7 +452,7 @@ class Search
     posts.where("posts.user_id = #{@guardian.user.id}") if @guardian.user
   end
 
-  advanced_filter(/^in:(created|mine)$/i) do |posts|
+  advanced_filter(/^in:created$/i) do |posts|
     posts.where(user_id: @guardian.user.id, post_number: 1) if @guardian.user
   end
 
@@ -511,7 +511,12 @@ class Search
     category_ids = Category.where('slug ilike ? OR name ilike ? OR id = ?',
                                   match, match, match.to_i).pluck(:id)
     if category_ids.present?
-      category_ids += Category.subcategory_ids(category_ids.first) unless exact
+
+      unless exact
+        category_ids +=
+          Category.where('parent_category_id = ?', category_ids.first).pluck(:id)
+      end
+
       @category_filter_matched ||= true
       posts.where("topics.category_id IN (?)", category_ids)
     else
@@ -520,31 +525,44 @@ class Search
   end
 
   advanced_filter(/^\#([\p{L}\p{M}0-9\-:=]+)$/i) do |posts, match|
+
+    exact = true
+
     category_slug, subcategory_slug = match.to_s.split(":")
     next unless category_slug
 
-    exact = true
-    if category_slug[0] == "="
-      category_slug = category_slug[1..-1]
-    else
-      exact = false
-    end
+    if subcategory_slug
 
-    category_id = if subcategory_slug
-      Category
-        .where('lower(slug) = ?', subcategory_slug.downcase)
-        .where(parent_category_id: Category.where('lower(slug) = ?', category_slug.downcase).select(:id))
-        .pluck_first(:id)
+      category_id, _ = DB.query_single(<<~SQL, category_slug.downcase, subcategory_slug.downcase)
+        SELECT sub.id
+        FROM categories sub
+        JOIN categories c ON sub.parent_category_id = c.id
+        WHERE LOWER(c.slug)  = ? AND LOWER(sub.slug) = ?
+        ORDER BY c.id
+        LIMIT 1
+      SQL
+
     else
-      Category
-        .where('lower(slug) = ?', category_slug.downcase)
+      # main category
+      if category_slug[0] == "="
+        category_slug = category_slug[1..-1]
+      else
+        exact = false
+      end
+
+      category_id = Category.where("lower(slug) = ?", category_slug.downcase)
         .order('case when parent_category_id is null then 0 else 1 end')
-        .pluck_first(:id)
+        .pluck(:id)
+        .first
     end
 
     if category_id
       category_ids = [category_id]
-      category_ids += Category.subcategory_ids(category_id) if !exact
+
+      unless exact
+        category_ids +=
+          Category.where('parent_category_id = ?', category_id).pluck(:id)
+      end
 
       @category_filter_matched ||= true
       posts.where("topics.category_id IN (?)", category_ids)
@@ -758,11 +776,11 @@ class Search
       # calling protected methods
       send("#{@results.type_filter}_search")
     else
-      if @term.present? && !@search_context
-        user_search
-        category_search
-        tags_search
-        groups_search
+      unless @search_context
+        user_search if @term.present?
+        category_search if @term.present?
+        tags_search if @term.present?
+        groups_search if @term.present?
       end
       topic_search
     end
@@ -832,10 +850,6 @@ class Search
       .order("last_posted_at DESC")
       .limit(limit)
 
-    if !SiteSetting.enable_listing_suspended_users_on_search && !@guardian.user&.admin
-      users = users.where(suspended_at: nil)
-    end
-
     users_custom_data_query = DB.query(<<~SQL, user_ids: users.pluck(:id), term: "%#{@original_term.downcase}%")
       SELECT user_custom_fields.user_id, user_fields.name, user_custom_fields.value FROM user_custom_fields
       INNER JOIN user_fields ON user_fields.id = REPLACE(user_custom_fields.name, 'user_field_', '')::INTEGER AND user_fields.searchable IS TRUE
@@ -862,13 +876,13 @@ class Search
     groups = Group
       .visible_groups(@guardian.user, "name ASC", include_everyone: false)
       .where("name ILIKE :term OR full_name ILIKE :term", term: "%#{@term}%")
-      .limit(limit)
 
     groups.each { |group| @results.add(group) }
   end
 
   def tags_search
     return unless SiteSetting.tagging_enabled
+
     tags = Tag.includes(:tag_search_data)
       .where("tag_search_data.search_data @@ #{ts_query}")
       .references(:tag_search_data)
@@ -879,15 +893,6 @@ class Search
 
     tags.each do |tag|
       @results.add(tag) if !hidden_tag_names.include?(tag.name)
-    end
-  end
-
-  def exclude_topics_search
-    if @term.present?
-      user_search
-      category_search
-      tags_search
-      groups_search
     end
   end
 

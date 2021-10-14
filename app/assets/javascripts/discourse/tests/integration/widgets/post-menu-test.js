@@ -2,9 +2,8 @@ import componentTest, {
   setupRenderingTest,
 } from "discourse/tests/helpers/component-test";
 import {
-  count,
   discourseModule,
-  exists,
+  queryAll,
 } from "discourse/tests/helpers/qunit-helpers";
 import hbs from "htmlbars-inline-precompile";
 import { withPluginApi } from "discourse/lib/plugin-api";
@@ -31,9 +30,8 @@ discourseModule(
         });
       },
       async test(assert) {
-        assert.equal(
-          count(".actions .extra-buttons .hot-coffee"),
-          1,
+        assert.ok(
+          queryAll(".actions .extra-buttons .hot-coffee").length === 1,
           "It renders extra button"
         );
       },
@@ -49,7 +47,7 @@ discourseModule(
       },
       async test(assert) {
         assert.ok(
-          !exists(".actions .extra-buttons .hot-coffee"),
+          queryAll(".actions .extra-buttons .hot-coffee").length === 0,
           "It doesn't removes coffee button"
         );
       },

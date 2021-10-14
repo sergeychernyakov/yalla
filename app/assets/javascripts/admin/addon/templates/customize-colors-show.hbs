@@ -17,7 +17,7 @@
         label="admin.customize.copy"
       }}
       {{d-button
-        class="btn-default copy-to-clipboard"
+        class="btn-default"
         action=(action "copyToClipboard" model)
         icon="far-clipboard"
         label="admin.customize.copy_to_clipboard"
@@ -37,6 +37,8 @@
         }}
       {{/if}}
     </div>
+
+    <br>
 
     <div class="admin-controls">
       {{#unless model.theme_id}}

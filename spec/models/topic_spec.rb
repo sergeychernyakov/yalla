@@ -7,7 +7,7 @@ describe Topic do
   let(:now) { Time.zone.local(2013, 11, 20, 8, 0) }
   fab!(:user) { Fabricate(:user) }
   fab!(:another_user) { Fabricate(:user) }
-  fab!(:trust_level_2) { Fabricate(:user, trust_level: SiteSetting.min_trust_level_to_allow_invite) }
+  fab!(:trust_level_2) { Fabricate(:user, trust_level: TrustLevel[2]) }
 
   context 'validations' do
     let(:topic) { Fabricate.build(:topic) }
@@ -540,12 +540,6 @@ describe Topic do
       expect(Topic.similar_to('some title', 'https://discourse.org/#INCORRECT#URI')).to be_empty
     end
 
-    it 'does not result in invalid statement when title is all stopwords for zh_CN' do
-      SiteSetting.default_locale = "zh_CN"
-
-      expect(Topic.similar_to("怎么上自己的", '')).to eq([])
-    end
-
     context 'with a similar topic' do
       fab!(:post) {
         SearchIndexer.enable
@@ -635,6 +629,7 @@ describe Topic do
 
       after do
         RateLimiter.clear_all!
+        RateLimiter.disable
       end
 
       it "rate limits topic invitations" do
@@ -905,7 +900,7 @@ describe Topic do
         end
 
         describe 'when user can invite via email' do
-          before { user.update!(trust_level: SiteSetting.min_trust_level_to_allow_invite) }
+          before { user.update!(trust_level: TrustLevel[2]) }
 
           it 'should create an invite' do
             Jobs.run_immediately!
@@ -1386,24 +1381,6 @@ describe Topic do
 
     end
 
-    context "bannered_until date" do
-
-      it 'sets bannered_until to be caught by ensure_consistency' do
-        bannered_until = 5.days.from_now
-        topic.make_banner!(user, bannered_until.to_s)
-
-        freeze_time 6.days.from_now do
-          expect(topic.archetype).to eq(Archetype.banner)
-
-          Topic.ensure_consistency!
-          topic.reload
-
-          expect(topic.archetype).to eq(Archetype.default)
-        end
-      end
-
-    end
-
   end
 
   context 'last_poster info' do
@@ -1621,12 +1598,7 @@ describe Topic do
           end
 
           it 'should generate the modified notification for the topic if already seen' do
-            TopicUser.create!(
-              topic_id: topic.id,
-              last_read_post_number: topic.posts.first.post_number,
-              user_id: user.id
-            )
-
+            TopicUser.create!(topic_id: topic.id, highest_seen_post_number: topic.posts.first.post_number, user_id: user.id)
             expect do
               topic.change_category_to_id(new_category.id)
             end.to change { Notification.count }.by(2)
@@ -2147,7 +2119,7 @@ describe Topic do
       expect(topic.all_allowed_users).to include moderator
     end
 
-    it 'includes moderators if official warning' do
+    it 'includes moderators if offical warning' do
       topic.stubs(:subtype).returns(TopicSubtype.moderator_warning)
       topic.stubs(:private_message?).returns(true)
       expect(topic.all_allowed_users).to include moderator
@@ -2324,6 +2296,7 @@ describe Topic do
 
     after do
       RateLimiter.clear_all!
+      RateLimiter.disable
     end
 
     it "limits according to max_personal_messages_per_day" do
@@ -2336,10 +2309,10 @@ describe Topic do
     end
   end
 
-  describe ".count_exceeds_minimum?" do
+  describe ".count_exceeds_minimun?" do
     before { SiteSetting.minimum_topics_similar = 20 }
 
-    context "when Topic count is greater than minimum_topics_similar" do
+    context "when Topic count is geater than minimum_topics_similar" do
       it "should be true" do
         Topic.stubs(:count).returns(30)
         expect(Topic.count_exceeds_minimum?).to be_truthy
@@ -2363,7 +2336,7 @@ describe Topic do
       expect(topic.expandable_first_post?).to eq(false)
     end
 
-    describe 'with an embeddable host' do
+    describe 'with an emeddable host' do
       before do
         Fabricate(:embeddable_host)
         SiteSetting.embed_truncate = true

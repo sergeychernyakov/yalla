@@ -128,7 +128,7 @@ class TopicsController < ApplicationController
     end
 
     page = params[:page]
-    if (page < 0) || ((page - 1) * @topic_view.chunk_size >= @topic_view.topic.highest_post_number)
+    if (page < 0) || ((page - 1) * @topic_view.chunk_size > @topic_view.topic.highest_post_number)
       raise Discourse::NotFound
     end
 
@@ -245,11 +245,11 @@ class TopicsController < ApplicationController
     params.require(:topic_id)
     params.require(:post_ids)
 
-    unless Array === params[:post_ids]
+    post_ids = params[:post_ids].map(&:to_i)
+    unless Array === post_ids
       render_json_error("Expecting post_ids to contain a list of posts ids")
       return
     end
-    post_ids = params[:post_ids].map(&:to_i)
 
     if post_ids.length > 100
       render_json_error("Requested a chunk that is too big")
@@ -262,21 +262,14 @@ class TopicsController < ApplicationController
     @posts = Post.where(hidden: false, deleted_at: nil, topic_id: @topic.id)
       .where('posts.id in (?)', post_ids)
       .joins("LEFT JOIN users u on u.id = posts.user_id")
-      .pluck(:id, :cooked, :username, :action_code, :created_at)
-      .map do |post_id, cooked, username, action_code, created_at|
-        attrs = {
-          post_id: post_id,
-          username: username,
-          excerpt: PrettyText.excerpt(cooked, 800, keep_emoji_images: true),
-        }
-
-        if action_code
-          attrs[:action_code] = action_code
-          attrs[:created_at] = created_at
-        end
-
-        attrs
-      end
+      .pluck(:id, :cooked, :username)
+      .map do |post_id, cooked, username|
+      {
+        post_id: post_id,
+        username: username,
+        excerpt: PrettyText.excerpt(cooked, 800, keep_emoji_images: true)
+      }
+    end
 
     render json: @posts.to_json
   end
@@ -379,11 +372,6 @@ class TopicsController < ApplicationController
     changes.delete(:title) if topic.title == changes[:title]
     changes.delete(:category_id) if topic.category_id.to_i == changes[:category_id].to_i
 
-    if Tag.include_tags?
-      topic_tags = topic.tags.map(&:name).sort
-      changes.delete(:tags) if changes[:tags]&.sort == topic_tags
-    end
-
     success = true
 
     if changes.length > 0
@@ -446,8 +434,6 @@ class TopicsController < ApplicationController
     else
       guardian.ensure_can_moderate!(@topic)
     end
-
-    params[:until] === '' ? params[:until] = nil : params[:until]
 
     @topic.update_status(status, enabled, current_user, until: params[:until])
 
@@ -555,22 +541,12 @@ class TopicsController < ApplicationController
     if group_ids.present?
       allowed_groups = topic.allowed_groups
         .where('topic_allowed_groups.group_id IN (?)', group_ids).pluck(:id)
-
       allowed_groups.each do |id|
         if archive
-          GroupArchivedMessage.archive!(
-            id,
-            topic,
-            acting_user_id: current_user.id
-          )
-
+          GroupArchivedMessage.archive!(id, topic)
           group_id = id
         else
-          GroupArchivedMessage.move_to_inbox!(
-            id,
-            topic,
-            acting_user_id: current_user.id
-          )
+          GroupArchivedMessage.move_to_inbox!(id, topic)
         end
       end
     end
@@ -606,21 +582,11 @@ class TopicsController < ApplicationController
   end
 
   def destroy
-    topic = Topic.with_deleted.find_by(id: params[:id])
+    topic = Topic.find_by(id: params[:id])
+    guardian.ensure_can_delete!(topic)
 
-    force_destroy = false
-    if params[:force_destroy].present?
-      if !guardian.can_permanently_delete?(topic)
-        return render_json_error topic.cannot_permanently_delete_reason(current_user), status: 403
-      end
-
-      force_destroy = true
-    else
-      guardian.ensure_can_delete!(topic)
-    end
-
-    first_post = topic.posts.with_deleted.order(:post_number).first
-    PostDestroyer.new(current_user, first_post, context: params[:context], force_destroy: force_destroy).destroy
+    first_post = topic.ordered_posts.first
+    PostDestroyer.new(current_user, first_post, context: params[:context]).destroy
 
     render body: nil
   rescue Discourse::InvalidAccess
@@ -945,14 +911,28 @@ class TopicsController < ApplicationController
 
   def bulk
     if params[:topic_ids].present?
-      unless Array === params[:topic_ids]
-        raise Discourse::InvalidParameters.new(
-          "Expecting topic_ids to contain a list of topic ids"
-        )
-      end
       topic_ids = params[:topic_ids].map { |t| t.to_i }
     elsif params[:filter] == 'unread'
-      topic_ids = bulk_unread_topic_ids
+      tq = TopicQuery.new(current_user)
+      topics = TopicQuery.unread_filter(tq.joined_topic_user, current_user.id, staff: guardian.is_staff?).listable_topics
+      topics = TopicQuery.tracked_filter(topics, current_user.id) if params[:tracked].to_s == "true"
+
+      if params[:category_id]
+        if params[:include_subcategories]
+          topics = topics.where(<<~SQL, category_id: params[:category_id])
+            category_id in (select id FROM categories WHERE parent_category_id = :category_id) OR
+            category_id = :category_id
+          SQL
+        else
+          topics = topics.where('category_id = ?', params[:category_id])
+        end
+      end
+
+      if params[:tag_name].present?
+        topics = topics.joins(:tags).where("tags.name": params[:tag_name])
+      end
+
+      topic_ids = topics.pluck(:id)
     else
       raise ActionController::ParameterMissing.new(:topic_ids)
     end
@@ -966,35 +946,6 @@ class TopicsController < ApplicationController
     operator = TopicsBulkAction.new(current_user, topic_ids, operation, group: operation[:group])
     changed_topic_ids = operator.perform!
     render_json_dump topic_ids: changed_topic_ids
-  end
-
-  def private_message_reset_new
-    topic_query = TopicQuery.new(current_user, limit: false)
-
-    if params[:topic_ids].present?
-      unless Array === params[:topic_ids]
-        raise Discourse::InvalidParameters.new(
-          "Expecting topic_ids to contain a list of topic ids"
-        )
-      end
-
-      topic_scope = topic_query
-        .private_messages_for(current_user, :all)
-        .where("topics.id IN (?)", params[:topic_ids].map(&:to_i))
-    else
-      params.require(:inbox)
-      inbox = params[:inbox].to_s
-      filter = private_message_filter(topic_query, inbox)
-      topic_scope = topic_query.filter_private_message_new(current_user, filter)
-    end
-
-    topic_ids = TopicsBulkAction.new(
-      current_user,
-      topic_scope.pluck(:id),
-      type: "dismiss_topics"
-    ).perform!
-
-    render json: success_json.merge(topic_ids: topic_ids)
   end
 
   def reset_new
@@ -1011,27 +962,15 @@ class TopicsController < ApplicationController
       elsif params[:tag_id].present?
         Topic.joins(:tags).where(tags: { name: params[:tag_id] })
       else
-        new_results = TopicQuery.new(current_user).new_results(limit: false)
         if params[:tracked].to_s == "true"
-          TopicQuery.tracked_filter(new_results, current_user.id)
+          TopicQuery.tracked_filter(TopicQuery.new(current_user).new_results, current_user.id)
         else
           current_user.user_stat.update_column(:new_since, Time.zone.now)
-          new_results
+          Topic
         end
       end
 
-    if params[:topic_ids].present?
-      unless Array === params[:topic_ids]
-        raise Discourse::InvalidParameters.new(
-          "Expecting topic_ids to contain a list of topic ids"
-        )
-      end
-
-      topic_ids = params[:topic_ids].map { |t| t.to_i }
-      topic_scope = topic_scope.where(id: topic_ids)
-    end
-
-    dismissed_topic_ids = TopicsBulkAction.new(current_user, topic_scope.pluck(:id), type: "dismiss_topics").perform!
+    dismissed_topic_ids = DismissTopics.new(current_user, topic_scope).perform!
     TopicTrackingState.publish_dismiss_new(current_user.id, topic_ids: dismissed_topic_ids)
 
     render body: nil
@@ -1254,51 +1193,5 @@ class TopicsController < ApplicationController
 
   def pm_has_slots?(pm)
     guardian.is_staff? || !pm.reached_recipients_limit?
-  end
-
-  def bulk_unread_topic_ids
-    topic_query = TopicQuery.new(current_user)
-
-    if inbox = params[:private_message_inbox]
-      filter = private_message_filter(topic_query, inbox)
-      topic_query.options[:limit] = false
-      topics = topic_query.filter_private_messages_unread(current_user, filter)
-    else
-      topics = TopicQuery.unread_filter(topic_query.joined_topic_user, staff: guardian.is_staff?).listable_topics
-      topics = TopicQuery.tracked_filter(topics, current_user.id) if params[:tracked].to_s == "true"
-
-      if params[:category_id]
-        if params[:include_subcategories]
-          topics = topics.where(<<~SQL, category_id: params[:category_id])
-            category_id in (select id FROM categories WHERE parent_category_id = :category_id) OR
-            category_id = :category_id
-          SQL
-        else
-          topics = topics.where('category_id = ?', params[:category_id])
-        end
-      end
-
-      if params[:tag_name].present?
-        topics = topics.joins(:tags).where("tags.name": params[:tag_name])
-      end
-    end
-
-    topics.pluck(:id)
-  end
-
-  def private_message_filter(topic_query, inbox)
-    case inbox
-    when "group"
-      group_name = params[:group_name]
-      group = Group.find_by("lower(name) = ?", group_name)
-      raise Discourse::NotFound if !group
-      raise Discourse::NotFound if !guardian.can_see_group_messages?(group)
-      topic_query.options[:group_name] = group_name
-      :group
-    when "user"
-      :user
-    else
-      :all
-    end
   end
 end

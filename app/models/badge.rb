@@ -75,10 +75,11 @@ class Badge < ActiveRecord::Base
   attr_accessor :has_badge
 
   def self.trigger_hash
-    @trigger_hash ||= Badge::Trigger.constants.map do |k|
-      name = k.to_s.underscore
-      [name, Badge::Trigger.const_get(k)] unless name =~ /deprecated/
-    end.compact.to_h
+    Hash[*(
+      Badge::Trigger.constants.map { |k|
+        [k.to_s.underscore, Badge::Trigger.const_get(k)]
+      }.flatten
+    )]
   end
 
   module Trigger
@@ -87,7 +88,7 @@ class Badge < ActiveRecord::Base
     PostRevision = 2
     TrustLevelChange = 4
     UserChange = 8
-    DeprecatedPostProcessed = 16 # No longer in use
+    PostProcessed = 16 # deprecated
 
     def self.is_none?(trigger)
       [None].include? trigger
@@ -248,7 +249,6 @@ class Badge < ActiveRecord::Base
   end
 
   def default_allow_title=(val)
-    return unless self.new_record?
     self.allow_title ||= val
   end
 
@@ -339,8 +339,8 @@ end
 #  trigger           :integer
 #  show_posts        :boolean          default(FALSE), not null
 #  system            :boolean          default(FALSE), not null
+#  image             :string(255)
 #  long_description  :text
-#  image_upload_id   :integer
 #
 # Indexes
 #

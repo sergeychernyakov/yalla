@@ -1,9 +1,4 @@
-import {
-  acceptance,
-  count,
-  exists,
-  queryAll,
-} from "discourse/tests/helpers/qunit-helpers";
+import { acceptance, queryAll } from "discourse/tests/helpers/qunit-helpers";
 import { click, fillIn, visit } from "@ember/test-helpers";
 import I18n from "I18n";
 import { test } from "qunit";
@@ -12,8 +7,9 @@ acceptance("New Group - Anonymous", function () {
   test("As an anon user", async function (assert) {
     await visit("/g");
 
-    assert.ok(
-      !exists(".groups-header-new"),
+    assert.equal(
+      queryAll(".groups-header-new").length,
+      0,
       "it should not display the button to create a group"
     );
   });
@@ -26,7 +22,7 @@ acceptance("New Group - Authenticated", function (needs) {
     await click(".groups-header-new");
 
     assert.equal(
-      count(".group-form-save[disabled]"),
+      queryAll(".group-form-save[disabled]").length,
       1,
       "save button should be disabled"
     );
@@ -39,9 +35,8 @@ acceptance("New Group - Authenticated", function (needs) {
       "it should show the right validation tooltip"
     );
 
-    assert.equal(
-      count(".group-form-save:disabled"),
-      1,
+    assert.ok(
+      queryAll(".group-form-save:disabled").length === 1,
       "it should disable the save button"
     );
 
@@ -74,8 +69,9 @@ acceptance("New Group - Authenticated", function (needs) {
 
     await click(".group-form-public-admission");
 
-    assert.ok(
-      !exists("groups-new-allow-membership-requests"),
+    assert.equal(
+      queryAll("groups-new-allow-membership-requests").length,
+      0,
       "it should disable the membership requests checkbox"
     );
 

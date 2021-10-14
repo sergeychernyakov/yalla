@@ -24,7 +24,7 @@ export default Component.extend({
   },
 
   keyPress(e) {
-    if (e.key === "Enter") {
+    if (e.keyCode === 13) {
       e.preventDefault();
       e.stopPropagation();
       this.send("addUser");

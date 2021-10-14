@@ -109,7 +109,7 @@ discourseModule("Unit | Model | topic", function () {
     assert.equal(topic.get("category"), category);
   });
 
-  test("recover", async function (assert) {
+  test("recover", function (assert) {
     const user = User.create({ username: "eviltrout" });
     const topic = Topic.create({
       id: 1234,
@@ -117,8 +117,7 @@ discourseModule("Unit | Model | topic", function () {
       deleted_by: user,
     });
 
-    await topic.recover();
-
+    topic.recover();
     assert.blank(topic.get("deleted_at"), "it clears deleted_at");
     assert.blank(topic.get("deleted_by"), "it clears deleted_by");
   });

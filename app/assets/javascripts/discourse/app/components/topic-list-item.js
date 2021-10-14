@@ -40,6 +40,8 @@ export default Component.extend({
   classNameBindings: [":topic-list-item", "unboundClassNames", "topic.visited"],
   attributeBindings: ["data-topic-id", "role", "ariaLevel:aria-level"],
   "data-topic-id": alias("topic.id"),
+  role: "heading",
+  ariaLevel: "2",
 
   didReceiveAttrs() {
     this._super(...arguments);
@@ -142,8 +144,8 @@ export default Component.extend({
       classes.push("unseen-topic");
     }
 
-    if (topic.unread_posts) {
-      classes.push("unread-posts");
+    if (topic.get("displayNewPosts")) {
+      classes.push("new-posts");
     }
 
     ["liked", "archived", "bookmarked", "pinned", "closed"].forEach((name) => {

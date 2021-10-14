@@ -34,8 +34,7 @@ RSpec.describe ReviewableFlaggedPost, type: :model do
         expect(actions.has?(:agree_and_keep_hidden)).to eq(false)
         expect(actions.has?(:agree_and_silence)).to eq(true)
         expect(actions.has?(:agree_and_suspend)).to eq(true)
-        expect(actions.has?(:delete_user)).to eq(true)
-        expect(actions.has?(:delete_user_block)).to eq(true)
+        expect(actions.has?(:delete_spammer)).to eq(true)
         expect(actions.has?(:disagree)).to eq(true)
         expect(actions.has?(:ignore)).to eq(true)
         expect(actions.has?(:delete_and_ignore)).to eq(true)
@@ -138,7 +137,7 @@ RSpec.describe ReviewableFlaggedPost, type: :model do
     end
 
     it "supports deleting a spammer" do
-      reviewable.perform(moderator, :delete_user_block)
+      reviewable.perform(moderator, :delete_spammer)
       expect(reviewable).to be_approved
       expect(score.reload).to be_agreed
       expect(post.reload.deleted_at).to be_present

@@ -21,7 +21,7 @@ export default Component.extend({
       $(
         "#login-account-password, #login-account-name, #login-second-factor"
       ).keydown((e) => {
-        if (e.key === "Enter") {
+        if (e.keyCode === 13) {
           this.action();
         }
       });

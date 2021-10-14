@@ -1,8 +1,4 @@
 .discourse-local-date {
-  > * {
-    pointer-events: none;
-  }
-
   &.cooked-date {
     color: var(--primary);
     cursor: pointer;
@@ -39,12 +35,6 @@
         background: var(--tertiary-low);
       }
     }
-  }
-
-  .download-calendar {
-    text-align: right;
-    cursor: pointer;
-    margin-top: 0.5em;
   }
 }
 

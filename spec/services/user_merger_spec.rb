@@ -837,7 +837,7 @@ describe UserMerger do
     expect(UserEmail.where(user_id: source_user.id).count).to eq(0)
   end
 
-  it "skips merging email addresses when a secondary email address exists" do
+  it "skips merging email adresses when a secondary email address exists" do
     merge_users!(source_user, target_user)
 
     alice2 = Fabricate(:user, username: 'alice2', email: 'alice@foo.com')
@@ -846,15 +846,6 @@ describe UserMerger do
     emails = UserEmail.where(user_id: target_user.id).pluck(:email, :primary)
     expect(emails).to contain_exactly(['alice@example.com', true], ['alice@work.com', false])
     expect(UserEmail.where(user_id: source_user.id).count).to eq(0)
-  end
-
-  it "skips merging email addresses when target user is not human" do
-    target_user = Discourse.system_user
-    merge_users!(source_user, target_user)
-
-    emails = UserEmail.where(user_id: target_user.id).pluck(:email, :primary)
-    expect(emails).to contain_exactly([target_user.email, true])
-    expect(UserEmail.exists?(user_id: source_user.id)).to eq(false)
   end
 
   it "updates exports" do

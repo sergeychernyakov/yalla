@@ -1,7 +1,10 @@
 import componentTest, {
   setupRenderingTest,
 } from "discourse/tests/helpers/component-test";
-import { discourseModule, exists } from "discourse/tests/helpers/qunit-helpers";
+import {
+  discourseModule,
+  queryAll,
+} from "discourse/tests/helpers/qunit-helpers";
 import hbs from "htmlbars-inline-precompile";
 
 discourseModule(
@@ -17,7 +20,7 @@ discourseModule(
       },
 
       test(assert) {
-        assert.ok(!exists("button.edit-email"));
+        assert.equal(queryAll("button.edit-email").length, 0);
       },
     });
   }

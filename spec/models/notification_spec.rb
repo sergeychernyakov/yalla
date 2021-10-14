@@ -48,8 +48,6 @@ describe Notification do
         expect(@types[:votes_released]).to eq(26)
         expect(@types[:event_reminder]).to eq(27)
         expect(@types[:event_invitation]).to eq(28)
-        expect(@types[:chat_mention]).to eq(29)
-        expect(@types[:chat_message]).to eq(30)
       end
     end
   end
@@ -300,7 +298,7 @@ describe Notification do
       expect(user.unread_notifications).to eq(0)
       expect(user.total_unread_notifications).to eq(3)
       # NOTE: because of deprecation this will be equal to unread_high_priority_notifications,
-      #       to be removed in 2.5
+      #       to be remonved in 2.5
       expect(user.unread_private_messages).to eq(2)
       expect(user.unread_high_priority_notifications).to eq(2)
     end
@@ -342,16 +340,6 @@ describe Notification do
       Notification.ensure_consistency!
 
       expect(Notification.count).to eq(2)
-    end
-
-    it 'does not delete chat_message notifications' do
-      user = Fabricate(:user)
-      Notification.create!(read: false, user_id: user.id, topic_id: nil, post_number: nil, data: '[]',
-                           notification_type: Notification.types[:chat_mention])
-
-      expect {
-        Notification.ensure_consistency!
-      }.to_not change { Notification.count }
     end
   end
 

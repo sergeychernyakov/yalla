@@ -1,7 +1,6 @@
 import I18n from "I18n";
 import LocalDateBuilder from "./local-date-builder";
 import sinon from "sinon";
-import { module, test } from "qunit";
 
 const UTC = "Etc/UTC";
 const SYDNEY = "Australia/Sydney";
@@ -448,45 +447,12 @@ test("previews", function (assert) {
 
   freezeTime({ date: "2020-03-22", timezone: PARIS }, () => {
     assert.buildsCorrectDate(
-      { duration: 90, timezone: PARIS, timezones: [PARIS] },
-      {
-        previews: [
-          {
-            current: true,
-            formated:
-              'Sunday, March 22, 2020 <br /><svg class=\'fa d-icon d-icon-clock svg-icon svg-string\' xmlns="http://www.w3.org/2000/svg"><use xlink:href="#clock" /></svg> 12:00 AM → 1:30 AM',
-            timezone: "Paris",
-          },
-        ],
-      }
-    );
-  });
-
-  freezeTime({ date: "2020-03-22", timezone: PARIS }, () => {
-    assert.buildsCorrectDate(
-      { duration: 1440, timezone: PARIS, timezones: [PARIS] },
-      {
-        previews: [
-          {
-            current: true,
-            formated:
-              "Sunday, March 22, 2020 12:00 AM → Monday, March 23, 2020 12:00 AM",
-            timezone: "Paris",
-          },
-        ],
-      }
-    );
-  });
-
-  freezeTime({ date: "2020-03-22", timezone: PARIS }, () => {
-    assert.buildsCorrectDate(
       { time: "11:34", timezone: PARIS, timezones: [PARIS] },
       {
         previews: [
           {
             current: true,
-            formated:
-              'Sunday, March 22, 2020 <br /><svg class=\'fa d-icon d-icon-clock svg-icon svg-string\' xmlns="http://www.w3.org/2000/svg"><use xlink:href="#clock" /></svg> 11:34 AM',
+            formated: "March 22, 2020 11:34 AM",
             timezone: "Paris",
           },
         ],
@@ -541,23 +507,19 @@ test("previews", function (assert) {
         previews: [
           {
             current: true,
-            formated:
-              'Tuesday, April 7, 2020 <br /><svg class=\'fa d-icon d-icon-clock svg-icon svg-string\' xmlns="http://www.w3.org/2000/svg"><use xlink:href="#clock" /></svg> 2:54 PM',
+            formated: "April 7, 2020 2:54 PM",
             timezone: "Paris",
           },
           {
-            formated:
-              'Tuesday, April 7, 2020 <br /><svg class=\'fa d-icon d-icon-clock svg-icon svg-string\' xmlns="http://www.w3.org/2000/svg"><use xlink:href="#clock" /></svg> 1:54 PM',
+            formated: "April 7, 2020 1:54 PM",
             timezone: "London",
           },
           {
-            formated:
-              'Tuesday, April 7, 2020 <br /><svg class=\'fa d-icon d-icon-clock svg-icon svg-string\' xmlns="http://www.w3.org/2000/svg"><use xlink:href="#clock" /></svg> 1:54 PM',
+            formated: "April 7, 2020 1:54 PM",
             timezone: "Lagos",
           },
           {
-            formated:
-              'Tuesday, April 7, 2020 <br /><svg class=\'fa d-icon d-icon-clock svg-icon svg-string\' xmlns="http://www.w3.org/2000/svg"><use xlink:href="#clock" /></svg> 10:54 PM',
+            formated: "April 7, 2020 10:54 PM",
             timezone: "Sydney",
           },
         ],
@@ -576,13 +538,11 @@ test("previews", function (assert) {
         previews: [
           {
             current: true,
-            formated:
-              'Wednesday, May 13, 2020 <br /><svg class=\'fa d-icon d-icon-clock svg-icon svg-string\' xmlns="http://www.w3.org/2000/svg"><use xlink:href="#clock" /></svg> 11:00 AM',
+            formated: "May 13, 2020 11:00 AM",
             timezone: "Los Angeles",
           },
           {
-            formated:
-              'Wednesday, May 13, 2020 <br /><svg class=\'fa d-icon d-icon-clock svg-icon svg-string\' xmlns="http://www.w3.org/2000/svg"><use xlink:href="#clock" /></svg> 6:00 PM',
+            formated: "May 13, 2020 6:00 PM",
             timezone: "UTC",
           },
         ],

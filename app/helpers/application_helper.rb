@@ -13,28 +13,6 @@ module ApplicationHelper
     @extra_body_classes ||= Set.new
   end
 
-  def discourse_config_environment
-    # TODO: Can this come from Ember CLI somehow?
-    { modulePrefix: "discourse",
-      environment: Rails.env,
-      rootURL: Discourse.base_path,
-      locationType: "auto",
-      historySupportMiddleware: false,
-      EmberENV: {
-        FEATURES: {},
-        EXTEND_PROTOTYPES: { "Date": false },
-        _APPLICATION_TEMPLATE_WRAPPER: false,
-        _DEFAULT_ASYNC_OBSERVERS: true,
-        _JQUERY_INTEGRATION: true
-      },
-      APP: {
-        name: "discourse",
-        version: "#{Discourse::VERSION::STRING} #{Discourse.git_version}",
-        exportApplicationGlobal: true
-      }
-    }.to_json
-  end
-
   def google_universal_analytics_json(ua_domain_name = nil)
     result = {}
     if ua_domain_name
@@ -97,17 +75,10 @@ module ApplicationHelper
         path = "#{GlobalSetting.s3_cdn_url}#{path}"
       end
 
-      # assets needed for theme testing are not compressed because they take a fair
-      # amount of time to compress (+30 seconds) during rebuilds/deploys when the
-      # vast majority of sites will never need them, so it makes more sense to serve
-      # them uncompressed instead of making everyone's rebuild/deploy take +30 more
-      # seconds.
-      if !script.start_with?("discourse/tests/")
-        if is_brotli_req?
-          path = path.gsub(/\.([^.]+)$/, '.br.\1')
-        elsif is_gzip_req?
-          path = path.gsub(/\.([^.]+)$/, '.gz.\1')
-        end
+      if is_brotli_req?
+        path = path.gsub(/\.([^.]+)$/, '.br.\1')
+      elsif is_gzip_req?
+        path = path.gsub(/\.([^.]+)$/, '.gz.\1')
       end
 
     elsif GlobalSetting.cdn_url&.start_with?("https") && is_brotli_req? && Rails.env != "development"
@@ -266,7 +237,6 @@ module ApplicationHelper
     # Add opengraph & twitter tags
     result = []
     result << tag(:meta, property: 'og:site_name', content: SiteSetting.title)
-    result << tag(:meta, property: 'og:type', content: 'website')
 
     if opts[:twitter_summary_large_image].present?
       result << tag(:meta, name: 'twitter:card', content: "summary_large_image")
@@ -336,18 +306,6 @@ module ApplicationHelper
           SiteSetting.site_logo_dark_url
         else
           SiteSetting.site_logo_url
-        end
-      end
-    end
-  end
-
-  def application_logo_dark_url
-    @application_logo_dark_url ||= begin
-      if dark_scheme_id != -1
-        if mobile_view? && SiteSetting.site_mobile_logo_dark_url != application_logo_url
-          SiteSetting.site_mobile_logo_dark_url
-        elsif !mobile_view? && SiteSetting.site_logo_dark_url != application_logo_url
-          SiteSetting.site_logo_dark_url
         end
       end
     end
@@ -449,17 +407,12 @@ module ApplicationHelper
     end
   end
 
-  def theme_id
+  def theme_ids
     if customization_disabled?
-      nil
+      [nil]
     else
-      request.env[:resolved_theme_id]
+      request.env[:resolved_theme_ids]
     end
-  end
-
-  def stylesheet_manager
-    return @stylesheet_manager if defined?(@stylesheet_manager)
-    @stylesheet_manager = Stylesheet::Manager.new(theme_id: theme_id)
   end
 
   def scheme_id
@@ -470,9 +423,12 @@ module ApplicationHelper
       return custom_user_scheme_id
     end
 
-    return if theme_id.blank?
+    return if theme_ids.blank?
 
-    @scheme_id = Theme.where(id: theme_id).pluck_first(:color_scheme_id)
+    @scheme_id = Theme
+      .where(id: theme_ids.first)
+      .pluck(:color_scheme_id)
+      .first
   end
 
   def dark_scheme_id
@@ -500,7 +456,7 @@ module ApplicationHelper
 
   def theme_lookup(name)
     Theme.lookup_field(
-      theme_id,
+      theme_ids,
       mobile_view? ? :mobile : :desktop,
       name,
       skip_transformation: request.env[:skip_theme_ids_transformation].present?
@@ -509,7 +465,7 @@ module ApplicationHelper
 
   def theme_translations_lookup
     Theme.lookup_field(
-      theme_id,
+      theme_ids,
       :translations,
       I18n.locale,
       skip_transformation: request.env[:skip_theme_ids_transformation].present?
@@ -518,7 +474,7 @@ module ApplicationHelper
 
   def theme_js_lookup
     Theme.lookup_field(
-      theme_id,
+      theme_ids,
       :extra_js,
       nil,
       skip_transformation: request.env[:skip_theme_ids_transformation].present?
@@ -526,26 +482,22 @@ module ApplicationHelper
   end
 
   def discourse_stylesheet_link_tag(name, opts = {})
-    manager =
-      if opts.key?(:theme_id)
-        Stylesheet::Manager.new(
-          theme_id: customization_disabled? ? nil : opts[:theme_id]
-        )
-      else
-        stylesheet_manager
-      end
+    if opts.key?(:theme_ids)
+      ids = opts[:theme_ids] unless customization_disabled?
+    else
+      ids = theme_ids
+    end
 
-    manager.stylesheet_link_tag(name, 'all')
+    Stylesheet::Manager.stylesheet_link_tag(name, 'all', ids)
   end
 
   def discourse_color_scheme_stylesheets
     result = +""
-    result << stylesheet_manager.color_scheme_stylesheet_link_tag(scheme_id, 'all')
+    result << Stylesheet::Manager.color_scheme_stylesheet_link_tag(scheme_id, 'all', theme_ids)
 
     if dark_scheme_id != -1
-      result << stylesheet_manager.color_scheme_stylesheet_link_tag(dark_scheme_id, '(prefers-color-scheme: dark)')
+      result << Stylesheet::Manager.color_scheme_stylesheet_link_tag(dark_scheme_id, '(prefers-color-scheme: dark)', theme_ids)
     end
-
     result.html_safe
   end
 
@@ -560,6 +512,8 @@ module ApplicationHelper
   end
 
   def client_side_setup_data
+    service_worker_url = Rails.env.development? ? 'service-worker.js' : Rails.application.assets_manifest.assets['service-worker.js']
+
     setup_data = {
       cdn: Rails.configuration.action_controller.asset_host,
       base_url: Discourse.base_url,
@@ -567,12 +521,12 @@ module ApplicationHelper
       environment: Rails.env,
       letter_avatar_version: LetterAvatar.version,
       markdown_it_url: script_asset_path('markdown-it-bundle'),
-      service_worker_url: 'service-worker.js',
+      service_worker_url: service_worker_url,
       default_locale: SiteSetting.default_locale,
       asset_version: Discourse.assets_digest,
       disable_custom_css: loading_admin?,
       highlight_js_path: HighlightJs.path,
-      svg_sprite_path: SvgSprite.path(theme_id),
+      svg_sprite_path: SvgSprite.path(theme_ids),
       enable_js_error_reporting: GlobalSetting.enable_js_error_reporting,
       color_scheme_is_dark: dark_color_scheme?,
       user_color_scheme_id: scheme_id,
@@ -580,7 +534,7 @@ module ApplicationHelper
     }
 
     if Rails.env.development?
-      setup_data[:svg_icon_list] = SvgSprite.all_icons(theme_id)
+      setup_data[:svg_icon_list] = SvgSprite.all_icons(theme_ids)
 
       if ENV['DEBUG_PRELOADED_APP_DATA']
         setup_data[:debug_preloaded_app_data] = true
@@ -611,13 +565,6 @@ module ApplicationHelper
       absolute_url = "#{Discourse.base_url_no_prefix}#{link}"
     end
     absolute_url
-  end
-
-  def manifest_url
-    # If you want the `manifest_url` to be different for a specific action,
-    # in the action set @manifest_url = X. Originally added for chat to add a
-    # separate manifest
-    @manifest_url || "#{Discourse.base_path}/manifest.webmanifest"
   end
 
   def can_sign_up?

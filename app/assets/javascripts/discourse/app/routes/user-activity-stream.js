@@ -1,30 +1,19 @@
 import DiscourseRoute from "discourse/routes/discourse";
 import ViewingActionType from "discourse/mixins/viewing-action-type";
-import { action } from "@ember/object";
-import I18n from "I18n";
 
 export default DiscourseRoute.extend(ViewingActionType, {
   queryParams: {
     acting_username: { refreshModel: true },
   },
 
-  emptyStateOthers: I18n.t("user_activity.no_activity_others"),
-
   model() {
-    const user = this.modelFor("user");
-    const stream = user.get("stream");
-
-    return {
-      stream,
-      isAnotherUsersPage: this.isAnotherUsersPage(user),
-      emptyState: this.emptyState(),
-      emptyStateOthers: this.emptyStateOthers,
-    };
+    return this.modelFor("user").get("stream");
   },
 
   afterModel(model, transition) {
-    return model.stream.filterBy({
+    return model.filterBy({
       filter: this.userActionType,
+      noContentHelpKey: this.noContentHelpKey || "user_activity.no_default",
       actingUsername: transition.to.queryParams.acting_username,
     });
   },
@@ -38,15 +27,10 @@ export default DiscourseRoute.extend(ViewingActionType, {
     this.viewingActionType(this.userActionType);
   },
 
-  emptyState() {
-    const title = I18n.t("user_activity.no_activity_title");
-    const body = "";
-    return { title, body };
-  },
-
-  @action
-  didTransition() {
-    this.controllerFor("user-activity")._showFooter();
-    return true;
+  actions: {
+    didTransition() {
+      this.controllerFor("user-activity")._showFooter();
+      return true;
+    },
   },
 });

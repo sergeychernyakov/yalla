@@ -1,9 +1,8 @@
 import { COMPONENTS, THEMES } from "admin/models/theme";
-import { equal, gt, gte } from "@ember/object/computed";
+import { equal, gt } from "@ember/object/computed";
 import Component from "@ember/component";
 import discourseComputed from "discourse-common/utils/decorators";
 import { inject as service } from "@ember/service";
-import { action } from "@ember/object";
 
 export default Component.extend({
   router: service(),
@@ -11,12 +10,10 @@ export default Component.extend({
   COMPONENTS,
 
   classNames: ["themes-list"],
-  filterTerm: null,
 
   hasThemes: gt("themesList.length", 0),
   hasActiveThemes: gt("activeThemes.length", 0),
   hasInactiveThemes: gt("inactiveThemes.length", 0),
-  showFilter: gte("themesList.length", 10),
 
   themesTabActive: equal("currentTab", THEMES),
   componentsTabActive: equal("currentTab", COMPONENTS),
@@ -34,36 +31,28 @@ export default Component.extend({
     "themesList",
     "currentTab",
     "themesList.@each.user_selectable",
-    "themesList.@each.default",
-    "filterTerm"
+    "themesList.@each.default"
   )
   inactiveThemes(themes) {
-    let results;
     if (this.componentsTabActive) {
-      results = themes.filter(
-        (theme) => theme.get("parent_themes.length") <= 0
-      );
-    } else {
-      results = themes.filter(
-        (theme) => !theme.get("user_selectable") && !theme.get("default")
-      );
+      return themes.filter((theme) => theme.get("parent_themes.length") <= 0);
     }
-    return this._filterThemes(results, this.filterTerm);
+    return themes.filter(
+      (theme) => !theme.get("user_selectable") && !theme.get("default")
+    );
   },
 
   @discourseComputed(
     "themesList",
     "currentTab",
     "themesList.@each.user_selectable",
-    "themesList.@each.default",
-    "filterTerm"
+    "themesList.@each.default"
   )
   activeThemes(themes) {
-    let results;
     if (this.componentsTabActive) {
-      results = themes.filter((theme) => theme.get("parent_themes.length") > 0);
+      return themes.filter((theme) => theme.get("parent_themes.length") > 0);
     } else {
-      results = themes
+      return themes
         .filter((theme) => theme.get("user_selectable") || theme.get("default"))
         .sort((a, b) => {
           if (a.get("default") && !b.get("default")) {
@@ -77,29 +66,16 @@ export default Component.extend({
             .localeCompare(b.get("name").toLowerCase());
         });
     }
-    return this._filterThemes(results, this.filterTerm);
   },
 
-  _filterThemes(themes, term) {
-    term = term?.trim()?.toLowerCase();
-    if (!term) {
-      return themes;
-    }
-    return themes.filter(({ name }) => name.toLowerCase().includes(term));
-  },
-
-  @action
-  changeView(newTab) {
-    if (newTab !== this.currentTab) {
-      this.set("currentTab", newTab);
-      if (!this.showFilter) {
-        this.set("filterTerm", null);
+  actions: {
+    changeView(newTab) {
+      if (newTab !== this.currentTab) {
+        this.set("currentTab", newTab);
       }
-    }
-  },
-
-  @action
-  navigateToTheme(theme) {
-    this.router.transitionTo("adminCustomizeThemes.show", theme);
+    },
+    navigateToTheme(theme) {
+      this.router.transitionTo("adminCustomizeThemes.show", theme);
+    },
   },
 });

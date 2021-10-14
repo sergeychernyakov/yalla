@@ -47,14 +47,6 @@ class DiscourseSingleSignOn < SingleSignOn
     end
   end
 
-  def nonce_error
-    if Discourse.cache.read(used_nonce_key).present?
-      "Nonce has already been used"
-    else
-      "Nonce has expired"
-    end
-  end
-
   def return_path
     if SiteSetting.discourse_connect_csrf_protection
       @secure_session[nonce_key] || "/"
@@ -70,17 +62,11 @@ class DiscourseSingleSignOn < SingleSignOn
       else
         Discourse.cache.delete nonce_key
       end
-
-      Discourse.cache.write(used_nonce_key, return_path, expires_in: SingleSignOn.used_nonce_expiry_time)
     end
   end
 
   def nonce_key
     "SSO_NONCE_#{nonce}"
-  end
-
-  def used_nonce_key
-    "USED_SSO_NONCE_#{nonce}"
   end
 
   BANNED_EXTERNAL_IDS = %w{none nil blank null}
@@ -242,8 +228,8 @@ class DiscourseSingleSignOn < SingleSignOn
 
         user_params = {
           primary_email: UserEmail.new(email: email, primary: true),
-          name: try_name || User.suggest_name(try_username),
-          username: UserNameSuggester.suggest(try_username || try_name),
+          name: try_name || User.suggest_name(try_username || email),
+          username: UserNameSuggester.suggest(try_username || try_name || email),
           ip_address: ip_address
         }
 
@@ -356,7 +342,7 @@ class DiscourseSingleSignOn < SingleSignOn
 
     if card_background_url.present?
       card_background_missing = user.user_profile.card_background_upload.blank? || Upload.get_from_url(user.user_profile.card_background_upload.url).blank?
-      if card_background_missing || SiteSetting.discourse_connect_overrides_card_background
+      if card_background_missing || SiteSetting.discourse_connect_overrides_profile_background
         card_background_changed = sso_record.external_card_background_url != card_background_url
         if card_background_changed || card_background_missing
           Jobs.enqueue(:download_profile_background_from_url,

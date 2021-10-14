@@ -86,33 +86,18 @@ const AdminUser = User.extend({
   revokeAdmin() {
     return ajax(`/admin/users/${this.id}/revoke_admin`, {
       type: "PUT",
-    }).then((resp) => {
+    }).then(() => {
       this.setProperties({
         admin: false,
         can_grant_admin: true,
         can_revoke_admin: false,
-        can_be_merged: resp.can_be_merged,
-        can_be_anonymized: resp.can_be_anonymized,
-        can_be_deleted: resp.can_be_deleted,
-        can_delete_all_posts: resp.can_delete_all_posts,
       });
     });
   },
 
-  grantAdmin(data) {
+  grantAdmin() {
     return ajax(`/admin/users/${this.id}/grant_admin`, {
       type: "PUT",
-      data,
-    }).then((resp) => {
-      if (resp.success && !resp.email_confirmation_required) {
-        this.setProperties({
-          admin: true,
-          can_grant_admin: false,
-          can_revoke_admin: true,
-        });
-      }
-
-      return resp;
     });
   },
 
@@ -120,13 +105,11 @@ const AdminUser = User.extend({
     return ajax(`/admin/users/${this.id}/revoke_moderation`, {
       type: "PUT",
     })
-      .then((resp) => {
+      .then(() => {
         this.setProperties({
           moderator: false,
           can_grant_moderation: true,
           can_revoke_moderation: false,
-          can_be_merged: resp.can_be_merged,
-          can_be_anonymized: resp.can_be_anonymized,
         });
       })
       .catch(popupAjaxError);
@@ -136,13 +119,11 @@ const AdminUser = User.extend({
     return ajax(`/admin/users/${this.id}/grant_moderation`, {
       type: "PUT",
     })
-      .then((resp) => {
+      .then(() => {
         this.setProperties({
           moderator: true,
           can_grant_moderation: false,
           can_revoke_moderation: true,
-          can_be_merged: resp.can_be_merged,
-          can_be_anonymized: resp.can_be_anonymized,
         });
       })
       .catch(popupAjaxError);

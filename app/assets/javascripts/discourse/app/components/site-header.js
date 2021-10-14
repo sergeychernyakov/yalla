@@ -1,11 +1,12 @@
 import PanEvents, {
   SWIPE_DISTANCE_THRESHOLD,
+  SWIPE_VELOCITY,
   SWIPE_VELOCITY_THRESHOLD,
 } from "discourse/mixins/pan-events";
 import { cancel, later, schedule } from "@ember/runloop";
 import Docking from "discourse/mixins/docking";
 import MountWidget from "discourse/components/mount-widget";
-import ItsATrap from "@discourse/itsatrap";
+import Mousetrap from "mousetrap";
 import RerenderOnDoNotDisturbChange from "discourse/mixins/rerender-on-do-not-disturb-change";
 import { observes } from "discourse-common/utils/decorators";
 import { topicTitleDecorators } from "discourse/components/topic-title";
@@ -22,59 +23,40 @@ const SiteHeaderComponent = MountWidget.extend(
     _isPanning: false,
     _panMenuOrigin: "right",
     _panMenuOffset: 0,
+    _scheduledMovingAnimation: null,
     _scheduledRemoveAnimate: null,
     _topic: null,
-    _itsatrap: null,
+    _mousetrap: null,
 
     @observes(
       "currentUser.unread_notifications",
       "currentUser.unread_high_priority_notifications",
-      "currentUser.reviewable_count",
-      "session.defaultColorSchemeIsDark",
-      "session.darkModeAvailable"
+      "currentUser.reviewable_count"
     )
     notificationsChanged() {
       this.queueRerender();
     },
 
-    _animateOpening(panel) {
-      const headerCloak = document.querySelector(".header-cloak");
-      panel.classList.add("animate");
-      headerCloak.classList.add("animate");
-      this._scheduledRemoveAnimate = later(() => {
-        panel.classList.remove("animate");
-        headerCloak.classList.remove("animate");
-      }, 200);
-      panel.style.setProperty("--offset", 0);
-      headerCloak.style.setProperty("--opacity", 0.5);
+    _animateOpening($panel) {
+      $panel.css({ right: "", left: "" });
       this._panMenuOffset = 0;
     },
 
-    _animateClosing(panel, menuOrigin) {
-      const windowWidth = document.body.offsetWidth;
+    _animateClosing($panel, menuOrigin, windowWidth) {
+      $panel.css(menuOrigin, -windowWidth);
       this._animate = true;
-      const headerCloak = document.querySelector(".header-cloak");
-      panel.classList.add("animate");
-      headerCloak.classList.add("animate");
-      const offsetDirection = menuOrigin === "left" ? -1 : 1;
-      panel.style.setProperty("--offset", `${offsetDirection * windowWidth}px`);
-      headerCloak.style.setProperty("--opacity", 0);
-      this._scheduledRemoveAnimate = later(() => {
-        panel.classList.remove("animate");
-        headerCloak.classList.remove("animate");
-        schedule("afterRender", () => {
-          this.eventDispatched("dom:clean", "header");
-          this._panMenuOffset = 0;
-        });
-      }, 200);
+      schedule("afterRender", () => {
+        this.eventDispatched("dom:clean", "header");
+        this._panMenuOffset = 0;
+      });
     },
 
     _isRTL() {
-      return document.querySelector("html").classList["direction"] === "rtl";
+      return $("html").css("direction") === "rtl";
     },
 
     _leftMenuClass() {
-      return this._isRTL() ? "user-menu" : "hamburger-panel";
+      return this._isRTL() ? ".user-menu" : ".hamburger-panel";
     },
 
     _leftMenuAction() {
@@ -85,15 +67,28 @@ const SiteHeaderComponent = MountWidget.extend(
       return this._isRTL() ? "toggleHamburger" : "toggleUserMenu";
     },
 
-    _handlePanDone(event) {
-      const menuPanels = document.querySelectorAll(".menu-panel");
+    _handlePanDone(offset, event) {
+      const $window = $(window);
+      const windowWidth = $window.width();
+      const $menuPanels = $(".menu-panel");
       const menuOrigin = this._panMenuOrigin;
-      menuPanels.forEach((panel) => {
-        panel.classList.remove("moving");
-        if (this._shouldMenuClose(event, menuOrigin)) {
-          this._animateClosing(panel, menuOrigin);
+      this._shouldMenuClose(event, menuOrigin)
+        ? (offset += SWIPE_VELOCITY)
+        : (offset -= SWIPE_VELOCITY);
+      $menuPanels.each((idx, panel) => {
+        const $panel = $(panel);
+        const $headerCloak = $(".header-cloak");
+        $panel.css(menuOrigin, -offset);
+        $headerCloak.css("opacity", Math.min(0.5, (300 - offset) / 600));
+        if (offset > windowWidth) {
+          this._animateClosing($panel, menuOrigin, windowWidth);
+        } else if (offset <= 0) {
+          this._animateOpening($panel);
         } else {
-          this._animateOpening(panel);
+          //continue to open or close menu
+          this._scheduledMovingAnimation = window.requestAnimationFrame(() =>
+            this._handlePanDone(offset, event)
+          );
         }
       });
     },
@@ -119,23 +114,15 @@ const SiteHeaderComponent = MountWidget.extend(
 
     panStart(e) {
       const center = e.center;
-      const panOverValidElement = document
-        .elementsFromPoint(center.x, center.y)
-        .some(
-          (ele) =>
-            ele.classList.contains("panel-body") ||
-            ele.classList.contains("header-cloak")
-        );
+      const $centeredElement = $(document.elementFromPoint(center.x, center.y));
       if (
-        panOverValidElement &&
+        ($centeredElement.hasClass("panel-body") ||
+          $centeredElement.hasClass("header-cloak") ||
+          $centeredElement.parents(".panel-body").length) &&
         (e.direction === "left" || e.direction === "right")
       ) {
         e.originalEvent.preventDefault();
         this._isPanning = true;
-        const panel = document.querySelector(".menu-panel");
-        if (panel) {
-          panel.classList.add("moving");
-        }
       } else {
         this._isPanning = false;
       }
@@ -146,58 +133,59 @@ const SiteHeaderComponent = MountWidget.extend(
         return;
       }
       this._isPanning = false;
-      this._handlePanDone(e);
+      $(".menu-panel").each((idx, panel) => {
+        const $panel = $(panel);
+        let offset = $panel.css("right");
+        if (this._panMenuOrigin === "left") {
+          offset = $panel.css("left");
+        }
+        offset = Math.abs(parseInt(offset, 10));
+        this._handlePanDone(offset, e);
+      });
     },
 
     panMove(e) {
       if (!this._isPanning) {
         return;
       }
-      const panel = document.querySelector(".menu-panel");
-      const headerCloak = document.querySelector(".header-cloak");
-      if (this._panMenuOrigin === "right") {
-        const pxClosed = Math.min(0, -e.deltaX + this._panMenuOffset);
-        panel.style.setProperty("--offset", `${-pxClosed}px`);
-        headerCloak.style.setProperty(
-          "--opacity",
-          Math.min(0.5, (300 + pxClosed) / 600)
-        );
-      } else {
-        const pxClosed = Math.min(0, e.deltaX + this._panMenuOffset);
-        panel.style.setProperty("--offset", `${pxClosed}px`);
-        headerCloak.style.setProperty(
-          "--opacity",
-          Math.min(0.5, (300 + pxClosed) / 600)
-        );
-      }
+      const $menuPanels = $(".menu-panel");
+      $menuPanels.each((idx, panel) => {
+        const $panel = $(panel);
+        const $headerCloak = $(".header-cloak");
+        if (this._panMenuOrigin === "right") {
+          const pxClosed = Math.min(0, -e.deltaX + this._panMenuOffset);
+          $panel.css("right", pxClosed);
+          $headerCloak.css("opacity", Math.min(0.5, (300 + pxClosed) / 600));
+        } else {
+          const pxClosed = Math.min(0, e.deltaX + this._panMenuOffset);
+          $panel.css("left", pxClosed);
+          $headerCloak.css("opacity", Math.min(0.5, (300 + pxClosed) / 600));
+        }
+      });
     },
 
     dockCheck(info) {
-      const header = document.querySelector("header.d-header");
+      const $header = $("header.d-header");
 
       if (this.docAt === null) {
-        if (!header) {
+        if (!($header && $header.length === 1)) {
           return;
         }
-        this.docAt = header.offsetTop;
+        this.docAt = $header.offset().top;
       }
 
+      const $body = $("body");
       const offset = info.offset();
-      const headerRect = header.getBoundingClientRect(),
-        headerOffset = headerRect.top + headerRect.height,
-        doc = document.documentElement;
       if (offset >= this.docAt) {
         if (!this.dockedHeader) {
-          document.body.classList.add("docked");
+          $body.addClass("docked");
           this.dockedHeader = true;
-          doc.style.setProperty("--header-offset", `${headerOffset}px`);
         }
       } else {
         if (this.dockedHeader) {
-          document.body.classList.remove("docked");
+          $body.removeClass("docked");
           this.dockedHeader = false;
         }
-        doc.style.setProperty("--header-offset", `${headerOffset}px`);
       }
     },
 
@@ -209,20 +197,20 @@ const SiteHeaderComponent = MountWidget.extend(
 
     willRender() {
       if (this.get("currentUser.staff")) {
-        document.body.classList.add("staff");
+        $("body").addClass("staff");
       }
     },
 
     didInsertElement() {
       this._super(...arguments);
-      this._resizeDiscourseMenuPanel = () => this.afterRender();
-      window.addEventListener("resize", this._resizeDiscourseMenuPanel);
+      $(window).on("resize.discourse-menu-panel", () => this.afterRender());
 
       this.appEvents.on("header:show-topic", this, "setTopic");
       this.appEvents.on("header:hide-topic", this, "setTopic");
 
       this.dispatch("notifications:changed", "user-notifications");
       this.dispatch("header:keyboard-trigger", "header");
+      this.dispatch("search-autocomplete:after-complete", "search-term");
       this.dispatch("user-menu:navigation", "user-menu");
 
       this.appEvents.on("dom:clean", this, "_cleanDom");
@@ -263,8 +251,8 @@ const SiteHeaderComponent = MountWidget.extend(
       }
 
       const header = document.querySelector("header.d-header");
-      this._itsatrap = new ItsATrap(header);
-      this._itsatrap.bind(["right", "left"], (e) => {
+      this._mousetrap = new Mousetrap(header);
+      this._mousetrap.bind(["right", "left"], (e) => {
         const activeTab = document.querySelector(".glyphs .menu-link.active");
 
         if (activeTab) {
@@ -291,16 +279,16 @@ const SiteHeaderComponent = MountWidget.extend(
     willDestroyElement() {
       this._super(...arguments);
 
-      window.removeEventListener("resize", this._resizeDiscourseMenuPanel);
+      $(window).off("resize.discourse-menu-panel");
 
       this.appEvents.off("header:show-topic", this, "setTopic");
       this.appEvents.off("header:hide-topic", this, "setTopic");
       this.appEvents.off("dom:clean", this, "_cleanDom");
 
       cancel(this._scheduledRemoveAnimate);
+      window.cancelAnimationFrame(this._scheduledMovingAnimation);
 
-      this._itsatrap?.destroy();
-      this._itsatrap = null;
+      this._mousetrap.reset();
 
       document.removeEventListener("click", this._dismissFirstNotification);
     },
@@ -320,24 +308,25 @@ const SiteHeaderComponent = MountWidget.extend(
         );
       }
 
-      const menuPanels = document.querySelectorAll(".menu-panel");
-      if (menuPanels.length === 0) {
+      const $menuPanels = $(".menu-panel");
+      if ($menuPanels.length === 0) {
         if (this.site.mobileView) {
           this._animate = true;
         }
         return;
       }
 
-      const windowWidth = document.body.offsetWidth;
-      const headerWidth =
-        document.querySelector("#main-outlet .container").offsetWidth || 1100;
-      const remaining = (windowWidth - headerWidth) / 2;
-      const viewMode =
-        this.site.mobileView || remaining < 50 ? "slide-in" : "drop-down";
+      const $window = $(window);
+      const windowWidth = $window.width();
 
-      menuPanels.forEach((panel) => {
-        const headerCloak = document.querySelector(".header-cloak");
-        let width = parseInt(panel.getAttribute("data-max-width"), 10) || 300;
+      const headerWidth = $("#main-outlet .container").width() || 1100;
+      const remaining = (windowWidth - headerWidth) / 2;
+      const viewMode = remaining < 50 ? "slide-in" : "drop-down";
+
+      $menuPanels.each((idx, panel) => {
+        const $panel = $(panel);
+        const $headerCloak = $(".header-cloak");
+        let width = parseInt($panel.attr("data-max-width"), 10) || 300;
         if (windowWidth - width < 50) {
           width = windowWidth - 50;
         }
@@ -345,51 +334,51 @@ const SiteHeaderComponent = MountWidget.extend(
           this._panMenuOffset = -width;
         }
 
-        panel.classList.remove("drop-down");
-        panel.classList.remove("slide-in");
-        panel.classList.add(viewMode);
+        $panel.removeClass("drop-down slide-in").addClass(viewMode);
         if (this._animate || this._panMenuOffset !== 0) {
+          $headerCloak.css("opacity", 0);
           if (
             this.site.mobileView &&
-            panel.parentElement.classList.contains(this._leftMenuClass())
+            $panel.parent(this._leftMenuClass()).length > 0
           ) {
             this._panMenuOrigin = "left";
-            panel.style.setProperty("--offset", `${-windowWidth}px`);
+            $panel.css("left", -windowWidth);
           } else {
             this._panMenuOrigin = "right";
-            panel.style.setProperty("--offset", `${windowWidth}px`);
+            $panel.css("right", -windowWidth);
           }
-          headerCloak.style.setProperty("--opacity", 0);
         }
 
-        const panelBody = panel.querySelector(".panel-body");
+        const $panelBody = $(".panel-body", $panel);
 
         // We use a mutationObserver to check for style changes, so it's important
-        // we don't set it if it doesn't change. Same goes for the panelBody!
+        // we don't set it if it doesn't change. Same goes for the $panelBody!
+        const style = $panel.prop("style");
 
         if (viewMode === "drop-down") {
-          const buttonPanel = document.querySelectorAll("header ul.icons");
-          if (buttonPanel.length === 0) {
+          const $buttonPanel = $("header ul.icons");
+          if ($buttonPanel.length === 0) {
             return;
           }
 
           // These values need to be set here, not in the css file - this is to deal with the
           // possibility of the window being resized and the menu changing from .slide-in to .drop-down.
-          if (panel.style.top !== "100%" || panel.style.height !== "auto") {
-            panel.style.setProperty("top", "100%");
-            panel.style.setProperty("height", "auto");
+          if (style.top !== "100%" || style.height !== "auto") {
+            $panel.css({ top: "100%", height: "auto" });
           }
 
-          document.body.classList.add("drop-down-mode");
+          $("body").addClass("drop-down-mode");
         } else {
           if (this.site.mobileView) {
-            headerCloak.style.display = "block";
+            $headerCloak.show();
           }
 
           const menuTop = this.site.mobileView ? headerTop() : headerHeight();
 
           const winHeightOffset = 16;
-          let initialWinHeight = window.innerHeight;
+          let initialWinHeight = window.innerHeight
+            ? window.innerHeight
+            : $(window).height();
           const winHeight = initialWinHeight - winHeightOffset;
 
           let height;
@@ -405,26 +394,27 @@ const SiteHeaderComponent = MountWidget.extend(
             height = winHeight - menuTop - iPadOffset;
           }
 
-          if (panelBody.style.height !== "100%") {
-            panelBody.style.setProperty("height", "100%");
+          if ($panelBody.prop("style").height !== "100%") {
+            $panelBody.height("100%");
           }
-          if (
-            panel.style.top !== `${menuTop}px` ||
-            panel.style[heightProp] !== `${height}px`
-          ) {
-            panel.style.top = `${menuTop}px`;
-            panel.style.setProperty(heightProp, `${height}px`);
-            if (headerCloak) {
-              headerCloak.style.top = `${menuTop}px`;
-            }
+          if (style.top !== menuTop + "px" || style[heightProp] !== height) {
+            $panel.css({ top: menuTop + "px", [heightProp]: height });
+            $(".header-cloak").css({ top: menuTop + "px" });
           }
-          document.body.classList.remove("drop-down-mode");
+          $("body").removeClass("drop-down-mode");
         }
 
-        panel.style.setProperty("width", `${width}px`);
+        $panel.width(width);
         if (this._animate) {
-          this._animateOpening(panel);
+          $panel.addClass("animate");
+          $headerCloak.addClass("animate");
+          this._scheduledRemoveAnimate = later(() => {
+            $panel.removeClass("animate");
+            $headerCloak.removeClass("animate");
+          }, 200);
         }
+        $panel.css({ right: "", left: "" });
+        $headerCloak.css("opacity", 0.5);
         this._animate = false;
       });
     },
@@ -436,19 +426,21 @@ export default SiteHeaderComponent.extend({
 });
 
 export function headerHeight() {
-  const header = document.querySelector("header.d-header");
+  const $header = $("header.d-header");
 
   // Header may not exist in tests (e.g. in the user menu component test).
-  if (!header) {
+  if ($header.length === 0) {
     return 0;
   }
 
-  const headerOffsetTop = header.offsetTop ? header.offsetTop : 0;
-  return header.offsetHeight + headerOffsetTop - document.body.scrollTop;
+  const headerOffset = $header.offset();
+  const headerOffsetTop = headerOffset ? headerOffset.top : 0;
+  return $header.outerHeight() + headerOffsetTop - $(window).scrollTop();
 }
 
 export function headerTop() {
-  const header = document.querySelector("header.d-header");
-  const headerOffsetTop = header.offsetTop ? header.offsetTop : 0;
-  return headerOffsetTop - document.body.scrollTop;
+  const $header = $("header.d-header");
+  const headerOffset = $header.offset();
+  const headerOffsetTop = headerOffset ? headerOffset.top : 0;
+  return headerOffsetTop - $(window).scrollTop();
 }

@@ -98,7 +98,7 @@ const Presence = EmberObject.extend({
 
   @discourseComputed("topicId")
   channel(topicId) {
-    return `/presence-plugin/${topicId}`;
+    return `/presence/${topicId}`;
   },
 
   publish(state, whisper, postId, staffOnly) {
@@ -134,7 +134,7 @@ const Presence = EmberObject.extend({
       data.staff_only = true;
     }
 
-    return ajax("/presence-plugin/publish", {
+    return ajax("/presence/publish", {
       type: "POST",
       data,
     });

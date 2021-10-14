@@ -94,6 +94,7 @@ hu:
       show_trimmed_content: "Levágott tartalom megjelenítése"
       no_subject: "(nincs tárgy)"
       no_body: "(nincs törzs)"
+      missing_attachment: "(A(z) %{filename} melléklet hiányzik)"
       errors:
         empty_email_error: "Akkor fordul elő, ha üres volt a kapott nyers e-mail."
         no_message_id_error: "Akkor történik, ha a levélnek nincs „Message-Id” fejléce."
@@ -132,7 +133,7 @@ hu:
       emojis_disabled: "nem tartalmazhat emodzsit"
       restrict_dependent_destroy:
         one: "Nem lehet törölni a rekordot, mert létezik egy függő %{record}"
-        other: "Nem lehet törölni a rekordot, mert létezik függő %{record}"
+        many: "Nem lehet törölni a rekordot, mert létezik függő %{record}"
       too_long:
         one: túl hosszú (legfeljebb %{count} karakter lehet)
         other: túl hosszú (legfeljebb %{count} karakter lehet)
@@ -168,6 +169,9 @@ hu:
     not_enough_space_on_disk: "Nincs elég hely a lemezen a biztonsági mentés feltöltéséhez."
     invalid_filename: "A mentési fájlnév érvénytelen karaktereket tartalmaz. Érvényes karakterek: a-z 0-9 . - _."
     file_exists: "A fájl, amit próbál feltölteni, már létezik."
+    location:
+      local: "Helyi"
+      s3: "Amazon S3"
   invalid_params: "Érvénytelen paramétereket adott meg a kéréshez: %{message}"
   not_logged_in: "Ehhez be kell jelentkeznie."
   not_found: "A kért URL vagy erőforrás nem található."
@@ -411,8 +415,16 @@ hu:
       topic_exists_no_oldest: "A kategóriát nem lehet törölni, mert a benne lévő témák száma %{count}."
     uncategorized_description: "Témák, amelyeknek nincs szükségük kategóriára, vagy nem férnek bele semmilyen más létező kategóriába."
   trust_levels:
-    admin: "Adminisztrátor"
-    staff: "Személyzet"
+    newuser:
+      title: "új felhasználó"
+    basic:
+      title: "egyszerű felhasználó"
+    member:
+      title: "tag"
+    regular:
+      title: "rendes tag"
+    leader:
+      title: "vezető"
   post:
     image_placeholder:
       broken: "Ez a kép hibás"
@@ -571,9 +583,18 @@ hu:
       description: "Bejegyzés kedvelése"
       short_description: "Bejegyzés kedvelése"
   user_activity:
+    no_default:
+      self: "Még nincsenek tevékenységek."
+      others: "Nincsenek tevékenységek."
     no_bookmarks:
       self: "Nincsenek könyvjelzővel ellátott bejegyzéseid; a könyvjelzők segítségével gyorsan hivatkozhatsz bizonyos bejegyzésekre."
       others: "Nincsenek könyvjelzők."
+    no_likes_given:
+      self: "Egyetlen bejegyzést sem kedvelt."
+      others: "Nincsenek kedvelt bejegyzések."
+    no_replies:
+      self: "Nem válaszoltál még egyetlen bejegyzésre sem."
+      others: "Nincsenek válaszok."
     no_drafts:
       self: "Nincsenek még piszkozataid. Kezdj választ írni bármelyik témához, és ha nem küldöd el, automatikusan elmentjük piszkozatként."
   topic_flag_types:
@@ -599,8 +620,9 @@ hu:
         remove: "Ez a téma már nem kiemelt. Ezt követően nem jelenik meg minden oldal tetején."
   unsubscribed:
     title: "Az e-mail beállítások frissítve!"
-    topic_description: "A(z) %{link} témára történő újbóli feliratkozáshoz használja a téma alján vagy jobb oldalán található értesítési vezérlőt."
-    private_topic_description: "Az újbóli feliratkozáshoz használja a téma alján vagy jobb oldalán található értesítési vezérlőt."
+    description: "a (z) <b>%{email}</b> e-mail beállításai frissültek. Az e-mail beállítások módosításához <a href='%{url}'>keresse fel a felhasználói beállításokat</a>."
+    topic_description: "A %{link}újbóli feliratkozásához használja a téma alján vagy jobbján található értesítési vezérlőt."
+    private_topic_description: "A újbóli feliratkozásához használja a téma alján vagy jobbján található értesítési vezérlőt."
   unsubscribe:
     title: "Leiratkozás"
     stop_watching_topic: "Ne figyelje tovább ezt a kategóriát: %{link}"
@@ -864,7 +886,6 @@ hu:
     host_names_warning: "A config/database.yml fájl az alapértelmezett „localhost” domaint használja. Állítsa be az oldala saját domain nevét."
     memory_warning: "A kiszolgáló kevesebb mint 1 GB memóriával rendelkezik. Legalább 1 GB memória ajánlott."
   site_settings:
-    disabled: "kikapcsolva"
     max_emojis_in_title: "A témacímekben lévő emodzsik legnagyobb száma"
     post_excerpt_maxlength: "A bejegyzés kivonatának / összefoglalójának maximális hossza."
     topic_excerpt_maxlength: "A témakör kivonatának / összefoglalójának maximális hossza a téma első bejegyzéséből generálva."
@@ -873,12 +894,12 @@ hu:
     enable_badges: "A jelvény rendszer engedélyezése"
     min_password_length: "Minimum jelszóhossz."
     block_common_passwords: "A 10 000 leggyakoribb jelszó tiltása."
+    discourse_connect_overrides_profile_background: "Felülírja a felhasználói profil hátterét a külső webhely-avatarral a DiscourseConnect payloadból."
     rate_limit_new_user_create_topic: "Egy téma létrehozása után az új felhasználóknak (n) másodpercet kell várniuk, mielőtt új témát hoznának létre."
     suggested_topics: "A javasolt témák száma a téma alján láthatók."
     limit_suggested_to_category: "Csak a javasolt kategóriákból származó témakörök jelenhetnek meg a javasolt témakörökben."
     suggested_topics_max_days_old: "A javasolt olvasatlan témák nem lehetnek több, mint n naposak."
     suggested_topics_unread_max_days_old: "A javasolt olvasatlan témák nem lehetnek több, mint n naposak."
-    external_emoji_url: "Az emodzsi képek külső szolgáltatásának URL-je. A letiltáshoz hagyja üresen."
     selectable_avatars: "A felhasználó által választható avatarok listája."
     recompress_original_jpg_quality: "A feltöltött képfájlok minősége (1 – legalacsonyabb, 99 – legjobb, 100 – letiltás)."
     image_preview_jpg_quality: "Az átméretezett képfájlok minősége (1 – legalacsonyabb, 99 – legjobb, 100 – letiltás)."
@@ -924,6 +945,7 @@ hu:
     not_found: "A fiókod nem található. Kérjük, lépj kapcsolatba a webhely rendszergazdájával."
     account_not_approved: "A fiókod jóváhagyásra vár. A jóváhagyásról e-mailben küldünk majd neked értesítést."
   original_poster: "Eredeti szerző"
+  most_posts: "Legtöbb bejegyzés"
   most_recent_poster: "Legutóbbi szerzők"
   frequent_poster: "Gyakori szerzők"
   redirected_to_top_reasons:
@@ -1389,28 +1411,6 @@ hu:
         %{context}
 
         %{respond_instructions}
-    user_group_mentioned_pm:
-      subject_template: "[%{email_prefix}] [PÜ] %{topic_title}"
-      text_body_template: |2
-
-        %{header_instructions}
-
-        %{message}
-
-        %{context}
-
-        %{respond_instructions}
-    user_group_mentioned_pm_group:
-      subject_template: "[%{email_prefix}] [PÜ] %{topic_title}"
-      text_body_template: |2
-
-        %{header_instructions}
-
-        %{message}
-
-        %{context}
-
-        %{respond_instructions}
     user_posted:
       subject_template: "[%{email_prefix}] %{topic_title}"
       text_body_template: |2
@@ -1652,8 +1652,6 @@ hu:
     sender_post_deleted: "a választ törölték"
     sender_message_to_invalid: "a címzett e-mail címe érvénytelen"
     sender_topic_deleted: "Ez a témakör ki lett törölve"
-    group_smtp_post_deleted: "a választ törölték"
-    group_smtp_topic_deleted: "Ez a témakör ki lett törölve"
   color_schemes:
     base_theme_name: "Alap"
     light: "Világos"
@@ -1802,7 +1800,7 @@ hu:
     first_quote:
       name: Első idézet
       long_description: |
-        Ezt a jelvényt akkor kapja meg, amikor első alkalommal idéz egy bejegyzést a válaszában. A válaszban a korábbi bejegyzések releváns részeinek idézése segít a megbeszélések és témák összekapcsolásában. Az idézés legegyszerűbb módja, ha kiemeleia bejegyzés egy részét, majd megnyomja bármelyik válasz gombot. Idézzen gyakran!
+        Ezt a jelvényt akkor kapod meg, amikor első alkalommal idézel egy bejegyzést a válaszodban. A válaszban a korábbi bejegyzések releváns részeinek idézése segít a megbeszélések és témák összekapcsolódásában. Az idézés legegyszerűbb módja, ha kiemeled a bejegyzés egy részét, majd megnyomod bármelyik válasz gombot. Idézz nagylelkűen!
     read_guidelines:
       name: Irányelvek elolvasva
       long_description: |
@@ -1957,22 +1955,12 @@ hu:
           company_name:
             label: "Cégnév"
             placeholder: "Példa szervezet"
-      styling:
+      colors:
+        title: "Színek"
+      fonts:
         fields:
-          styling_preview:
+          font_preview:
             label: "Előnézet"
-          homepage_style:
-            choices:
-              latest:
-                label: "Legutóbbi témák"
-              categories_only:
-                label: "Csak kategóriák szerint"
-              categories_with_featured_topics:
-                label: "Kategóriák funkciók szerint"
-              categories_and_latest_topics:
-                label: "Kategóriák és legutóbbi témák"
-              categories_and_top_topics:
-                label: "Kategóriák és legfelső témák"
       logos:
         title: "Logók"
         fields:
@@ -1983,6 +1971,21 @@ hu:
         fields:
           large_icon:
             label: "Nagy ikon"
+      homepage:
+        title: "Főoldal"
+        fields:
+          homepage_style:
+            choices:
+              latest:
+                label: "Legutóbbi témák"
+              categories_only:
+                label: "Csak kategóriák"
+              categories_with_featured_topics:
+                label: "Kategóriák kiemelt témákkal"
+              categories_and_latest_topics:
+                label: "Kategóriák és legutóbbi témák"
+              categories_and_top_topics:
+                label: "Kategóriák és legnépszerűbb témák"
       invites:
         title: "Stáb meghívása"
       finished:
@@ -2015,6 +2018,8 @@ hu:
       low: "Alacsony"
       medium: "Közepes"
       high: "Magas"
+    reasons:
+      suspect_user: "Ez az új felhasználó anélkül adta meg a profil adatait, hogy bármilyen témát vagy bejegyzést olvasott volna, ami erősen azt sugallja, hogy spamelők lehetnek. See `approve_suspect_users`."
     actions:
       agree_and_keep:
         title: "Bejegyzés megtartása"
@@ -2030,6 +2035,8 @@ hu:
       agree_and_hide:
         title: "Bejegyzés elrejtése"
         description: "Bejegyzés elrejtése, és automatikus üzenet küldése a létrehozójának, hogy módosítson rajta."
+      delete_spammer:
+        title: "Spammer törlése"
       delete_single:
         title: "Törlés"
       delete:
@@ -2061,6 +2068,8 @@ hu:
           title: "Felhasználó törlése"
       reject:
         title: "Elutasítás"
+      delete_user:
+        title: "Felhasználó törlése"
   notification_level:
     ignore_error: "Sajnáljuk, de nem tilthatod le ezt a felhasználót"
   old_keys_reminder:
@@ -2078,7 +2087,6 @@ hu:
       other: "%{topic_title} (%{count}. rész)"
     post_raw: "Beszélgetés folytatása innen: %{parent_url}.\n\nElőző beszélgetések:\n\n%{previous_topics}"
     small_action_post_raw: "Beszélgetés folytatása itt: %{new_title}."
-  fallback_username: "felhasználó"
   activemodel:
     errors:
       <<: *errors

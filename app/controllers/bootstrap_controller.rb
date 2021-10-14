@@ -3,8 +3,6 @@
 class BootstrapController < ApplicationController
   include ApplicationHelper
 
-  skip_before_action :redirect_to_login_if_required
-
   # This endpoint allows us to produce the data required to start up Discourse via JSON API,
   # so that you don't have to scrape the HTML for `data-*` payloads
   def index
@@ -17,10 +15,8 @@ class BootstrapController < ApplicationController
     end
 
     @stylesheets = []
-
-    add_scheme(scheme_id, "all", "light-scheme")
-    add_scheme(dark_scheme_id, "(prefers-color-scheme: dark)", "dark-scheme")
-
+    add_scheme(scheme_id, 'all')
+    add_scheme(dark_scheme_id, '(prefers-color-scheme: dark)')
     if rtl?
       add_style(mobile_view? ? :mobile_rtl : :desktop_rtl)
     else
@@ -36,7 +32,7 @@ class BootstrapController < ApplicationController
     ).each do |file|
       add_style(file, plugin: true)
     end
-    add_style(mobile_view? ? :mobile_theme : :desktop_theme) if theme_id.present?
+    add_style(mobile_view? ? :mobile_theme : :desktop_theme) if theme_ids.present?
 
     extra_locales = []
     if ExtraLocalesController.client_overrides_exist?
@@ -53,8 +49,7 @@ class BootstrapController < ApplicationController
     ).map { |f| script_asset_path(f) }
 
     bootstrap = {
-      theme_id: theme_id,
-      theme_color: "##{ColorScheme.hex_for_name('header_background', scheme_id)}",
+      theme_ids: theme_ids,
       title: SiteSetting.title,
       current_homepage: current_homepage,
       locale_script: locale,
@@ -67,8 +62,7 @@ class BootstrapController < ApplicationController
       theme_html: create_theme_html,
       html_classes: html_classes,
       html_lang: html_lang,
-      login_path: main_app.login_path,
-      authentication_data: authentication_data
+      login_path: main_app.login_path
     }
     bootstrap[:extra_locales] = extra_locales if extra_locales.present?
     bootstrap[:csrf_token] = form_authenticity_token if current_user
@@ -77,16 +71,17 @@ class BootstrapController < ApplicationController
   end
 
 private
-  def add_scheme(scheme_id, media, css_class)
+  def add_scheme(scheme_id, media)
     return if scheme_id.to_i == -1
+    theme_id = theme_ids&.first
 
-    if style = Stylesheet::Manager.new(theme_id: theme_id).color_scheme_stylesheet_details(scheme_id, media)
-      @stylesheets << { href: style[:new_href], media: media, class: css_class }
+    if style = Stylesheet::Manager.color_scheme_stylesheet_details(scheme_id, media, theme_id)
+      @stylesheets << { href: style[:new_href], media: media }
     end
   end
 
   def add_style(target, opts = nil)
-    if styles = Stylesheet::Manager.new(theme_id: theme_id).stylesheet_details(target, 'all')
+    if styles = Stylesheet::Manager.stylesheet_details(target, 'all', theme_ids)
       styles.each do |style|
         @stylesheets << {
           href: style[:new_href],
@@ -120,11 +115,11 @@ private
 
     theme_view = mobile_view? ? :mobile : :desktop
 
-    add_if_present(theme_html, :body_tag, Theme.lookup_field(theme_id, theme_view, 'body_tag'))
-    add_if_present(theme_html, :head_tag, Theme.lookup_field(theme_id, theme_view, 'head_tag'))
-    add_if_present(theme_html, :header, Theme.lookup_field(theme_id, theme_view, 'header'))
-    add_if_present(theme_html, :translations, Theme.lookup_field(theme_id, :translations, I18n.locale))
-    add_if_present(theme_html, :js, Theme.lookup_field(theme_id, :extra_js, nil))
+    add_if_present(theme_html, :body_tag, Theme.lookup_field(theme_ids, theme_view, 'body_tag'))
+    add_if_present(theme_html, :head_tag, Theme.lookup_field(theme_ids, theme_view, 'head_tag'))
+    add_if_present(theme_html, :header, Theme.lookup_field(theme_ids, theme_view, 'header'))
+    add_if_present(theme_html, :translations, Theme.lookup_field(theme_ids, :translations, I18n.locale))
+    add_if_present(theme_html, :js, Theme.lookup_field(theme_ids, :extra_js, nil))
 
     theme_html
   end

@@ -6,40 +6,32 @@ import { userPath } from "discourse/lib/url";
 let maxGroupMention;
 
 function replaceSpan($e, username, opts) {
-  let extra = {};
-  let extraClass = [];
-  const element = $e[0];
-  const a = document.createElement("a");
+  let extra = "";
+  let extraClass = "";
 
   if (opts && opts.group) {
     if (opts.mentionable) {
-      extra = {
-        name: username,
-        mentionableUserCount: opts.mentionable.user_count,
-        maxMentions: maxGroupMention,
-      };
-      extraClass.push("notify");
+      extra = `data-name='${username}' data-mentionable-user-count='${opts.mentionable.user_count}' data-max-mentions='${maxGroupMention}'`;
+      extraClass = "notify";
     }
-
-    a.setAttribute("href", getURL("/g/") + username);
-    a.classList.add("mention-group", ...extraClass);
-    a.innerText = `@${username}`;
+    $e.replaceWith(
+      `<a href='${
+        getURL("/g/") + username
+      }' class='mention-group ${extraClass}' ${extra}>@${username}</a>`
+    );
   } else {
     if (opts && opts.cannot_see) {
-      extra = { name: username };
-      extraClass.push("cannot-see");
+      extra = `data-name='${username}'`;
+      extraClass = "cannot-see";
     }
-
-    a.href = userPath(username.toLowerCase());
-    a.classList.add("mention", ...extraClass);
-    a.innerText = `@${formatUsername(username)}`;
+    $e.replaceWith(
+      `<a href='${userPath(
+        username.toLowerCase()
+      )}' class='mention ${extraClass}' ${extra}>@${formatUsername(
+        username
+      )}</a>`
+    );
   }
-
-  Object.keys(extra).forEach((key) => {
-    a.dataset[key] = extra[key];
-  });
-
-  element.replaceWith(a);
 }
 
 const found = {};

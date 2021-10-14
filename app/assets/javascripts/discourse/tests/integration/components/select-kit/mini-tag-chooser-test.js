@@ -42,16 +42,10 @@ discourseModule(
 
         await this.subject.expand();
         await this.subject.fillInFilter("mon");
-        assert.equal(
-          queryAll(".select-kit-row").text().trim(),
-          "monkey x1\ngazelle x2"
-        );
+        assert.equal(queryAll(".select-kit-row").text().trim(), "monkey x1");
         await this.subject.fillInFilter("key");
-        assert.equal(
-          queryAll(".select-kit-row").text().trim(),
-          "monkey x1\ngazelle x2"
-        );
-        await this.subject.selectRowByValue("monkey");
+        assert.equal(queryAll(".select-kit-row").text().trim(), "monkey x1");
+        await this.subject.keyboard("enter");
 
         assert.equal(this.subject.header().value(), "foo,bar,monkey");
       },
@@ -70,7 +64,7 @@ discourseModule(
 
         await this.subject.expand();
         await this.subject.fillInFilter("baz");
-        await this.subject.selectRowByValue("monkey");
+        await this.subject.keyboard("enter");
 
         const error = queryAll(".select-kit-error").text();
         assert.equal(

@@ -33,7 +33,7 @@ export default Component.extend({
   },
 
   keyDown(event) {
-    if (event.key === "Enter") {
+    if (event.keyCode === 13) {
       this.send("addValue", this.newValue);
     }
   },

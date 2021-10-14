@@ -3,8 +3,8 @@ import componentTest, {
 } from "discourse/tests/helpers/component-test";
 import {
   discourseModule,
-  exists,
   query,
+  queryAll,
 } from "discourse/tests/helpers/qunit-helpers";
 import hbs from "htmlbars-inline-precompile";
 
@@ -20,10 +20,13 @@ discourseModule("Integration | Component | Widget | button", function (hooks) {
 
     test(assert) {
       assert.ok(
-        exists("button.btn.btn-icon.no-text"),
+        queryAll("button.btn.btn-icon.no-text").length,
         "it has all the classes"
       );
-      assert.ok(exists("button .d-icon.d-icon-far-smile"), "it has the icon");
+      assert.ok(
+        queryAll("button .d-icon.d-icon-far-smile").length,
+        "it has the icon"
+      );
     },
   });
 
@@ -35,9 +38,18 @@ discourseModule("Integration | Component | Widget | button", function (hooks) {
     },
 
     test(assert) {
-      assert.ok(exists("button.btn.btn-icon-text"), "it has all the classes");
-      assert.ok(exists("button .d-icon.d-icon-plus"), "it has the icon");
-      assert.ok(exists("button span.d-button-label"), "it has the label");
+      assert.ok(
+        queryAll("button.btn.btn-icon-text").length,
+        "it has all the classes"
+      );
+      assert.ok(
+        queryAll("button .d-icon.d-icon-plus").length,
+        "it has the icon"
+      );
+      assert.ok(
+        queryAll("button span.d-button-label").length,
+        "it has the label"
+      );
     },
   });
 
@@ -49,8 +61,14 @@ discourseModule("Integration | Component | Widget | button", function (hooks) {
     },
 
     test(assert) {
-      assert.ok(exists("button.btn.btn-text"), "it has all the classes");
-      assert.ok(exists("button span.d-button-label"), "it has the label");
+      assert.ok(
+        queryAll("button.btn.btn-text").length,
+        "it has all the classes"
+      );
+      assert.ok(
+        queryAll("button span.d-button-label").length,
+        "it has the label"
+      );
     },
   });
 
@@ -75,6 +93,7 @@ discourseModule("Integration | Component | Widget | button", function (hooks) {
 
     test(assert) {
       assert.equal(query("button").title, "foo bar");
+      assert.equal(query("button").getAttribute("aria-label"), "foo bar");
     },
   });
 });

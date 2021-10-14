@@ -10,13 +10,11 @@ import { userPath } from "discourse/lib/url";
 
 export function actionDescriptionHtml(actionCode, createdAt, username) {
   const dt = new Date(createdAt);
-  const when = autoUpdatingRelativeAge(dt, {
-    format: "medium-with-ago-and-on",
-  });
+  const when = autoUpdatingRelativeAge(dt, { format: "medium-with-ago" });
 
   let who = "";
   if (username) {
-    if (groupActionCodes.includes(actionCode)) {
+    if (actionCode === "invited_group" || actionCode === "removed_group") {
       who = `<a class="mention-group" href="/g/${username}">@${username}</a>`;
     } else {
       who = `<a class="mention" href="${userPath(username)}">@${username}</a>`;
@@ -33,8 +31,6 @@ export function actionDescription(actionCode, createdAt, username) {
     }
   });
 }
-
-const groupActionCodes = ["invited_group", "removed_group"];
 
 const icons = {
   "closed.enabled": "lock",
@@ -64,10 +60,6 @@ const icons = {
 
 export function addPostSmallActionIcon(key, icon) {
   icons[key] = icon;
-}
-
-export function addGroupPostSmallActionCode(actionCode) {
-  groupActionCodes.push(actionCode);
 }
 
 export default createWidget("post-small-action", {

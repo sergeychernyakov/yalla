@@ -4,7 +4,7 @@
 # about: Show which users are writing a reply to a topic
 # version: 2.0
 # authors: André Pereira, David Taylor, tgxworld
-# url: https://github.com/discourse/discourse/tree/main/plugins/discourse-presence
+# url: https://github.com/discourse/discourse/tree/master/plugins/discourse-presence
 
 enabled_site_setting :presence_enabled
 hide_plugin if self.respond_to?(:hide_plugin)
@@ -15,7 +15,7 @@ PLUGIN_NAME ||= -"discourse-presence"
 
 after_initialize do
 
-  MessageBus.register_client_message_filter('/presence-plugin/') do |message|
+  MessageBus.register_client_message_filter('/presence/') do |message|
     published_at = message.data["published_at"]
 
     if published_at
@@ -146,7 +146,7 @@ after_initialize do
         payload[:post_id] = post_id
       end
 
-      MessageBus.publish("/presence-plugin/#{topic_id}", payload, opts)
+      MessageBus.publish("/presence/#{topic_id}", payload, opts)
 
       render json: success_json
     end
@@ -172,7 +172,7 @@ after_initialize do
   end
 
   Discourse::Application.routes.append do
-    mount ::Presence::Engine, at: '/presence-plugin'
+    mount ::Presence::Engine, at: '/presence'
   end
 
 end

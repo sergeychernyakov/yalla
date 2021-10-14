@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class UserFieldOption < ActiveRecord::Base
-  belongs_to :user_field
 end
 
 # == Schema Information

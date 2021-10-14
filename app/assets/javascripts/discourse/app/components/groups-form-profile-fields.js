@@ -57,50 +57,52 @@ export default Component.extend({
       );
     }
 
-    this.checkGroupNameDebounced();
+    this.checkGroupName();
 
     return this._failedInputValidation(
       I18n.t("admin.groups.new.name.checking")
     );
   },
 
-  checkGroupNameDebounced() {
-    discourseDebounce(this, this._checkGroupName, 500);
-  },
-
-  _checkGroupName() {
-    if (isEmpty(this.nameInput)) {
-      return;
-    }
-
-    Group.checkName(this.nameInput)
-      .then((response) => {
-        const validationName = "uniqueNameValidation";
-
-        if (response.available) {
-          this.set(
-            validationName,
-            EmberObject.create({
-              ok: true,
-              reason: I18n.t("admin.groups.new.name.available"),
-            })
-          );
-
-          this.set("disableSave", false);
-          this.set("model.name", this.nameInput);
-        } else {
-          let reason;
-
-          if (response.errors) {
-            reason = response.errors.join(" ");
-          } else {
-            reason = I18n.t("admin.groups.new.name.not_available");
-          }
-
-          this.set(validationName, this._failedInputValidation(reason));
+  checkGroupName() {
+    discourseDebounce(
+      this,
+      function () {
+        if (isEmpty(this.nameInput)) {
+          return;
         }
-      })
-      .catch(popupAjaxError);
+
+        Group.checkName(this.nameInput)
+          .then((response) => {
+            const validationName = "uniqueNameValidation";
+
+            if (response.available) {
+              this.set(
+                validationName,
+                EmberObject.create({
+                  ok: true,
+                  reason: I18n.t("admin.groups.new.name.available"),
+                })
+              );
+
+              this.set("disableSave", false);
+              this.set("model.name", this.nameInput);
+            } else {
+              let reason;
+
+              if (response.errors) {
+                reason = response.errors.join(" ");
+              } else {
+                reason = I18n.t("admin.groups.new.name.not_available");
+              }
+
+              this.set(validationName, this._failedInputValidation(reason));
+            }
+          })
+          .catch(popupAjaxError);
+      },
+      500
+    );
   },
 
   _failedInputValidation(reason) {

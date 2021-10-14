@@ -1,13 +1,6 @@
 # frozen_string_literal: true
 
 class UserLookup
-  def self.lookup_columns
-    @user_lookup_columns ||= %i{id username name uploaded_avatar_id primary_group_id flair_group_id admin moderator trust_level}
-  end
-
-  def self.group_lookup_columns
-    @group_lookup_columns ||= %i{id name flair_icon flair_upload_id flair_bg_color flair_color}
-  end
 
   def initialize(user_ids = [])
     @user_ids = user_ids.tap(&:compact!).tap(&:uniq!).tap(&:flatten!)
@@ -19,42 +12,48 @@ class UserLookup
   end
 
   def primary_groups
-    @primary_groups ||= users.values.each_with_object({}) do |user, hash|
-      if user.primary_group_id
-        hash[user.id] = groups[user.primary_group_id]
-      end
-    end
-  end
-
-  def flair_groups
-    @flair_groups ||= users.values.each_with_object({}) do |user, hash|
-      if user.flair_group_id
-        hash[user.id] = groups[user.flair_group_id]
-      end
-    end
+    @groups ||= group_lookup_hash
   end
 
   private
 
+  def self.lookup_columns
+    @user_lookup_columns ||= %i{id username name uploaded_avatar_id primary_group_id admin moderator trust_level}
+  end
+
+  def self.group_lookup_columns
+    @group_lookup_columns ||= %i{id name flair_icon flair_upload_id flair_bg_color flair_color}
+  end
+
   def users
-    @users ||= User
-      .where(id: @user_ids)
+    @users ||= user_lookup_hash
+  end
+
+  def user_lookup_hash
+    hash = {}
+    User.where(id: @user_ids)
       .select(self.class.lookup_columns)
-      .index_by(&:id)
+      .each { |user| hash[user.id] = user }
+    hash
   end
 
-  def groups
-    @group_lookup ||= begin
-      group_ids = users.values.map { |u| [u.primary_group_id, u.flair_group_id] }
-      group_ids.flatten!
-      group_ids.uniq!
-      group_ids.compact!
+  def group_lookup_hash
+    users_with_primary_group = users.values.reject { |u| u.primary_group_id.nil? }
 
-      Group
-        .includes(:flair_upload)
-        .where(id: group_ids)
-        .select(self.class.group_lookup_columns)
-        .index_by(&:id)
+    group_lookup = {}
+    group_ids = users_with_primary_group.map { |u| u.primary_group_id }
+    group_ids.uniq!
+
+    Group.includes(:flair_upload)
+      .where(id: group_ids)
+      .select(self.class.group_lookup_columns)
+      .each { |g| group_lookup[g.id] = g }
+
+    hash = {}
+    users_with_primary_group.each do |u|
+      hash[u.id] = group_lookup[u.primary_group_id]
     end
+    hash
   end
+
 end

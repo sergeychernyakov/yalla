@@ -62,7 +62,7 @@ class TopicViewSerializer < ApplicationSerializer
     :is_warning,
     :chunk_size,
     :bookmarked,
-    :bookmarks,
+    :bookmark_reminder_at,
     :message_archived,
     :topic_timer,
     :unicode_title,
@@ -75,8 +75,7 @@ class TopicViewSerializer < ApplicationSerializer
     :requested_group_name,
     :thumbnails,
     :user_last_posted_at,
-    :is_shared_draft,
-    :slow_mode_enabled_until
+    :is_shared_draft
   )
 
   has_one :details, serializer: TopicViewDetailsSerializer, root: false, embed: :objects
@@ -193,8 +192,12 @@ class TopicViewSerializer < ApplicationSerializer
     object.has_bookmarks?
   end
 
-  def bookmarks
-    object.bookmarks
+  def include_bookmark_reminder_at?
+    bookmarked
+  end
+
+  def bookmark_reminder_at
+    object.first_post_bookmark_reminder_at
   end
 
   def topic_timer
@@ -260,17 +263,20 @@ class TopicViewSerializer < ApplicationSerializer
   end
 
   def requested_group_name
-    Group
-      .joins(:group_users)
-      .where(
-        id: object.topic.custom_fields['requested_group_id'].to_i,
-        group_users: { user_id: scope.user.id, owner: true }
-      )
-      .pluck_first(:name)
+    if scope&.user
+      group = Group
+        .joins('JOIN group_users ON groups.id = group_users.group_id')
+        .find_by(
+          id: object.topic.custom_fields['requested_group_id'].to_i,
+          group_users: { user_id: scope.user.id, owner: true }
+        )
+
+      group.name if group
+    end
   end
 
   def include_requested_group_name?
-    object.personal_message && object.topic.custom_fields['requested_group_id']
+    object.personal_message
   end
 
   def include_published_page?
@@ -291,9 +297,5 @@ class TopicViewSerializer < ApplicationSerializer
 
   def include_user_last_posted_at?
     has_topic_user? && object.topic.slow_mode_seconds.to_i > 0
-  end
-
-  def slow_mode_enabled_until
-    object.topic.slow_mode_topic_timer&.execute_at
   end
 end

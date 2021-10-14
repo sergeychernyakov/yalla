@@ -28,10 +28,7 @@ export default Controller.extend(
 
     invitedBy: readOnly("model.invited_by"),
     email: alias("model.email"),
-    accountEmail: alias("email"),
     hiddenEmail: alias("model.hidden_email"),
-    emailVerifiedByLink: alias("model.email_verified_by_link"),
-    differentExternalEmail: alias("model.different_external_email"),
     accountUsername: alias("model.username"),
     passwordRequired: notEmpty("accountPassword"),
     successMessage: null,
@@ -130,20 +127,16 @@ export default Controller.extend(
       "rejectedEmails.[]",
       "authOptions.email",
       "authOptions.email_valid",
-      "hiddenEmail",
-      "emailVerifiedByLink",
-      "differentExternalEmail"
+      "hiddenEmail"
     )
     emailValidation(
       email,
       rejectedEmails,
       externalAuthEmail,
       externalAuthEmailValid,
-      hiddenEmail,
-      emailVerifiedByLink,
-      differentExternalEmail
+      hiddenEmail
     ) {
-      if (hiddenEmail && !differentExternalEmail) {
+      if (hiddenEmail) {
         return EmberObject.create({
           ok: true,
           reason: I18n.t("user.email.ok"),
@@ -164,12 +157,12 @@ export default Controller.extend(
         });
       }
 
-      if (externalAuthEmail && externalAuthEmailValid) {
+      if (externalAuthEmail) {
         const provider = this.createAccount.authProviderDisplayName(
           this.get("authOptions.auth_provider")
         );
 
-        if (externalAuthEmail === email) {
+        if (externalAuthEmail === email && externalAuthEmailValid) {
           return EmberObject.create({
             ok: true,
             reason: I18n.t("user.email.authenticated", {
@@ -184,13 +177,6 @@ export default Controller.extend(
             }),
           });
         }
-      }
-
-      if (emailVerifiedByLink) {
-        return EmberObject.create({
-          ok: true,
-          reason: I18n.t("user.email.authenticated_by_invite"),
-        });
       }
 
       if (emailValid(email)) {
@@ -211,17 +197,6 @@ export default Controller.extend(
 
     @discourseComputed
     ssoPath: () => getUrl("/session/sso"),
-
-    @discourseComputed("authOptions.associate_url", "authOptions.auth_provider")
-    associateHtml(url, provider) {
-      if (!url) {
-        return;
-      }
-      return I18n.t("create_account.associate", {
-        associate_link: url,
-        provider: I18n.t(`login.${provider}.name`),
-      });
-    },
 
     actions: {
       submit() {

@@ -74,14 +74,6 @@ const DiscourseRoute = Route.extend({
     }
   },
 
-  isAnotherUsersPage(user) {
-    if (!this.currentUser) {
-      return true;
-    }
-
-    return user.username !== this.currentUser.username;
-  },
-
   isPoppedState(transition) {
     return !transition._discourse_intercepted && !!transition.intent.url;
   },

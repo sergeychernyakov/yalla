@@ -4,6 +4,7 @@ on:
   pull_request:
   push:
     branches:
+      - master
       - main
 
 jobs:
@@ -25,12 +26,10 @@ jobs:
       fail-fast: false
 
       matrix:
-        build_type: [backend, frontend, annotations]
+        build_type: [backend, frontend]
         target: [core, plugins]
         postgres: ["13"]
-        exclude:
-          - build_type: annotations
-            target: plugins
+        redis: ["6.x"]
 
     services:
       postgres:
@@ -58,9 +57,10 @@ jobs:
           git config --global user.email "ci@ci.invalid"
           git config --global user.name "Discourse CI"
 
-      - name: Start redis
-        run: |
-          redis-server /etc/redis/redis.conf &
+      - name: Setup redis
+        uses: shogo82148/actions-setup-redis@v1
+        with:
+          redis-version: ${{ matrix.redis }}
 
       - name: Bundler cache
         uses: actions/cache@v2
@@ -111,7 +111,7 @@ jobs:
 
       - name: Core RSpec
         if: matrix.build_type == 'backend' && matrix.target == 'core'
-        run: bin/turbo_rspec --verbose
+        run: bin/turbo_rspec
 
       - name: Plugin RSpec
         if: matrix.build_type == 'backend' && matrix.target == 'plugins'
@@ -130,21 +130,4 @@ jobs:
       - name: Plugin QUnit
         if: matrix.build_type == 'frontend' && matrix.target == 'plugins'
         run: bin/rake plugin:qunit['*','1200000']
-        timeout-minutes: 30
-
-      - name: Check Annotations
-        if: matrix.build_type == 'annotations'
-        run: |
-          bin/rake annotate:ensure_all_indexes
-          bin/annotate --models --model-dir app/models
-
-          if [ ! -z "$(git status --porcelain app/models/)" ]; then
-            echo "Core annotations are not up to date. To resolve, run:"
-            echo "  bin/rake annotate:clean"
-            echo
-            echo "Or manually apply the diff printed below:"
-            echo "---------------------------------------------"
-            git -c color.ui=always diff app/models/
-            exit 1
-          fi
         timeout-minutes: 30

@@ -19,14 +19,8 @@ import { resolveShareUrl } from "discourse/helpers/share-url";
 import { userPath } from "discourse/lib/url";
 
 const Post = RestModel.extend({
-  customShare: null,
-
-  @discourseComputed("url", "customShare")
+  @discourseComputed("url")
   shareUrl(url) {
-    if (this.customShare) {
-      return this.customShare;
-    }
-
     const user = User.current();
     return resolveShareUrl(url, user);
   },
@@ -178,6 +172,7 @@ const Post = RestModel.extend({
 
     return ajax(`/posts/${this.id}/recover`, {
       type: "PUT",
+      cache: false,
     })
       .then((data) => {
         this.setProperties({
@@ -213,9 +208,13 @@ const Post = RestModel.extend({
     } else {
       const key =
         this.post_number === 1
-          ? "topic.deleted_by_author_simple"
-          : "post.deleted_by_author_simple";
-      promise = cookAsync(I18n.t(key)).then((cooked) => {
+          ? "topic.deleted_by_author"
+          : "post.deleted_by_author";
+      promise = cookAsync(
+        I18n.t(key, {
+          count: this.siteSettings.delete_removed_posts_after,
+        })
+      ).then((cooked) => {
         this.setProperties({
           cooked: cooked,
           can_delete: false,
@@ -249,10 +248,10 @@ const Post = RestModel.extend({
     }
   },
 
-  destroy(deletedBy, opts) {
+  destroy(deletedBy) {
     return this.setDeletedState(deletedBy).then(() => {
       return ajax("/posts/" + this.id, {
-        data: { context: window.location.pathname, ...opts },
+        data: { context: window.location.pathname },
         type: "DELETE",
       });
     });
@@ -308,12 +307,12 @@ const Post = RestModel.extend({
     this.setProperties({
       "topic.bookmarked": true,
       bookmarked: true,
-      bookmark_reminder_at: data.reminder_at,
-      bookmark_auto_delete_preference: data.auto_delete_preference,
+      bookmark_reminder_at: data.reminderAt,
+      bookmark_reminder_type: data.reminderType,
+      bookmark_auto_delete_preference: data.autoDeletePreference,
       bookmark_name: data.name,
       bookmark_id: data.id,
     });
-    this.topic.incrementProperty("bookmarksWereChanged");
     this.appEvents.trigger("page:bookmark-post-toggled", this);
     this.appEvents.trigger("post-stream:refresh", { id: this.id });
   },
@@ -321,19 +320,18 @@ const Post = RestModel.extend({
   deleteBookmark(bookmarked) {
     this.set("topic.bookmarked", bookmarked);
     this.clearBookmark();
-    this.topic.incrementProperty("bookmarksWereChanged");
     this.appEvents.trigger("page:bookmark-post-toggled", this);
   },
 
   clearBookmark() {
     this.setProperties({
       bookmark_reminder_at: null,
+      bookmark_reminder_type: null,
       bookmark_name: null,
       bookmark_id: null,
       bookmarked: false,
       bookmark_auto_delete_preference: null,
     });
-    this.topic.incrementProperty("bookmarksWereChanged");
   },
 
   updateActionsSummary(json) {

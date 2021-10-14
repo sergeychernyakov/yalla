@@ -57,7 +57,6 @@ export function avatarImg(wanted, attrs) {
       height: size,
       src: getURLWithCDN(url),
       title,
-      "aria-label": title,
     },
     className,
   };
@@ -187,7 +186,7 @@ createWidget("post-avatar", {
 
     const result = [body];
 
-    if (attrs.flair_url || attrs.flair_bg_color) {
+    if (attrs.primary_group_flair_url || attrs.primary_group_flair_bg_color) {
       result.push(this.attach("avatar-flair", attrs));
     } else {
       const autoFlairAttrs = autoGroupFlairForUser(this.site, attrs);
@@ -247,13 +246,6 @@ function showReplyTab(attrs, siteSettings) {
 
 createWidget("post-meta-data", {
   tagName: "div.topic-meta-data",
-
-  buildAttributes() {
-    return {
-      role: "heading",
-      "aria-level": "2",
-    };
-  },
 
   settings: {
     displayPosterName: true,
@@ -499,16 +491,7 @@ createWidget("post-contents", {
       .then((posts) => {
         this.state.repliesBelow = posts.map((p) => {
           let result = transformWithCallbacks(p);
-
-          // these would conflict with computed properties with identical names
-          // in the post model if we kept them.
-          delete result.new_user;
-          delete result.deleted;
-          delete result.shareUrl;
-          delete result.firstPost;
-          delete result.usernameUrl;
-
-          result.customShare = `${topicUrl}/${p.post_number}`;
+          result.shareUrl = `${topicUrl}/${p.post_number}`;
           result.asPost = this.store.createRecord("post", result);
           return result;
         });
@@ -710,17 +693,7 @@ createWidget("post-article", {
         .then((posts) => {
           this.state.repliesAbove = posts.map((p) => {
             let result = transformWithCallbacks(p);
-
-            // We don't want to overwrite CPs - we are doing something a bit weird
-            // here by creating a post object from a transformed post. They aren't
-            // 100% the same.
-            delete result.new_user;
-            delete result.deleted;
-            delete result.shareUrl;
-            delete result.firstPost;
-            delete result.usernameUrl;
-
-            result.customShare = `${topicUrl}/${p.post_number}`;
+            result.shareUrl = `${topicUrl}/${p.post_number}`;
             result.asPost = this.store.createRecord("post", result);
             return result;
           });
@@ -755,7 +728,7 @@ export default createWidget("post", {
     }
     const classNames = ["topic-post", "clearfix"];
 
-    if (attrs.id === -1 || attrs.isSaving || attrs.staged) {
+    if (attrs.id === -1 || attrs.isSaving) {
       classNames.push("staged");
     }
     if (attrs.selected) {
@@ -763,9 +736,6 @@ export default createWidget("post", {
     }
     if (attrs.topicOwner) {
       classNames.push("topic-owner");
-    }
-    if (this.currentUser && attrs.user_id === this.currentUser.id) {
-      classNames.push("current-user-post");
     }
     if (attrs.groupModerator) {
       classNames.push("category-moderator");

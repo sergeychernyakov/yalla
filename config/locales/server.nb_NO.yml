@@ -131,7 +131,7 @@ nb_NO:
       ip_address_already_screened: "er allerede inkludert i en eksisterende regel"
       restrict_dependent_destroy:
         one: "Kunne ikke slette oppføringen, oppføringen %{record} er avhengig av denne"
-        other: "Kunne ikke slette oppføringen, oppføringen %{record} er avhengig av denne"
+        many: "Kunne ikke slette oppføringen, oppføringen %{record} er avhengig av denne"
       too_long:
         one: for lang tekst (maks %{count} tegn)
         other: for lang tekst(maks %{count} tegn)
@@ -351,6 +351,7 @@ nb_NO:
               target_user_not_found: "En av brukerne du prøver å sende denne meldingen til ble ikke funnet."
             featured_link:
               invalid: "er ugyldig. Nettadressen bør inneholde http:// eller https://"
+              invalid_category: "kan ikke redigeres i denne kategorien."
         user:
           attributes:
             password:
@@ -438,8 +439,16 @@ nb_NO:
       topic_exists_no_oldest: "Kan ikke slette denne kategorien fordi antall emner er %{count}."
     uncategorized_description: "Emne som ikke trenger en kategori eller som ikke passer i noen av de andre kategoriene."
   trust_levels:
-    admin: "Admin"
-    staff: "Stab"
+    newuser:
+      title: "ny bruker"
+    basic:
+      title: " bruker"
+    member:
+      title: "medlem"
+    regular:
+      title: "aktivt medlem"
+    leader:
+      title: "leder"
     change_failed_explanation: "Du forsøkte å nedgradere %{user_name} til '%{new_trust_level}'. Men tillitsnivået til brukeren er allerede '%{current_trust_level}'. %{user_name} vil bli værende ved '%{current_trust_level}' - hvis du ønsker å nedgradere brukeren må du låse fast tillitsnivået først"
   post:
     image_placeholder:
@@ -600,9 +609,18 @@ nb_NO:
       description: "Liker dette innlegget"
       short_description: "Lik dette innlegget"
   user_activity:
+    no_default:
+      self: "Du har ingen aktivitet enda."
+      others: "Ingen aktivitet."
     no_bookmarks:
       self: "Du har ingen bokmerkede innlegg; bokmerker lar deg raskt slå opp spesifike innlegg."
       others: "Ingen bokmerker."
+    no_likes_given:
+      self: "Du har ikke likt noen innlegg."
+      others: "Ingen likte innlegg. "
+    no_replies:
+      self: "Du har ikke svart på noen innlegg."
+      others: "Ingen svar."
     no_drafts:
       self: "Du har ingen utkast; når du begynner å forfatte et svar på et emne vil det automatisk lagres som et nytt utkast."
   topic_flag_types:
@@ -925,7 +943,6 @@ nb_NO:
     force_https_warning: "Nettstedet ditt bruker SSL. Men `<a href='%{base_path}/admin/site_settings/category/all_results?filter=force_https'>force_https</a>` er ikke aktivert enda i instillingene."
     out_of_date_themes: "Oppdateringer er tilgjengelig for følgende drakter:"
   site_settings:
-    disabled: "deaktivert"
     censored_words: "Ord som automatisk vil bli erstattet med &#9632;&#9632;&#9632;&#9632;"
     delete_old_hidden_posts: "Slett automatisk skjulte innlegg som har vært skjult i mer enn 30 dager."
     allow_user_locale: "Tillat brukere å velge eget språk"
@@ -1054,6 +1071,7 @@ nb_NO:
       topic: "Resultater"
       user: "Brukere"
     results_page: "Søkeresultater for \"%{term}\""
+  most_posts: "Flest innlegg"
   most_recent_poster: "Ferskeste innlegg av"
   redirected_to_top_reasons:
     new_user: "Velkommen til felleskapet vårt! Dette er de mest populære emnene for tiden. "
@@ -1154,19 +1172,12 @@ nb_NO:
       subject_template: "[%{email_prefix}] [privat samtale] %{topic_title}"
     user_mentioned_pm:
       subject_template: "[%{email_prefix}] [privat samtale] %{topic_title}"
-    user_group_mentioned_pm:
-      subject_template: "[%{email_prefix}] [privat samtale] %{topic_title}"
-    user_group_mentioned_pm_group:
-      subject_template: "[%{email_prefix}] [privat samtale] %{topic_title}"
     user_posted_pm:
       title: "Bruker opprettet privat samtale"
       subject_template: "[%{email_prefix}] [privat samtale] %{topic_title}"
     user_posted_pm_staged:
       title: "Bruker opprettet arrangert privat samtale"
     account_suspended:
-      title: "Konto sperret"
-      subject_template: "[%{email_prefix}] Kontoen din er blitt sperret"
-    account_suspended_forever:
       title: "Konto sperret"
       subject_template: "[%{email_prefix}] Kontoen din er blitt sperret"
     digest:
@@ -1429,10 +1440,25 @@ nb_NO:
             label: "Automatiserte meldinger"
       corporate:
         title: "Organisasjon"
-      styling:
+      colors:
+        title: "Farger"
+      fonts:
         fields:
-          styling_preview:
+          font_preview:
             label: "Forhåndsvis"
+      logos:
+        title: "Logoer"
+        fields:
+          logo:
+            label: "Primær logo"
+      icons:
+        title: "Ikoner"
+        fields:
+          large_icon:
+            label: "Stort ikon"
+      homepage:
+        title: "Hjemmeside"
+        fields:
           homepage_style:
             choices:
               latest:
@@ -1445,16 +1471,6 @@ nb_NO:
                 label: "Kategorier og siste emner"
               categories_and_top_topics:
                 label: "Kategorier og toppemner"
-      logos:
-        title: "Logoer"
-        fields:
-          logo:
-            label: "Primær logo"
-      icons:
-        title: "Ikoner"
-        fields:
-          large_icon:
-            label: "Stort ikon"
   joined: "Medlem fra"
   discourse_push_notifications:
     popup:
@@ -1484,6 +1500,8 @@ nb_NO:
       agree_and_hide:
         title: "Skjul innlegg"
         description: "Gjem dette innlegget og send en melding til brukeren automatisk med en forespørsel om gjøre endringer."
+      delete_spammer:
+        title: "Slett spammer"
       delete_single:
         title: "Slett"
       disagree_and_restore:
@@ -1499,7 +1517,8 @@ nb_NO:
           title: "Slett bruker"
       reject:
         title: "Avvis"
-  fallback_username: "bruker"
+      delete_user:
+        title: "Slett bruker"
   activemodel:
     errors:
       <<: *errors

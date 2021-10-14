@@ -5,6 +5,3 @@
 # https://translate.discourse.org/
 
 lv:
-  site_settings:
-    styleguide_enabled: 'Iespējojiet "/styleguide" ceļu, lai palīdzētu veidot diskursa stilu'
-    styleguide_admin_only: "Ierobežo stila ceļveža redzamību tikai administratoriem"

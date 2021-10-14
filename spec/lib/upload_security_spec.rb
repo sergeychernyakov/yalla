@@ -25,12 +25,6 @@ RSpec.describe UploadSecurity do
       end
 
       context "when uploading in public context" do
-        describe "for a public type badge_image" do
-          let(:type) { 'badge_image' }
-          it "returns false" do
-            expect(subject.should_be_secure?).to eq(false)
-          end
-        end
         describe "for a public type group_flair" do
           let(:type) { 'group_flair' }
           it "returns false" do
@@ -120,7 +114,7 @@ RSpec.describe UploadSecurity do
 
         describe "when it is based on a regular emoji" do
           it "returns false" do
-            falafel = Emoji.all.find { |e| e.url == "/images/emoji/twitter/falafel.png?v=#{Emoji::EMOJI_VERSION}" }
+            falafel = Emoji.all.find { |e| e.url == '/images/emoji/twitter/falafel.png?v=9' }
             upload.update!(origin: "http://localhost:3000#{falafel.url}")
             expect(subject.should_be_secure?).to eq(false)
           end

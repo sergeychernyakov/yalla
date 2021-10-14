@@ -1,7 +1,5 @@
-import { acceptance, exists } from "discourse/tests/helpers/qunit-helpers";
+import { acceptance } from "discourse/tests/helpers/qunit-helpers";
 import { clearPopupMenuOptionsCallback } from "discourse/controllers/composer";
-import { test } from "qunit";
-import { visit } from "@ember/test-helpers";
 
 acceptance("Poll in a post reply history", function (needs) {
   needs.user();
@@ -38,9 +36,9 @@ acceptance("Poll in a post reply history", function (needs) {
               topic_slug: "topic-with-a-poll-in-a-post-reply-history",
               display_username: null,
               primary_group_name: null,
-              flair_url: null,
-              flair_bg_color: null,
-              flair_color: null,
+              primary_group_flair_url: null,
+              primary_group_flair_bg_color: null,
+              primary_group_flair_color: null,
               version: 1,
               can_edit: true,
               can_delete: true,
@@ -54,7 +52,6 @@ acceptance("Poll in a post reply history", function (needs) {
                   "/letter_avatar_proxy/v4/letter/a/bbce88/{size}.png",
               },
               bookmarked: false,
-              bookmarks: [],
               actions_summary: [
                 {
                   id: 3,
@@ -151,7 +148,8 @@ acceptance("Poll in a post reply history", function (needs) {
             archetype: "regular",
             unseen: false,
             last_read_post_number: 3,
-            unread_posts: 0,
+            unread: 0,
+            new_posts: 0,
             pinned: false,
             unpinned: null,
             visible: true,
@@ -159,7 +157,6 @@ acceptance("Poll in a post reply history", function (needs) {
             archived: false,
             notification_level: 2,
             bookmarked: false,
-            bookmarks: [],
             liked: false,
             like_count: 0,
             views: 3,
@@ -206,7 +203,8 @@ acceptance("Poll in a post reply history", function (needs) {
             archetype: "regular",
             unseen: false,
             last_read_post_number: 12,
-            unread_posts: 0,
+            unread: 0,
+            new_posts: 0,
             pinned: false,
             unpinned: null,
             visible: true,
@@ -214,7 +212,6 @@ acceptance("Poll in a post reply history", function (needs) {
             archived: false,
             notification_level: 2,
             bookmarked: false,
-            bookmarks: [],
             liked: false,
             like_count: 0,
             views: 4,
@@ -305,7 +302,6 @@ acceptance("Poll in a post reply history", function (needs) {
         ],
         chunk_size: 20,
         bookmarked: false,
-        bookmarks: [],
         topic_timer: null,
         message_bus_last_id: 4,
         participant_count: 1,
@@ -341,9 +337,9 @@ acceptance("Poll in a post reply history", function (needs) {
                 "/letter_avatar_proxy/v4/letter/a/bbce88/{size}.png",
               post_count: 4,
               primary_group_name: null,
-              flair_url: null,
-              flair_color: null,
-              flair_bg_color: null,
+              primary_group_flair_url: null,
+              primary_group_flair_color: null,
+              primary_group_flair_bg_color: null,
             },
           ],
           created_by: {
@@ -389,9 +385,9 @@ acceptance("Poll in a post reply history", function (needs) {
           topic_slug: "topic-with-a-poll-in-a-post-reply-history",
           display_username: null,
           primary_group_name: null,
-          flair_url: null,
-          flair_bg_color: null,
-          flair_color: null,
+          primary_group_flair_url: null,
+          primary_group_flair_bg_color: null,
+          primary_group_flair_color: null,
           version: 1,
           can_edit: false,
           can_delete: false,
@@ -399,7 +395,6 @@ acceptance("Poll in a post reply history", function (needs) {
           can_wiki: false,
           user_title: null,
           bookmarked: false,
-          bookmarks: [],
           actions_summary: [],
           moderator: false,
           admin: true,

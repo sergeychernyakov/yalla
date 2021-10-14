@@ -18,12 +18,4 @@ class TrustLevelAndStaffSetting < TrustLevelSetting
   def self.special_groups
     ['staff', 'admin']
   end
-
-  def self.translation(value)
-    if special_group?(value)
-      I18n.t("trust_levels.#{value}")
-    else
-      super
-    end
-  end
 end

@@ -183,10 +183,7 @@ function renderImageOrPlayableMedia(tokens, idx, options, env, slf) {
   // see https://github.com/markdown-it/markdown-it/blob/master/docs/architecture.md#renderer
   // handles |video and |audio alt transformations for image tags
   if (split[1] === "video") {
-    if (
-      options.discourse.previewing &&
-      !options.discourse.limitedSiteSettings.enableDiffhtmlPreview
-    ) {
+    if (options.discourse.previewing) {
       return `<div class="onebox-placeholder-container">
         <span class="placeholder-icon video"></span>
       </div>`;
@@ -368,7 +365,6 @@ export function setup(opts, siteSettings, state) {
 
   opts.discourse.limitedSiteSettings = {
     secureMedia: siteSettings.secure_media,
-    enableDiffhtmlPreview: siteSettings.enable_diffhtml_preview,
   };
 
   opts.engine = window.markdownit({

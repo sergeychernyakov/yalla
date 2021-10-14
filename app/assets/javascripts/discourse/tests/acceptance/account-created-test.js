@@ -60,7 +60,7 @@ acceptance("Account Created", function () {
     await click(".activation-controls .edit-email");
 
     assert.equal(currentRouteName(), "account-created.edit-email");
-    assert.ok(exists(".activation-controls .btn-primary:disabled"));
+    assert.ok(queryAll(".activation-controls .btn-primary:disabled").length);
 
     await click(".activation-controls .edit-cancel");
 
@@ -79,11 +79,11 @@ acceptance("Account Created", function () {
 
     await click(".activation-controls .edit-email");
 
-    assert.ok(exists(".activation-controls .btn-primary:disabled"));
+    assert.ok(queryAll(".activation-controls .btn-primary:disabled").length);
 
     await fillIn(".activate-new-email", "newemail@example.com");
 
-    assert.notOk(exists(".activation-controls .btn-primary:disabled"));
+    assert.notOk(queryAll(".activation-controls .btn-primary:disabled").length);
 
     await click(".activation-controls .btn-primary");
 

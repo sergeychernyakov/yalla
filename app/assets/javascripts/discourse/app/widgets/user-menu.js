@@ -265,24 +265,21 @@ export default createWidget("user-menu", {
   },
 
   clickOutsideMobile(e) {
-    const centeredElement = document.elementFromPoint(e.clientX, e.clientY);
-    const parents = document
-      .elementsFromPoint(e.clientX, e.clientY)
-      .some((ele) => ele.classList.contains("panel"));
-    if (!centeredElement.classList.contains("header-cloak") && parents) {
+    const $centeredElement = $(document.elementFromPoint(e.clientX, e.clientY));
+    if (
+      $centeredElement.parents(".panel").length &&
+      !$centeredElement.hasClass("header-cloak")
+    ) {
       this.sendWidgetAction("toggleUserMenu");
     } else {
-      const windowWidth = document.body.offsetWidth;
-      const panel = document.querySelector(".menu-panel");
-      panel.classList.add("animate");
-      let offsetDirection =
-        document.querySelector("html").classList["direction"] === "rtl"
-          ? -1
-          : 1;
-      panel.style.setProperty("--offset", `${offsetDirection * windowWidth}px`);
-      const headerCloak = document.querySelector(".header-cloak");
-      headerCloak.classList.add("animate");
-      headerCloak.style.setProperty("--opacity", 0);
+      const $window = $(window);
+      const windowWidth = $window.width();
+      const $panel = $(".menu-panel");
+      $panel.addClass("animate");
+      $panel.css("right", -windowWidth);
+      const $headerCloak = $(".header-cloak");
+      $headerCloak.addClass("animate");
+      $headerCloak.css("opacity", 0);
       later(() => this.sendWidgetAction("toggleUserMenu"), 200);
     }
   },

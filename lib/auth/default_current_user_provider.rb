@@ -131,7 +131,7 @@ class Auth::DefaultCurrentUserProvider
       raise Discourse::InvalidAccess.new(I18n.t('invalid_api_credentials'), nil, custom_message: "invalid_api_credentials") unless current_user
       raise Discourse::InvalidAccess if current_user.suspended? || !current_user.active
       @env[API_KEY_ENV] = true
-      rate_limit_admin_api_requests!
+      rate_limit_admin_api_requests(api_key)
     end
 
     # user api key handling
@@ -377,23 +377,15 @@ class Auth::DefaultCurrentUserProvider
     !!@env[HEADER_API_KEY]
   end
 
-  def rate_limit_admin_api_requests!
+  def rate_limit_admin_api_requests(api_key)
     return if Rails.env == "profile"
 
-    limit = GlobalSetting.max_admin_api_reqs_per_minute.to_i
-    if GlobalSetting.respond_to?(:max_admin_api_reqs_per_key_per_minute)
-      Discourse.deprecate("DISCOURSE_MAX_ADMIN_API_REQS_PER_KEY_PER_MINUTE is deprecated. Please use DISCOURSE_MAX_ADMIN_API_REQS_PER_MINUTE")
-      limit = [ GlobalSetting.max_admin_api_reqs_per_key_per_minute.to_i, limit].max
-    end
-
-    global_limit = RateLimiter.new(
+    RateLimiter.new(
       nil,
-      "admin_api_min",
-      limit,
+      "admin_api_min_#{ApiKey.hash_key(api_key)}",
+      GlobalSetting.max_admin_api_reqs_per_key_per_minute,
       60
-    )
-
-    global_limit.performed!
+    ).performed!
   end
 
   def can_write?

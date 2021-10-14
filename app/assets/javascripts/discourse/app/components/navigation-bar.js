@@ -52,10 +52,6 @@ export default Component.extend(FilterModeMixin, {
   },
 
   ensureDropClosed() {
-    if (!this.element || this.isDestroying || this.isDestroyed) {
-      return;
-    }
-
     if (this.expanded) {
       this.set("expanded", false);
     }
@@ -79,13 +75,17 @@ export default Component.extend(FilterModeMixin, {
             this.element.querySelector(".drop").style.display = "none";
 
             next(() => {
-              this.ensureDropClosed();
+              if (!this.element || this.isDestroying || this.isDestroyed) {
+                return;
+              }
+              this.set("expanded", false);
             });
+
             return true;
           });
 
           $(window).on("click.navigation-bar", () => {
-            this.ensureDropClosed();
+            this.set("expanded", false);
             return true;
           });
         });

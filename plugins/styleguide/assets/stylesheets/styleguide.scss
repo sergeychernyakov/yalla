@@ -42,6 +42,7 @@
 
   .styleguide-contents {
     flex: 4 0 0;
+    font-size: 14px;
   }
 
   .styleguide-section {
@@ -66,7 +67,7 @@
     .styleguide-example {
       .example-title {
         color: var(--primary-medium);
-        font-size: var(--font-down-1);
+        font-size: var(--font-0);
         border-bottom: 1px solid var(--primary-low);
         margin-bottom: 1em;
       }

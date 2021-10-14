@@ -29,7 +29,7 @@ const DEFAULT_BINDINGS = {
   "command+]": { handler: "webviewKeyboardForward", anonymous: true },
   "mod+p": { handler: "printTopic", anonymous: true },
   d: { postAction: "deletePost" },
-  e: { handler: "editPost" },
+  e: { postAction: "editPost" },
   end: { handler: "goToLastPost", anonymous: true },
   "command+down": { handler: "goToLastPost", anonymous: true },
   f: { handler: "toggleBookmarkTopic" },
@@ -86,9 +86,9 @@ const DEFAULT_BINDINGS = {
   t: { postAction: "replyAsNewTopic" },
   u: { handler: "goBack", anonymous: true },
   "x r": {
-    click: "#dismiss-new-bottom,#dismiss-new-top",
-  }, // dismiss new
-  "x t": { click: "#dismiss-topics-bottom,#dismiss-topics-top" }, // dismiss topics
+    click: "#dismiss-new,#dismiss-new-top,#dismiss-posts,#dismiss-posts-top",
+  }, // dismiss new/posts
+  "x t": { click: "#dismiss-topics,#dismiss-topics-top" }, // dismiss topics
 };
 
 const animationDuration = 100;
@@ -107,10 +107,10 @@ export default {
     this.searchService = this.container.lookup("search-service:main");
     this.appEvents = this.container.lookup("service:app-events");
     this.currentUser = this.container.lookup("current-user:main");
-    this.siteSettings = this.container.lookup("site-settings:main");
+    let siteSettings = this.container.lookup("site-settings:main");
 
     // Disable the shortcut if private messages are disabled
-    if (!this.siteSettings.enable_personal_messages) {
+    if (!siteSettings.enable_personal_messages) {
       delete DEFAULT_BINDINGS["g m"];
     }
   },
@@ -122,8 +122,10 @@ export default {
   },
 
   teardown() {
-    this.keyTrapper?.destroy();
-    this.keyTrapper = null;
+    if (this.keyTrapper) {
+      this.keyTrapper.reset();
+      this.keyTrapper = null;
+    }
     this.container = null;
   },
 
@@ -205,7 +207,7 @@ export default {
    **/
   addShortcut(shortcut, callback, opts = {}) {
     // we trim but leave whitespace between characters, as shortcuts
-    // like `z z` are valid for ItsATrap
+    // like `z z` are valid for Mousetrap
     shortcut = shortcut.trim();
     let newBinding = Object.assign({ handler: callback }, opts);
     this.bindKey(shortcut, newBinding);
@@ -261,25 +263,9 @@ export default {
   },
 
   quoteReply() {
-    if (this.isPostTextSelected()) {
-      this.appEvents.trigger("quote-button:quote");
-      return false;
-    }
-
     this.sendToSelectedPost("replyToPost");
     // lazy but should work for now
     later(() => $(".d-editor .quote").click(), 500);
-
-    return false;
-  },
-
-  editPost() {
-    if (this.siteSettings.enable_fast_edit && this.isPostTextSelected()) {
-      this.appEvents.trigger("quote-button:edit");
-      return false;
-    } else {
-      this.sendToSelectedPost("editPost");
-    }
 
     return false;
   },
@@ -505,11 +491,6 @@ export default {
     }
   },
 
-  isPostTextSelected() {
-    const topicController = this.container.lookup("controller:topic");
-    return !!topicController?.get("quoteState")?.postId;
-  },
-
   sendToSelectedPost(action, elem) {
     // TODO: We should keep track of the post without a CSS class
     const selectedPost =
@@ -555,21 +536,20 @@ export default {
   _bindToClick(selector, binding) {
     binding = binding.split(",");
     this.keyTrapper.bind(binding, function (e) {
-      const selection = document.querySelector(selector);
+      const $sel = $(selector);
 
       // Special case: We're binding to enter.
-      if (e && e.key === "Enter") {
+      if (e && e.keyCode === 13) {
         // Binding to enter should only be effective when there is something
         // to select.
-        if (!selection) {
+        if ($sel.length === 0) {
           return;
         }
 
         // If effective, prevent default.
         e.preventDefault();
       }
-
-      selection?.click();
+      $sel.click();
     });
   },
 

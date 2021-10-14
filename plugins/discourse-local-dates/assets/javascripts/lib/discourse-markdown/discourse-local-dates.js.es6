@@ -1,7 +1,5 @@
 import { parseBBCodeTag } from "pretty-text/engines/discourse-markdown/bbcode-block";
 
-const timezoneNames = moment.tz.names();
-
 function addLocalDate(buffer, matches, state) {
   let token;
 
@@ -79,7 +77,7 @@ function addLocalDate(buffer, matches, state) {
 
   if (
     config.displayedTimezone &&
-    timezoneNames.includes(config.displayedTimezone)
+    moment.tz.names().includes(config.displayedTimezone)
   ) {
     token.attrs.push([
       "data-displayed-timezone",
@@ -89,7 +87,7 @@ function addLocalDate(buffer, matches, state) {
 
   if (config.timezones) {
     const timezones = config.timezones.split("|").filter((timezone) => {
-      return timezoneNames.includes(timezone);
+      return moment.tz.names().includes(timezone);
     });
 
     token.attrs.push([
@@ -98,7 +96,7 @@ function addLocalDate(buffer, matches, state) {
     ]);
   }
 
-  if (config.timezone && timezoneNames.includes(config.timezone)) {
+  if (config.timezone && moment.tz.names().includes(config.timezone)) {
     token.attrs.push([
       "data-timezone",
       state.md.utils.escapeHtml(config.timezone),
@@ -142,17 +140,8 @@ function closeBuffer(buffer, state, text) {
 export function setup(helper) {
   helper.allowList([
     "span.discourse-local-date",
+    "span[data-*]",
     "span[aria-label]",
-    "span[data-date]",
-    "span[data-time]",
-    "span[data-format]",
-    "span[data-countdown]",
-    "span[data-calendar]",
-    "span[data-displayed-timezone]",
-    "span[data-timezone]",
-    "span[data-timezones]",
-    "span[data-recurring]",
-    "span[data-email-preview]",
   ]);
 
   helper.registerOptions((opts, siteSettings) => {

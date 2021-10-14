@@ -8,6 +8,7 @@ import { ajax } from "discourse/lib/ajax";
 import { get } from "@ember/object";
 import { getOwner } from "discourse-common/lib/get-owner";
 import getURL from "discourse-common/lib/get-url";
+import { escapeExpression } from "discourse/lib/utilities";
 
 const STAFF_GROUP_NAME = "staff";
 
@@ -54,6 +55,11 @@ const Category = RestModel.extend({
   @discourseComputed("id")
   searchContext(id) {
     return { type: "category", id, category: this };
+  },
+
+  @discourseComputed("name")
+  escapeName(name) {
+    return escapeExpression(name);
   },
 
   @discourseComputed("parentCategory.ancestors")
@@ -177,11 +183,6 @@ const Category = RestModel.extend({
     return topicCount;
   },
 
-  @discourseComputed("default_slow_mode_seconds")
-  defaultSlowModeMinutes(seconds) {
-    return seconds ? seconds / 60 : null;
-  },
-
   save() {
     const id = this.id;
     const url = id ? `/categories/${id}` : "/categories";
@@ -198,7 +199,6 @@ const Category = RestModel.extend({
         auto_close_based_on_last_post: this.get(
           "auto_close_based_on_last_post"
         ),
-        default_slow_mode_seconds: this.default_slow_mode_seconds,
         position: this.position,
         email_in: this.email_in,
         email_in_allow_strangers: this.email_in_allow_strangers,
@@ -212,14 +212,8 @@ const Category = RestModel.extend({
         all_topics_wiki: this.all_topics_wiki,
         allow_unlimited_owner_edits_on_first_post: this
           .allow_unlimited_owner_edits_on_first_post,
-        allowed_tags:
-          this.allowed_tags && this.allowed_tags.length > 0
-            ? this.allowed_tags
-            : null,
-        allowed_tag_groups:
-          this.allowed_tag_groups && this.allowed_tag_groups.length > 0
-            ? this.allowed_tag_groups
-            : null,
+        allowed_tags: this.allowed_tags,
+        allowed_tag_groups: this.allowed_tag_groups,
         allow_global_tags: this.allow_global_tags,
         required_tag_group_name: this.required_tag_groups
           ? this.required_tag_groups[0]
@@ -438,7 +432,7 @@ Category.reopenClass({
 
   findBySlugPathWithID(slugPathWithID) {
     let parts = slugPathWithID.split("/").filter(Boolean);
-    // slugs found by star/glob pathing in ember do not automatically url decode - ensure that these are decoded
+    // slugs found by star/glob pathing in emeber do not automatically url decode - ensure that these are decoded
     if (this.slugEncoded()) {
       parts = parts.map((urlPart) => decodeURI(urlPart));
     }

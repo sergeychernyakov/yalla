@@ -71,6 +71,7 @@ class PostTiming < ActiveRecord::Base
       end
 
       TopicUser.where(user_id: user.id, topic_id: topic.id).update_all(
+        highest_seen_post_number: last_read,
         last_read_post_number: last_read
       )
 
@@ -225,5 +226,6 @@ end
 # Indexes
 #
 #  index_post_timings_on_user_id  (user_id)
+#  post_timings_summary           (topic_id,post_number)
 #  post_timings_unique            (topic_id,post_number,user_id) UNIQUE
 #

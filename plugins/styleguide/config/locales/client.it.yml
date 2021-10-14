@@ -7,7 +7,7 @@
 it:
   js:
     styleguide:
-      title: "Guida di stile"
+      title: "Guida stilistica"
       welcome: "Per iniziare, scegli una sezione dal menu a sinistra."
       categories:
         atoms: Atomi
@@ -21,7 +21,7 @@ it:
         date_time_inputs:
           title: "Inserimenti Data/Ora"
         font_scale:
-          title: "Sistema di caratteri"
+          title: "Sistema di font"
         colors:
           title: "Colori"
         icons:
@@ -56,13 +56,13 @@ it:
         basic_topic_list:
           title: "Elenco argomenti di base"
         footer_message:
-          title: "Messaggio Piè di Pagina"
+          title: "Messaggio Piè Pagina"
         signup_cta:
-          title: "CTA registrazione"
+          title: "Registrazione CTA"
         topic_timer_info:
           title: "Timer Argomento"
         topic_footer_buttons:
-          title: "Pulsanti Piè di Pagina"
+          title: "Pulsanti Piè Pagina"
         topic_notifications:
           title: "Notifiche Argomenti"
         post:
@@ -78,10 +78,10 @@ it:
         modal:
           title: "Finestra Dialogo"
           header: "Titolo Finestra Dialogo"
-          footer: "Piè di Pagina Finestra Dialogo"
+          footer: "Piè Pagina Finestra Dialogo"
         user_about:
           title: "Casella Informazioni Utente"
         header_icons:
           title: "Icone Intestazione"
         spinners:
-          title: "Icone di Caricamento"
+          title: "Icone Caricamenti"

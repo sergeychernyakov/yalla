@@ -4,7 +4,6 @@ import discourseDebounce from "discourse-common/lib/debounce";
 import { isEmpty } from "@ember/utils";
 import { next, schedule } from "@ember/runloop";
 import { searchForTerm } from "discourse/lib/search";
-import { INPUT_DELAY } from "discourse-common/config/environment";
 
 export default Component.extend({
   loading: null,
@@ -44,7 +43,7 @@ export default Component.extend({
     this._super(...arguments);
     schedule("afterRender", () => {
       $("#choose-topic-title").keydown((e) => {
-        if (e.key === "Enter") {
+        if (e.keyCode === 13) {
           return false;
         }
       });
@@ -69,7 +68,7 @@ export default Component.extend({
       oldTopicTitle: this.topicTitle,
     });
 
-    this.searchDebounced(this.topicTitle);
+    this.search(this.topicTitle);
   },
 
   @discourseComputed("label")
@@ -86,48 +85,48 @@ export default Component.extend({
     this.set("loading", false);
   },
 
-  searchDebounced(title) {
-    discourseDebounce(this, this.search, title, INPUT_DELAY);
-  },
-
   search(title) {
-    if (!this.element || this.isDestroying || this.isDestroyed) {
-      return;
-    }
-
-    if (isEmpty(title) && isEmpty(this.additionalFilters)) {
-      this.setProperties({ topics: null, loading: false });
-      return;
-    }
-
-    const currentTopicId = this.currentTopicId;
-    const titleWithFilters = `${title} ${this.additionalFilters}`;
-    let searchParams = {};
-
-    if (!isEmpty(title)) {
-      searchParams.typeFilter = "topic";
-      searchParams.restrictToArchetype = "regular";
-      searchParams.searchForId = true;
-    }
-
-    searchForTerm(titleWithFilters, searchParams).then((results) => {
-      // search term changed after the request was fired but before we
-      // got a response, ignore results.
-      if (title !== this.topicTitle) {
-        return;
-      }
-      if (results && results.posts && results.posts.length > 0) {
-        this.set(
-          "topics",
-          results.posts.mapBy("topic").filter((t) => t.id !== currentTopicId)
-        );
-        if (this.topics.length === 1) {
-          this.send("chooseTopic", this.topics[0]);
+    discourseDebounce(
+      this,
+      function () {
+        if (!this.element || this.isDestroying || this.isDestroyed) {
+          return;
         }
-      } else {
-        this.setProperties({ topics: null, loading: false });
-      }
-    });
+
+        if (isEmpty(title) && isEmpty(this.additionalFilters)) {
+          this.setProperties({ topics: null, loading: false });
+          return;
+        }
+
+        const currentTopicId = this.currentTopicId;
+        const titleWithFilters = `${title} ${this.additionalFilters}`;
+        let searchParams = {};
+
+        if (!isEmpty(title)) {
+          searchParams.typeFilter = "topic";
+          searchParams.restrictToArchetype = "regular";
+          searchParams.searchForId = true;
+        }
+
+        searchForTerm(titleWithFilters, searchParams).then((results) => {
+          if (results && results.posts && results.posts.length > 0) {
+            this.set(
+              "topics",
+              results.posts
+                .mapBy("topic")
+                .filter((t) => t.id !== currentTopicId)
+            );
+            if (this.topics.length === 1) {
+              this.send("chooseTopic", this.topics[0]);
+            }
+          } else {
+            this.setProperties({ topics: null, loading: false });
+          }
+        });
+      },
+      title,
+      300
+    );
   },
 
   actions: {

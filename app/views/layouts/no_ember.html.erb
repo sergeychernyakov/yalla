@@ -8,44 +8,22 @@
   <%= render partial: "common/discourse_stylesheet" %>
   <%= discourse_csrf_tags %>
 
-  <%- unless customization_disabled? %>
-    <%= theme_lookup("head_tag") %>
-  <%- end %>
-
+  <%= theme_lookup("head_tag") %>
   <%= yield(:no_ember_head) %>
-
-  <%- if allow_plugins? %>
-    <%= build_plugin_html 'server:before-head-close' %>
-  <%- end -%>
+  <%= build_plugin_html 'server:before-head-close' %>
 </head>
 <body class="no-ember <%= @custom_body_class %>">
-  <%- if allow_plugins? %>
-    <%= build_plugin_html 'server:after-body-open' %>
-  <%- end -%>
-
-  <%- unless customization_disabled? %>
-    <%= theme_lookup("header") %>
-  <%- end %>
-
-  <%- if allow_plugins? %>
-    <%= build_plugin_html 'server:header' %>
-  <%- end %>
-
+  <%= theme_lookup("header") %>
+  <%= build_plugin_html 'server:header' %>
   <section id='main'>
     <%= render partial: 'header', locals: { hide_auth_buttons: local_assigns[:hide_auth_buttons] } %>
     <div id="main-outlet" class="<%= @container_class ? @container_class : 'wrap' %>">
       <%= yield %>
     </div>
   </section>
-
-  <%- unless customization_disabled? %>
-    <%= theme_lookup("footer") %>
-    <%= theme_lookup("body_tag") %>
-  <%- end %>
-
-  <%- if allow_plugins? %>
-    <%= build_plugin_html 'no-client:footer' %>
-    <%= build_plugin_html 'server:before-body-close' %>
-  <%- end %>
+  <%= theme_lookup("footer") %>
+  <%= theme_lookup("body_tag") %>
+  <%= build_plugin_html 'no-client:footer' %>
+  <%= build_plugin_html 'server:before-body-close' %>
 </body>
 </html>

@@ -31,9 +31,4 @@ export default Component.extend({
     }
     return sanitize(description);
   },
-
-  @discourseComputed("badge.id")
-  showFavorite(badgeId) {
-    return ![1, 2, 3, 4].includes(badgeId);
-  },
 });

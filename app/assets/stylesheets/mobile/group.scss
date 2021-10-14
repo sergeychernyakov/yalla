@@ -1,6 +1,5 @@
 .group {
-  margin: 0;
-  padding-bottom: 3em;
+  margin-top: 15px;
 }
 
 .group-name {
@@ -46,22 +45,5 @@
   flex-wrap: wrap;
   .group-details-button button {
     margin-top: 0.5em;
-  }
-}
-
-.group-smtp-email-settings,
-.group-imap-email-settings {
-  .groups-form {
-    grid-template-columns: 1fr;
-
-    input[type="text"],
-    input[type="password"],
-    .group-imap-mailboxes .combo-box {
-      width: 100%;
-    }
-
-    &.groups-form-imap {
-      grid-template-columns: 1fr;
-    }
   }
 }

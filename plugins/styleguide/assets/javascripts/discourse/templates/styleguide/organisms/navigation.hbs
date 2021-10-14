@@ -4,10 +4,8 @@
       {{#d-section class="navigation-container"}}
         {{bread-crumbs categories=dummy.categories}}
         {{navigation-bar navItems=dummy.navItems filterMode="latest"}}
-        <div class="navigation-controls">
-          {{categories-admin-dropdown}}
-          {{create-topic-button canCreateTopic=true}}
-        </div>
+        {{categories-admin-dropdown}}
+        {{create-topic-button canCreateTopic=true}}
       {{/d-section}}
     </div>
   </div>

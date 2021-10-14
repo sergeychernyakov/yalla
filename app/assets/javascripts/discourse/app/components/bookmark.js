@@ -11,7 +11,7 @@ import { AUTO_DELETE_PREFERENCES } from "discourse/models/bookmark";
 import Component from "@ember/component";
 import I18n from "I18n";
 import KeyboardShortcuts from "discourse/lib/keyboard-shortcuts";
-import ItsATrap from "@discourse/itsatrap";
+import Mousetrap from "mousetrap";
 import { Promise } from "rsvp";
 import { TIME_SHORTCUT_TYPES } from "discourse/lib/time-shortcut";
 import { action } from "@ember/object";
@@ -37,7 +37,6 @@ export default Component.extend({
   _savingBookmarkManually: null,
   _saving: null,
   _deleting: null,
-  _itsatrap: null,
   postDetectedLocalDate: null,
   postDetectedLocalTime: null,
   postDetectedLocalTimezone: null,
@@ -45,6 +44,7 @@ export default Component.extend({
   userTimezone: null,
   showOptions: null,
   model: null,
+
   afterSave: null,
 
   @on("init")
@@ -62,7 +62,6 @@ export default Component.extend({
       prefilledDatetime: null,
       userTimezone: this.currentUser.resolvedTimezone(this.currentUser),
       showOptions: false,
-      _itsatrap: new ItsATrap(),
     });
 
     this.registerOnCloseHandler(this._onModalClose.bind(this));
@@ -124,8 +123,9 @@ export default Component.extend({
   _bindKeyboardShortcuts() {
     KeyboardShortcuts.pause();
 
+    this._mousetrap = new Mousetrap();
     Object.keys(BOOKMARK_BINDINGS).forEach((shortcut) => {
-      this._itsatrap.bind(shortcut, () => {
+      this._mousetrap.bind(shortcut, () => {
         let binding = BOOKMARK_BINDINGS[shortcut];
         this.send(binding.handler);
         return false;
@@ -167,13 +167,25 @@ export default Component.extend({
 
     localStorage.bookmarkDeleteOption = this.autoDeletePreference;
 
+    let reminderType;
+    if (this.selectedReminderType === TIME_SHORTCUT_TYPES.NONE) {
+      reminderType = null;
+    } else if (
+      this.selectedReminderType === TIME_SHORTCUT_TYPES.LAST_CUSTOM ||
+      this.selectedReminderType === TIME_SHORTCUT_TYPES.POST_LOCAL_DATE
+    ) {
+      reminderType = TIME_SHORTCUT_TYPES.CUSTOM;
+    } else {
+      reminderType = this.selectedReminderType;
+    }
+
     const data = {
+      reminder_type: reminderType,
       reminder_at: reminderAtISO,
       name: this.model.name,
       post_id: this.model.postId,
       id: this.model.id,
       auto_delete_preference: this.autoDeletePreference,
-      for_topic: this.model.forTopic,
     };
 
     if (this.editingExistingBookmark) {
@@ -195,10 +207,9 @@ export default Component.extend({
       return;
     }
     this.afterSave({
-      reminder_at: reminderAtISO,
-      for_topic: this.model.forTopic,
-      auto_delete_preference: this.autoDeletePreference,
-      post_id: this.model.postId,
+      reminderAt: reminderAtISO,
+      reminderType: this.selectedReminderType,
+      autoDeletePreference: this.autoDeletePreference,
       id: this.model.id || response.id,
       name: this.model.name,
     });
@@ -209,7 +220,7 @@ export default Component.extend({
       type: "DELETE",
     }).then((response) => {
       if (this.afterDelete) {
-        this.afterDelete(response.topic_bookmarked, this.model.id);
+        this.afterDelete(response.topic_bookmarked);
       }
     });
   },
@@ -255,9 +266,7 @@ export default Component.extend({
 
   willDestroyElement() {
     this._super(...arguments);
-
-    this._itsatrap?.destroy();
-    this.set("_itsatrap", null);
+    this._mousetrap.reset();
     KeyboardShortcuts.unpause();
   },
 
@@ -299,7 +308,7 @@ export default Component.extend({
       customOptions.push({
         icon: "globe-americas",
         id: TIME_SHORTCUT_TYPES.POST_LOCAL_DATE,
-        label: "time_shortcut.post_local_date",
+        label: "bookmarks.reminders.post_local_date",
         time: this._postLocalDate(),
         timeFormatted: this._postLocalDate().format(
           I18n.t("dates.long_no_year")

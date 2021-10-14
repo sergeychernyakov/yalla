@@ -18,10 +18,13 @@ discourseModule("Integration | Component | d-button", function (hooks) {
 
     test(assert) {
       assert.ok(
-        exists("button.btn.btn-icon.no-text"),
+        queryAll("button.btn.btn-icon.no-text").length,
         "it has all the classes"
       );
-      assert.ok(exists("button .d-icon.d-icon-plus"), "it has the icon");
+      assert.ok(
+        queryAll("button .d-icon.d-icon-plus").length,
+        "it has the icon"
+      );
       assert.equal(
         queryAll("button").attr("tabindex"),
         "3",
@@ -34,9 +37,18 @@ discourseModule("Integration | Component | d-button", function (hooks) {
     template: hbs`{{d-button icon="plus" label="topic.create"}}`,
 
     test(assert) {
-      assert.ok(exists("button.btn.btn-icon-text"), "it has all the classes");
-      assert.ok(exists("button .d-icon.d-icon-plus"), "it has the icon");
-      assert.ok(exists("button span.d-button-label"), "it has the label");
+      assert.ok(
+        queryAll("button.btn.btn-icon-text").length,
+        "it has all the classes"
+      );
+      assert.ok(
+        queryAll("button .d-icon.d-icon-plus").length,
+        "it has the icon"
+      );
+      assert.ok(
+        queryAll("button span.d-button-label").length,
+        "it has the label"
+      );
     },
   });
 
@@ -44,8 +56,14 @@ discourseModule("Integration | Component | d-button", function (hooks) {
     template: hbs`{{d-button label="topic.create"}}`,
 
     test(assert) {
-      assert.ok(exists("button.btn.btn-text"), "it has all the classes");
-      assert.ok(exists("button span.d-button-label"), "it has the label");
+      assert.ok(
+        queryAll("button.btn.btn-text").length,
+        "it has all the classes"
+      );
+      assert.ok(
+        queryAll("button span.d-button-label").length,
+        "it has the label"
+      );
     },
   });
 
@@ -62,7 +80,7 @@ discourseModule("Integration | Component | d-button", function (hooks) {
 
     test(assert) {
       assert.ok(
-        exists("button.btn-link:not(.btn)"),
+        queryAll("button.btn-link:not(.btn)").length,
         "it has the right classes"
       );
     },
@@ -77,22 +95,22 @@ discourseModule("Integration | Component | d-button", function (hooks) {
 
     test(assert) {
       assert.ok(
-        exists("button.is-loading .loading-icon"),
+        queryAll("button.is-loading .loading-icon").length,
         "it has a spinner showing"
       );
       assert.ok(
-        exists("button[disabled]"),
+        queryAll("button[disabled]").length,
         "while loading the button is disabled"
       );
 
       this.set("isLoading", false);
 
       assert.notOk(
-        exists("button .loading-icon"),
+        queryAll("button .loading-icon").length,
         "it doesn't have a spinner showing"
       );
       assert.ok(
-        exists("button:not([disabled])"),
+        queryAll("button:not([disabled])").length,
         "while not loading the button is enabled"
       );
     },
@@ -106,11 +124,14 @@ discourseModule("Integration | Component | d-button", function (hooks) {
     },
 
     test(assert) {
-      assert.ok(exists("button[disabled]"), "the button is disabled");
+      assert.ok(queryAll("button[disabled]").length, "the button is disabled");
 
       this.set("disabled", false);
 
-      assert.ok(exists("button:not([disabled])"), "the button is enabled");
+      assert.ok(
+        queryAll("button:not([disabled])").length,
+        "the button is enabled"
+      );
     },
   });
 
@@ -125,7 +146,7 @@ discourseModule("Integration | Component | d-button", function (hooks) {
       this.set("ariaLabel", "test.fooAriaLabel");
 
       assert.equal(
-        query("button").getAttribute("aria-label"),
+        queryAll("button")[0].getAttribute("aria-label"),
         I18n.t("test.fooAriaLabel")
       );
 
@@ -134,7 +155,7 @@ discourseModule("Integration | Component | d-button", function (hooks) {
         translatedAriaLabel: "bar",
       });
 
-      assert.equal(query("button").getAttribute("aria-label"), "bar");
+      assert.equal(queryAll("button")[0].getAttribute("aria-label"), "bar");
     },
   });
 
@@ -148,7 +169,7 @@ discourseModule("Integration | Component | d-button", function (hooks) {
     test(assert) {
       this.set("title", "test.fooTitle");
       assert.equal(
-        query("button").getAttribute("title"),
+        queryAll("button")[0].getAttribute("title"),
         I18n.t("test.fooTitle")
       );
 
@@ -157,7 +178,7 @@ discourseModule("Integration | Component | d-button", function (hooks) {
         translatedTitle: "bar",
       });
 
-      assert.equal(query("button").getAttribute("title"), "bar");
+      assert.equal(queryAll("button")[0].getAttribute("title"), "bar");
     },
   });
 
