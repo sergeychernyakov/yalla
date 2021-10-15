@@ -38,6 +38,8 @@ class User < ActiveRecord::Base
   has_many :reviewable_scores, dependent: :destroy
   has_many :invites, foreign_key: :invited_by_id, dependent: :destroy
   has_many :user_custom_fields, dependent: :destroy
+  has_many :ticket_admins, foreign_key: 'admin_id'
+  has_many :transaction_tickets, through: :ticket_admins, foreign_key: 'transaction_ticket_id'
 
   has_one :user_option, dependent: :destroy
   has_one :user_avatar, dependent: :destroy
