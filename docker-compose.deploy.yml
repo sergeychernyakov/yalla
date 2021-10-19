@@ -1,0 +1,59 @@
+version: '2.1'
+networks:
+  back:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.0.0.0/24
+services:
+  app:
+    restart: unless-stopped
+    image: ${DOCKER_IMAGE}
+    command: bash -c "sleep 30 && bundle exec rake assets:precompile && bundle exec config/unicorn_launcher -E production -c config/unicorn.conf.rb"
+    environment:
+      - DISCOURSE_HOSTNAME=$VIRTUAL_HOST
+      - POSTGRES_USER
+      - DISCOURSE_SMTP_PORT=587
+      - DISCOURSE_SMTP_ADDRESS
+      - DISCOURSE_SMTP_USER_NAME
+      - DISCOURSE_SMTP_PASSWORD
+      - DISCOURSE_DB_PASSWORD
+      - DISCOURSE_DB_HOST
+      - DISCOURSE_DB_NAME
+      - UNICORN_BIND_ALL=true
+      - DISCOURSE_REFRESH_MAXMIND_DB_DURING_PRECOMPILE_DAYS=0
+    ports:
+      - "80:3000"
+    depends_on:
+      - redis
+    networks:
+      - back
+  sidekiq:
+    image: ${DOCKER_IMAGE}
+    command: bundle exec sidekiq -q critical -q default -q low -v
+    volumes:
+      - ./data/assets:/home/discourse/discourse/public/assets
+    environment:
+      - DISCOURSE_HOSTNAME=$VIRTUAL_HOST
+      - POSTGRES_USER
+      - DISCOURSE_SMTP_PORT=587
+      - DISCOURSE_SMTP_ADDRESS
+      - DISCOURSE_SMTP_USER_NAME
+      - DISCOURSE_SMTP_PASSWORD
+      - DISCOURSE_DB_HOST
+      - DISCOURSE_DB_PASSWORD
+      - DISCOURSE_DB_NAME
+      - DISCOURSE_REFRESH_MAXMIND_DB_DURING_PRECOMPILE_DAYS=0
+    depends_on:
+      - redis
+    networks:
+      - back
+  redis:
+    container_name: redis
+    image: redis:${REDIS_VERSION:-4-alpine}
+    command: ["--appendonly","yes"]
+    networks:
+      - back
+    volumes:
+      - ./data/redis:/data
