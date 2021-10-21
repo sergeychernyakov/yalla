@@ -466,6 +466,7 @@ GEM
     webpush (1.1.0)
       hkdf (~> 0.2)
       jwt (~> 2.0)
+    will_paginate (3.3.1)
     xorcist (1.1.2)
     yaml-lint (0.0.10)
     zeitwerk (2.4.2)
@@ -602,6 +603,7 @@ DEPENDENCIES
   unicorn
   webmock
   webpush
+  will_paginate (>= 3.0.pre)
   xorcist
   yaml-lint
 
