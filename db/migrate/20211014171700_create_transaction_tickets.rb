@@ -1,7 +1,7 @@
 class CreateTransactionTickets < ActiveRecord::Migration[6.1]
   def change
     create_table :transaction_tickets do |t|
-      t.integer :buyer_id, null; false
+      t.integer :buyer_id, null: false
       t.integer :seller_id, null: false
       t.integer :creator_id, null: false
       t.integer :ticket_type, null: false
