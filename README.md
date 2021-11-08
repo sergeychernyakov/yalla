@@ -1,3 +1,46 @@
+### Start Container
+
+Clone Discourse repository to your local device.
+
+
+git clone https://github.com/sergeychernyakov/yalla.git
+cd yalla
+(from your source root)
+
+```
+d/boot_dev --init
+```
+
+wait while:
+  - dependencies are installed,
+  - the database is migrated, and
+  - an admin user is created (you'll need to interact with this)
+
+# In one terminal:
+```
+d/rails s
+```
+
+# And in a separate terminal
+```
+d/ember-cli 
+```
+or 
+```
+bin/ember-cli
+```
+
+… then open a browser on http://localhost:4200 68 and voila!, you should see Discourse.
+
+
+Helping links:
+
+https://meta.discourse.org/t/beginners-guide-to-install-discourse-on-macos-for-development/15772
+https://meta.discourse.org/t/beginners-guide-to-install-discourse-for-development-using-docker/102009
+
+
+
+
 <a href="https://www.discourse.org/"><img src=
 "https://user-images.githubusercontent.com/1681963/52239617-e2683480-289c-11e9-922b-5da55472e5b4.png"
  width="300px"></a>
