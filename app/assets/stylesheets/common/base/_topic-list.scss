@@ -23,14 +23,15 @@
   }
 
   .combo-box .combo-box-header {
-    background: var(--secondary);
-    color: var(--primary);
-    border: 1px solid var(--primary-medium);
-    font-size: $font-0;
-    transition: none;
-    &:focus {
-      border-color: var(--tertiary);
-    }
+    font-size: 14px;
+    color: #818180;
+    margin: 0;
+    font-weight: 500;
+    padding: 5px 19px;
+    background: #ffffff;
+    border-radius: 18px;
+    margin-right: 22px;
+    transition: 0.3s;
   }
   .select-kit {
     .select-kit-collection {
@@ -40,10 +41,16 @@
 }
 
 .navigation-container {
-  width: 100%;
-  --nav-space: 0.75em;
+  width: 102%;
+  right: 1%;
   display: flex;
   flex-wrap: wrap;
+  display: inline-block;
+  background: #fbf7ed;
+  border-radius: 20px;
+  padding: 15px 35px;
+  position: relative;
+  margin-bottom: 40px;
 }
 
 .category-breadcrumb {
@@ -170,7 +177,8 @@
   a.title {
     padding: 15px 0;
     word-break: break-word;
-    color: var(--primary);
+    color: #757575;
+    font-size: 33px;
   }
 
   .anon & {
@@ -281,13 +289,22 @@
   .topic-excerpt {
     font-size: $font-down-1;
     margin-top: 5px;
-    color: var(--primary-high);
+    color: #818180;
     word-wrap: break-word;
     line-height: $line-height-large;
     padding-right: 20px;
   }
   .topic-statuses:empty {
     display: none;
+  }
+
+  .topic-statuses {
+    display: inline;
+    font-size: 24px;
+  }
+
+  .topic-statuses a{
+    font-size: 25px;
   }
 
   .num {

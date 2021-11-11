@@ -68,7 +68,7 @@ export default createWidget("home-logo", {
         mobileLogoUrlDark
       );
     } else if (logoUrl.length) {
-      return this.logoElement("logo-big", "/assets/logo-single.png", title, logoUrlDark);
+      return this.logoElement("logo-big", "/assets/logo.png", title, logoUrlDark);
     } else {
       return h("h1#site-text-logo.text-logo", { key: "logo-text" }, title);
     }
