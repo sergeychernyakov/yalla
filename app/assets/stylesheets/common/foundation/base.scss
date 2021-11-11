@@ -133,13 +133,22 @@ table {
 }
 
 tbody {
-  border-top: 3px solid var(--primary-low);
+  // border-top: 3px solid var(--primary-low);
 }
 
-tr {
-  border-bottom: 1px solid var(--primary-low);
+tbody tr {
+	background: #fbf7ed;
+	padding: 25px 0px;
+	border-radius: 20px;
+	text-align: left;
+	transition: 0.3s;
+	box-shadow: 7px 6px 7.74px 1.26px rgba(3, 100, 75, 1);
+  // border-bottom: 1px solid var(--primary-low);
   &.highlighted {
     animation: background-fade-highlight 2.5s ease-out;
+    -webkit-box-shadow:0px 0px 12px 6px rgba(21,183,129,1);
+    -moz-box-shadow: 0px 0px 12px 6px rgba(21,183,129,1);
+    box-shadow: 0px 0px 12px 6px rgba(21,183,129,1);
   }
 }
 

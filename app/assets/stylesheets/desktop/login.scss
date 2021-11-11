@@ -129,6 +129,11 @@
       }
     }
   }
+
+  .login-modal-body {
+    z-index: 1300;
+  }
+
   .login-left-side {
     background: var(--secondary);
     width: calc(100% - 4em);
