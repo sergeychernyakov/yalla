@@ -1,10 +1,10 @@
 <div class="triangle-box">
-{{#d-section bodyClass="navigation-topics" class="navigation-container" scrollTop="false"}}
-  {{d-navigation
-    filterMode=filterMode
-    canCreateTopic=canCreateTopic
-    hasDraft=currentUser.has_topic_draft
-    createTopic=(route-action "createTopic")}}
-{{/d-section}}
-<img src="/assets/triangle.png" alt="">
+  {{#d-section bodyClass="navigation-topics" class="navigation-container" scrollTop="false"}}
+    {{d-navigation
+      filterMode=filterMode
+      canCreateTopic=canCreateTopic
+      hasDraft=currentUser.has_topic_draft
+      createTopic=(route-action "createTopic")}}
+  {{/d-section}}
+  <img src="/assets/triangle.png">
 </div>
