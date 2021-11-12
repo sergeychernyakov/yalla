@@ -27,10 +27,15 @@
     margin-right: 0.5em;
 
     > a {
+      display: inline-block;
+      text-decoration: none;
+      font-size: 14px;
+      color: #818180;
+      font-weight: 500;
+      transition: 0.3s;
+
       border: none;
       padding: 6px 12px;
-      color: var(--primary);
-      font-size: $font-up-1;
       line-height: $line-height-small;
       box-sizing: border-box;
       min-height: 30px;
@@ -45,13 +50,19 @@
 
       &:hover {
         color: var(--quaternary);
-        background-color: var(--quaternary-low);
+        // background-color: var(--quaternary-low);
       }
     }
 
     a.active {
-      color: var(--secondary);
-      background-color: var(--quaternary);
+      background-color: #008060;
+      color: #fff;
+      margin: 0;
+      font-weight: 500;
+      padding: 5px 19px;
+      border-radius: 18px;
+      margin-right: 22px;
+      transition: 0.3s;
 
       .d-icon {
         opacity: 1;
