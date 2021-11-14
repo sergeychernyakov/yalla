@@ -10,10 +10,7 @@ services:
   app:
     restart: unless-stopped
     image: ${DOCKER_IMAGE}
-    command:
-      bash -c "sleep 30 && bundle exec rake assets:precompile \
-        && cp -R app/assets/images/* public/assets \
-        && bundle exec config/unicorn_launcher -E production -c config/unicorn.conf.rb"
+    command: bash -c "sleep 30 && bundle exec rake assets:precompile && cp -R app/assets/images/* public/assets && bundle exec config/unicorn_launcher -E production -c config/unicorn.conf.rb"
     environment:
       - DISCOURSE_HOSTNAME=$VIRTUAL_HOST
       - POSTGRES_USER
