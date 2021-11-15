@@ -11,10 +11,6 @@
     {{shared-draft-controls topic=model}}
   {{/if}}
 
-  <script type="text/x-handlebars" data-template-name="/connectors/topic-above-post-stream/foobar">
-  <div style="height: 200px; width: 200px;background: red"></div>
-</script>
-
   {{plugin-outlet name="topic-above-post-stream" args=(hash model=model editFirstPost=(action "editFirstPost"))}}
 
   {{#if model.postStream.loaded}}
