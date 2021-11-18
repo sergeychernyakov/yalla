@@ -7,7 +7,7 @@
       <div class="row">
         <div class="col-lg-12 col-xs-12 col-sm-12 flush">
           <nav class="navbar navbar-expand-md navbar-dark">
-            <a class="navbar-brand" href="/"><img src="/assets/logo.png" alt=""></a>
+            <a class="navbar-brand" href="/"><img src="/assets/logo.png" alt="YallaSwap Logo"></a>
             <button class="navbar-toggler js-offcanvas-toggler" data-button-options="{'wrapText':false}"
               aria-label="Toggle navigation" type="button">
               <span class="navbar-toggler-icon"><img src="/assets/hambur_img.png"></span>
@@ -16,25 +16,25 @@
             <div class="collapse navbar-collapse" id="navbarsExampleDefault" data-set="bs">
               <ul class="navbar-nav ml-auto js-append-around">
                 <li class="nav-item active">
-                  <a class="nav-link" href="#">How it Works?</a>
+                  <a class="nav-link" href="/t/how-does-yallaswap-work/">{{i18n "ui.nav_menu.how_it_works"}}</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="#">Earn Money</a>
+                  <a class="nav-link" href="/c/p/earn-money/">{{i18n "ui.nav_menu.earn_money"}}</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="#">Start Checkout</a>
+                  <a class="nav-link" href="/c/p/start-checkout/">{{i18n "ui.nav_menu.start_checkout"}}</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="#">Search Listings</a>
+                  <a class="nav-link" href="/c/p/search-listings/">{{i18n "ui.nav_menu.search_listings"}}</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="#">Advertise</a>
+                  <a class="nav-link" href="/c/p/advertise-on-swapd/">{{i18n "ui.nav_menu.advertise"}}</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link su_btn" href="#">Sign Up</a>
+                  {{#link-to "signup" class="nav-link su_btn"}}{{i18n "ui.nav_menu.sign_up"}}{{/link-to}}
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link li_btn" href="#"><img src="/assets/login_icon.png"> Log In</a>
+                  {{#link-to "login" class="nav-link li_btn"}}<img src="/assets/login_icon.png"> {{i18n "ui.nav_menu.log_in"}}{{/link-to}}
                 </li>
               </ul>
             </div>
@@ -48,22 +48,17 @@
     <div class="container">
       <div class="row">
         <div class="col-lg-7 col-xs-12 col-sm-7 flush xs-no-flush">
-          <h1><span>Buy, Sell,</span><br>& Trade Virtual Properties</h1>
+          <h1><span>{{i18n "ui.texts.banner.buy"}}, {{i18n "ui.texts.banner.sell"}},</span><br>& {{i18n "ui.texts.banner.trade_virtual_properties"}}</h1>
           <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin varius, est vitae mollis pellentesque,
-            mauris ligula auctor turpis, sed malesuada sapien tellus ac leo. Ut aliquet ex orci, vitae commodo nibh
-            pulvinar tincidunt. Duis id pellentesque lacus, in vestibulum ipsum. Phasellus dui ex, porta nec malesuada
-            at, sodales at odio. Nulla tempor dolor elit, non elementum tortor suscipit et. Suspendisse ut felis eget
-            odio blandit pellentesque vel auctor nunc. Praesent sollicitudin enim et justo porta finibus vulputate eu
-            risus. In scelerisque nec eros id feugiat. Proin dolor leo, lacinia in interdum et, blandit ac nisi.
+            {{i18n "ui.texts.banner.text"}}
           </p>
           <ul class="btns">
-            <li><a href="#">Get Started</a></li>
-            <li><a href="#">Learn More</a></li>
+            <li><a href="/c/p/start-checkout/">{{i18n "ui.texts.banner.get_started"}}</a></li>
+            <li><a href="/t/how-does-yallaswap-work/">{{i18n "ui.texts.banner.learn_more"}}</a></li>
           </ul>
         </div>
         <div class="col-lg-5 col-xs-12 col-sm-5 text-right flush xs-no-flush">
-          <img src="/assets/home_img.png" alt="">
+          <img src="/assets/home_img.png">
         </div>
       </div>
     </div>
@@ -73,7 +68,7 @@
     <div class="container">
       <div class="row">
         <div class="col-lg-12 col-xs-12 col-sm-12 text-center">
-          <h2>Our Social Media</h2>
+          <h2>{{i18n "ui.texts.content.our_social_media"}}</h2>
           <ul class="social">
             <li><a href="#"><img src="/assets/big_so_icon_1.png"></a></li>
             <li><a href="#"><img src="/assets/big_so_icon_2.png"></a></li>
@@ -92,66 +87,66 @@
 
       <div class="row">
         <div class="col-lg-12 col-xs-12 col-sm-12 text-center">
-          <h2 class="h2_sec">Looking for something?</h2>
+          <h2 class="h2_sec">{{i18n "ui.texts.content.looking_for_something"}}</h2>
           <div class="search_bar">
-            <input type="text" name="" placeholder="Search for topics, posts, categories or use # to filter tags.">
+            <input type="text" name="search" placeholder={{i18n "ui.texts.content.search_placeholder"}}>
             <span><img src="/assets/search_icon.png"></span>
             <div class="row row-eq-height">
               <div class="col-lg-5 col-xs-12 col-sm-5 text-center flush-left xs-no-flush">
-                <div class="card">
-                  <div class="cont">
-                    <h2>What is <br>YallaSwap?</h2>
-                    <p>make good money and have the <br>freedom to enjoy the benefits.</p>
+                <a href="/t/what-is-yallaswap/13/2">
+                  <div class="card">
+                    <div class="cont">
+                      <h2>{{i18n "ui.texts.content.what_is"}}</h2>
+                      <p>{{i18n "ui.texts.content.make_good_money"}}</p>
+                    </div>
+                    <img class="img_1" src="/assets/card_img_1.png" alt="">
                   </div>
-                  <img class="img_1" src="/assets/card_img_1.png" alt="">
-                </div>
+                </a>
               </div>
               <div class="col-lg-7 col-xs-12 col-sm-7 text-center flush-right xs-no-flush">
-                <div class="card">
-                  <div class="cont">
-                    <h2 class="rd_h">Read & Agree</h2>
-                    <p>with our terms of services or view our <br>quick rules.</p>
+                <a href="/t/quick-rules-yallaswap/15/2">
+                  <div class="card">
+                    <div class="cont">
+                      <h2 class="rd_h">{{i18n "ui.texts.content.read_agree"}}</h2>
+                      <p>{{i18n "ui.texts.content.quick_rules"}}</p>
+                    </div>
+                    <img class="img_1" src="/assets/card_img_2.png" alt="">
                   </div>
-                  <img class="img_1" src="/assets/card_img_2.png" alt="">
-                </div>
+                </a>
               </div>
             </div>
             <div class="row row-eq-height sp_top">
               <div class="col-lg-6 col-xs-12 col-sm-6 text-center flush-left xs-no-flush">
-                <div class="card">
-                  <div class="cont">
-                    <h2 class="rd_h">Check Out</h2>
-                    <p>Why we are the best place to buy a<br>nd sell your properties</p>
+                <a href="/c/p/start-checkout/">
+                  <div class="card">
+                    <div class="cont">
+                      <h2 class="rd_h">{{i18n "ui.texts.content.check_out"}}</h2>
+                      <p>{{i18n "ui.texts.content.best_place"}}</p>
+                    </div>
+                    <img class="img_1" src="/assets/card_img_3.png" alt="">
                   </div>
-                  <img class="img_1" src="/assets/card_img_3.png" alt="">
-                </div>
+                </a>
               </div>
               <div class="col-lg-6 col-xs-12 col-sm-6 text-center flush-right xs-no-flush">
-                <div class="card">
-                  <div class="cont">
-                    <h2>YallaSwap<br>Rewards</h2>
-                    <p>make good money and have the <br>freedom to enjoy the benefits.</p>
+                <a href="/t/earn-a-lifetime-reward-of-2-reward-for-every-new-member-that-you-invite-to-yallaswap/18/2">
+                  <div class="card">
+                    <div class="cont">
+                      <h2>YallaSwap<br>{{i18n "ui.texts.content.rewards"}}</h2>
+                      <p>{{i18n "ui.texts.content.rewards_text"}}</p>
+                    </div>
+                    <img class="img_4" src="/assets/card_img_4.png" alt="">
                   </div>
-                  <img class="img_4" src="/assets/card_img_4.png" alt="">
-                </div>
+                </a>
               </div>
             </div>
           </div>
           <ul class="big_btns">
-            <li><a href="#"><img src="/assets/cal_icon.png"> Calculator</a></li>
-            <li><a href="#" class="red"><img src="/assets/tick_icon.png"> Start Checkout Ticket</a></li>
+            <li><a href="/calculator"><img src="/assets/cal_icon.png"> {{i18n "ui.texts.content.calculator"}}</a></li>
+            <li><a href="/c/p/start-checkout/" class="red"><img src="/assets/tick_icon.png"> {{i18n "ui.texts.content.start_checkout_ticket"}}</a></li>
           </ul>
         </div>
       </div>
     </div>
-
-    {{!-- {{site-header canSignUp=canSignUp
-                  showCreateAccount=(route-action "showCreateAccount")
-                  showLogin=(route-action "showLogin")
-                  showKeyboard=(route-action "showKeyboardShortcutsHelp")
-                  toggleMobileView=(route-action "toggleMobileView")
-                  toggleAnonymous=(route-action "toggleAnonymous")
-                  logout=(route-action "logout")}} --}}
 
     {{software-update-prompt id="software-update-prompt"}}
 
@@ -201,9 +196,7 @@
             <div class="col-lg-7 col-xs-12 col-sm-12 flush text-left">
               <a href="#" class="ft_logo"><img src="/assets/footer_logo.png" alt=""></a>
               <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed<br>do eiusmod tempor incididunt ut labore
-                et dolore magna<br>aliqua. Quis ipsum suspendisse ultrices gravida. Risus<br>commodo viverra maecenas
-                accumsan lacus vel facilisis.
+                {{i18n "ui.texts.footer.yalla_description"}}
               </p>
             </div>
             <div class="col-lg-5 col-xs-12 col-sm-12 flush">
@@ -211,19 +204,19 @@
                 <div class="col-lg-6 col-xs-12 col-sm-6 text-left">
                   <ul>
                     <li>
-                      <h2>Quick Links</h2>
+                      <h2>{{i18n "ui.texts.footer.quick_links.title"}}</h2>
                     </li>
-                    <li><a href="#">Api</a></li>
-                    <li><a href="#">How it Works?</a></li>
-                    <li><a href="#">FAQ</a></li>
-                    <li><a href="#">Terms</a></li>
-                    <li><a href="#">Blog</a></li>
+                    <li><a href="/t/how-to-use-yallaswap/11/2">{{i18n "ui.texts.footer.quick_links.how_to_use"}}</a></li>
+                    <li><a href="/t/quick-rules-yallaswap/15/2">{{i18n "ui.texts.footer.quick_links.quick_rules"}}</a></li>
+                    <li><a href="/t/faq-yallaswap-you-can-start-here/16/2">{{i18n "ui.texts.footer.quick_links.faq"}}</a></li>
+                    <li><a href="/t/faq-yallaswap-rewards-program/21/2">{{i18n "ui.texts.footer.quick_links.rewards"}}</a></li>
+                    <li><a href="/c/p/advertise-on-swapd/">{{i18n "ui.texts.footer.quick_links.advertice"}}</a></li>
                   </ul>
                 </div>
                 <div class="col-lg-6 col-xs-12 col-sm-6 text-left">
-                  <h2>Contact Us</h2>
-                  <a href="#">+1 (23a4) 567-89-00</a><br>
-                  <a href="#">www.swap.com/foruminterne</a>
+                  <h2>{{i18n "ui.texts.footer.quick_links.contact_us"}}</h2>
+                  <a href="#">+1 (234) 567-89-00</a><br>
+                  <a href="/contact-us">yallaswap.com/contact-us</a>
                   <ul class="footer_social">
                     <li><a href="#"><img src="/assets/ft_icon_1.png"></a></li>
                     <li><a href="#"><img src="/assets/ft_icon_2.png"></a></li>
@@ -238,7 +231,7 @@
               </div>
             </div>
           </div>
-          <p class="last">Copyright &copy; 2010-2021 YallaSwap. All rights reserved.</p>
+          <p class="last">{{i18n "ui.texts.footer.copyright"}}</p>
         </div>
       </div>
     </div>

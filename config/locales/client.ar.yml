@@ -6,6 +6,49 @@
 
 ar:
   js:
+    ui:
+      nav_menu:
+        how_it_works: "كیف یعمل الأمر؟"
+        earn_money: "أكسب أموال"
+        start_checkout: "ابدأ المعاملة"
+        search_listings: "بحث عن"
+        advertise: "اعلان"
+        sign_up: "سجّل حسابًا"
+        log_in: "لِج"
+      texts:
+        banner:
+          buy: "شراء"
+          sell: "قم ببیع"
+          trade_virtual_properties: "تداول الممتلكات الافتراضیة"
+          text: "يلا YALLASWAP هو سوق على الأنترنت لشراء وبيع او تبديل الأصول الافتراضية. هدفنا هو تقديم مساحة آمنة ومنظمة لمشترين وبائعين الأصول الافتراضية تسمح لهم ببيع، شراء او تبديل الأصول الافتراضية براحة بال."
+          get_started: "ابدأ الان"
+          learn_more: "اعرف اكثر"
+        content:
+          our_social_media: "مواقع وسائل التواصل الاجتماعي لدینا"
+          looking_for_something: "تبحث عن شيء ما؟"
+          search_placeholder: "ابحث عن المواضيع، المنشورات والتصنيفات او استخدم # لفلترة العلامات. "
+          what_is: "ما <br>هو يلا Swap"
+          make_good_money: "احصل على أموال جيدة وعلى <br>حرية الاستمتاع بالمزايا"
+          read_agree: "اقرأ ووافق"
+          quick_rules: "على شروط خدمتنا <br>واظهر القواعد السريعة"
+          check_out: "الدفع"
+          best_place: "لماذا نعد افضل مكان <br>لبيع وشراء ممتلكاتك"
+          rewards: "المكافآت"
+          rewards_text: "ھو برنامج إحالات في الموقع لمكافأة اعضائنا في كل مرة یحضروا أعضاء جدد."
+          calculator: "آلة حاسبة"
+          start_checkout_ticket: "بدء تذكرة الخروج"
+        footer:
+          yalla_description: "یلا SWAP مبني ببرمجة عالیة الجودة تزید من أمان معاملاتك. نحن دائماً <br>نحتفظ بعلامات التبویب في كل المعاملات لضمان عدم تعرضك للخداع."
+          quick_links:
+            title: "روابط سريعة"
+            contact_us: "اتصل بنا"
+            how_to_use: "كيف تستعمل؟"
+            quick_rules: "قواعد سريعة"
+            faq: "التعليمات"
+            rewards: "المكافآت"
+            advertice: "اعلان"
+          copyright: "حقوق النشر &copy; 2010-2021 YallaSwap. كل الحقوق محفوظة."
+
     number:
       format:
         separator: "٫"

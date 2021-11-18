@@ -1,5 +1,90 @@
 en:
   js:
+    ui:
+      # nav_menu:
+      #   how_it_works: "How it Works?"
+      #   earn_money: "Earn Money"
+      #   start_checkout: "Start Checkout"
+      #   search_listings: "Search Listings"
+      #   advertise: "Advertise"
+      #   sign_up: "Sign Up"
+      #   log_in: "Log In"
+      # texts:
+      #   banner:
+      #     buy: "Buy"
+      #     sell: "Sell"
+      #     trade_virtual_properties: "Trade Virtual Properties"
+      #     text: "YALLASWAP is an online marketplace for buying, selling, or swapping virtual assets. Our goal is to offer buyers and sellers of virtual assets a safe and moderated space that allows them to buy, sell, and even swap virtual assets with peace of mind."
+      #     get_started: "Get Started"
+      #     learn_more: "Learn More"
+      #   content:
+      #     our_social_media: "Our Social Media"
+      #     looking_for_something: "Looking for something?"
+      #     search_placeholder: "Search for topics, posts, categories or use # to filter tags."
+      #     what_is: "What is <br>YallaSwap?"
+      #     make_good_money: "make good money and have the <br>freedom to enjoy the benefits."
+      #     read_agree: "Read & Agree"
+      #     quick_rules: "with our terms of services or view our <br>quick rules."
+      #     check_out: "Check Out"
+      #     best_place: "why we are the best place to buy <br>and sell your properties"
+      #     rewards: "Rewards"
+      #     rewards_text: "is an in-house referral program for awarding our members"
+      #     calculator: "Calculator"
+      #     start_checkout_ticket: "Start Checkout Ticket"
+      #   footer:
+      #     yalla_description: "YALLASWAP is built with high-end software that maximises <br>the safety of your transactions. We always keep tabs on all <br>transactions during the checkout process to ensure you do not <br>get scammed."
+      #     quick_links:
+      #       contact_us: Contact Us
+      #       title: "Quick Links"
+      #       how_to_use: "How To Use?"
+      #       quick_rules: "Quick Rules"
+      #       faq: "FAQ"
+      #       rewards: "Rewards"
+      #       advertice: "Advertice"
+      #     copyright: "Copyright &copy; 2010-2021 YallaSwap. All rights reserved."
+
+      nav_menu:
+        how_it_works: "كیف یعمل الأمر؟"
+        earn_money: "أكسب أموال"
+        start_checkout: "ابدأ المعاملة"
+        search_listings: "بحث عن"
+        advertise: "اعلان"
+        sign_up: "سجّل حسابًا"
+        log_in: "لِج"
+      texts:
+        banner:
+          buy: "شراء"
+          sell: "قم ببیع"
+          trade_virtual_properties: "تداول الممتلكات الافتراضیة"
+          text: "يلا YALLASWAP هو سوق على الأنترنت لشراء وبيع او تبديل الأصول الافتراضية. هدفنا هو تقديم مساحة آمنة ومنظمة لمشترين وبائعين الأصول الافتراضية تسمح لهم ببيع، شراء او تبديل الأصول الافتراضية براحة بال."
+          get_started: "ابدأ الان"
+          learn_more: "اعرف اكثر"
+        content:
+          our_social_media: "مواقع وسائل التواصل الاجتماعي لدینا"
+          looking_for_something: "تبحث عن شيء ما؟"
+          search_placeholder: "ابحث عن المواضيع، المنشورات والتصنيفات او استخدم # لفلترة العلامات. "
+          what_is: "ما هو يلا Swap"
+          make_good_money: "احصل على أموال جيدة وعلى حرية الاستمتاع بالمزايا"
+          read_agree: "اقرأ ووافق"
+          quick_rules: "على شروط خدمتنا واظهر القواعد السريعة"
+          check_out: "الدفع"
+          best_place: "لماذا نعد افضل مكان لبيع وشراء ممتلكاتك"
+          rewards: "المكافآت"
+          rewards_text: "ھو برنامج إحالات في الموقع لمكافأة اعضائنا في كل مرة یحضروا أعضاء جدد."
+          calculator: "آلة حاسبة"
+          start_checkout_ticket: "بدء تذكرة الخروج"
+        footer:
+          yalla_description: "یلا SWAP مبني ببرمجة عالیة الجودة تزید من أمان معاملاتك. نحن دائماً نحتفظ بعلامات التبویب في كل المعاملات لضمان عدم تعرضك للخداع."
+          quick_links:
+            title: "روابط سريعة"
+            contact_us: "اتصل بنا"
+            how_to_use: "كيف تستعمل؟"
+            quick_rules: "قواعد سريعة"
+            faq: "التعليمات"
+            rewards: "المكافآت"
+            advertice: "اعلان"
+          copyright: "حقوق النشر &copy; 2010-2021 YallaSwap. كل الحقوق محفوظة."
+
     number:
       format:
         # symbol used to separate the integer part from the fractional part of a number
