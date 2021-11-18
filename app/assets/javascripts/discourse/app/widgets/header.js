@@ -12,6 +12,7 @@ import { iconNode } from "discourse-common/lib/icon-library";
 import { schedule } from "@ember/runloop";
 import { scrollTop } from "discourse/mixins/scroll-top";
 import { wantsNewWindow } from "discourse/lib/intercept-click";
+import hbs from "discourse/widgets/hbs-compiler";
 
 const _extraHeaderIcons = [];
 
@@ -307,6 +308,29 @@ createWidget("header-buttons", {
   },
 });
 
+createWidget("header-buttons-menu", {
+  tagName: "span.header-buttons-menu",
+  template: hbs`
+  <ul class="navbar-nav ml-auto js-append-around">
+      <li class="nav-item active">
+          <a class="nav-link" href="#">How it Works?</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Earn Money</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Start Checkout</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Search Listings</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Advertise</a>
+        </li>
+  </ul>
+  `,
+});
+
 createWidget("header-cloak", {
   tagName: "div.header-cloak",
   html() {
@@ -357,7 +381,7 @@ export default createWidget("header", {
         return headerIcons;
       }
 
-      const panels = [this.attach("header-buttons", attrs), headerIcons];
+      const panels = [this.attach("header-buttons-menu", attrs), this.attach("header-buttons", attrs), headerIcons];
 
       if (state.searchVisible) {
         const contextType = this.searchContextType();

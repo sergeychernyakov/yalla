@@ -25,16 +25,16 @@ button {
 
 ::-webkit-input-placeholder {}
 
-.panel {
-	float:left;
-	width:100%;
-	border-radius:0px;
-	padding:0px;
-	margin:0px;
-	box-shadow:none;
-	background:none;
-	border:none;
-}
+// .panel {
+// 	float:left;
+// 	width:100%;
+// 	border-radius:0px;
+// 	padding:0px;
+// 	margin:0px;
+// 	box-shadow:none;
+// 	background:none;
+// 	border:none;
+// }
 
 .flush {
 	padding:0px;
@@ -2573,4 +2573,16 @@ table tr td:first-child {
 }
 table tr:first-child th,
 table tr:first-child td {
+}
+
+.topic-statuses {
+    display: inline;
+}
+
+li.nav-item {
+    float: left;
+}
+
+.navbar-nav {
+    display: inline!important;
 }

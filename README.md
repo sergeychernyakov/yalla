@@ -1,3 +1,79 @@
+
+## Set up with Docker
+
+```
+git clone https://github.com/sergeychernyakov/yallatest
+cd yallatest
+```
+
+(from your source root)
+
+
+```
+d/boot_dev --init
+    # wait while:
+    #   - dependencies are installed,
+    #   - the database is migrated, and
+    #   - an admin user is created (you'll need to interact with this)
+
+
+# In one terminal:
+d/rails s
+
+# And in a separate terminal
+d/ember-cli
+```
+
+… then open a browser on http://localhost:4200 70 and voila!, you should see Discourse.
+
+
+
+
+To test emails, run MailHog :
+
+```
+d/mailhog
+```
+If there are missing gems, run:
+
+```
+d/bundle install
+```
+If a db migration is needed:
+```
+d/rake db:migrate RAILS_ENV=development
+```
+When you’re done, you can choose to kill the Docker container with:
+```
+d/shutdown_dev
+```
+Data is persisted between invocations of the container in your source root tmp/postgres directory. If for any reason you want to reset your database run:
+```
+sudo rm -fr data
+```
+If you see errors like “permission denied while trying to connect to Docker”, Run:
+```
+run `sudo usermod -aG docker ${USER}` 
+sudo service docker restart
+```
+If you wish to globally expose the ports from the container to the network (default off) use:
+
+```
+d/boot_dev -p
+```
+
+
+
+Guides:
+
+https://meta.discourse.org/t/beginners-guide-to-install-discourse-for-development-using-docker/102009
+
+https://meta.discourse.org/t/beginners-guide-to-install-discourse-on-macos-for-development/15772
+
+
+
+## Discourse
+
 <a href="https://www.discourse.org/"><img src=
 "https://user-images.githubusercontent.com/1681963/52239617-e2683480-289c-11e9-922b-5da55472e5b4.png"
  width="300px"></a>
