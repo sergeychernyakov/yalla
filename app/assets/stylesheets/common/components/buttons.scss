@@ -115,12 +115,23 @@
 
 .btn-primary {
   @include btn(
-    $text-color: var(--secondary),
-    $bg-color: var(--tertiary),
+    $text-color: #686868,
+    $bg-color: #fbf7ed,
     $icon-color: var(--secondary),
     $hover-bg-color: var(--tertiary-hover),
     $hover-icon-color: var(--secondary)
   );
+
+  font-size: 13px;
+  font-weight: bold;
+  display: inline-block;
+  width: 118px;
+  height: 31px;
+  margin-left: 20px;
+  text-align: center;
+  line-height: 31px;
+  border-radius: 5px;
+  padding: 0px 18px;
 }
 
 // Danger button
@@ -249,7 +260,7 @@
 // Small
 
 .btn-small {
-  padding: 6px;
+  // padding: 6px;
   font-size: $font-down-1;
   min-height: 20px;
   .d-icon {
