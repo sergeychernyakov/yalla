@@ -27,6 +27,43 @@ d/ember-cli
 … then open a browser on http://localhost:4200 70 and voila!, you should see Discourse.
 
 
+
+
+To test emails, run MailHog :
+
+```
+d/mailhog
+```
+If there are missing gems, run:
+
+```
+d/bundle install
+```
+If a db migration is needed:
+```
+d/rake db:migrate RAILS_ENV=development
+```
+When you’re done, you can choose to kill the Docker container with:
+```
+d/shutdown_dev
+```
+Data is persisted between invocations of the container in your source root tmp/postgres directory. If for any reason you want to reset your database run:
+```
+sudo rm -fr data
+```
+If you see errors like “permission denied while trying to connect to Docker”, Run:
+```
+run `sudo usermod -aG docker ${USER}` 
+sudo service docker restart
+```
+If you wish to globally expose the ports from the container to the network (default off) use:
+
+```
+d/boot_dev -p
+```
+
+
+
 Guides:
 
 https://meta.discourse.org/t/beginners-guide-to-install-discourse-for-development-using-docker/102009
