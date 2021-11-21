@@ -44,9 +44,9 @@ en:
       #     copyright: "Copyright &copy; 2010-2021 YallaSwap. All rights reserved."
 
       nav_menu:
-        how_it_works: "How it Works?"
-        earn_money: "Earn Money"
-        start_checkout: "Start Checkout"
+        how_it_works: "كیف یعمل الأمر؟"
+        earn_money: "أكسب أموال"
+        start_checkout: "ابدأ المعاملة"
         search_listings: "بحث عن"
         advertise: "اعلان"
         sign_up: "سجّل حسابًا"
@@ -71,7 +71,7 @@ en:
           best_place: "لماذا نعد افضل مكان لبيع وشراء ممتلكاتك"
           rewards: "المكافآت"
           rewards_text: "ھو برنامج إحالات في الموقع لمكافأة اعضائنا في كل مرة یحضروا أعضاء جدد."
-          calculator: "Calculator"
+          calculator: "آلة حاسبة"
           start_checkout_ticket: "بدء تذكرة الخروج"
         footer:
           yalla_description: "یلا SWAP مبني ببرمجة عالیة الجودة تزید من أمان معاملاتك. نحن دائماً نحتفظ بعلامات التبویب في كل المعاملات لضمان عدم تعرضك للخداع."
