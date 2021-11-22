@@ -1,4 +1,4 @@
-{{custom-home-layout}}
+{{!-- {{custom-home-layout}} --}}
 <div class="container">
   {{discourse-banner user=currentUser banner=site.banner}}
   {{#unless viewingCategoriesList}}
@@ -7,11 +7,13 @@
 </div>
 
 {{plugin-outlet name="discovery-list-controls-above"}}
-
-<div class="list-controls">
-  <div class="container">
-    {{outlet "navigation-bar"}}
+<div class="triangle-box">
+  <div class="list-controls">
+    <div class="container">
+      {{outlet "navigation-bar"}}
+    </div>
   </div>
+  <img src="/assets/triangle.png" alt="">
 </div>
 
 {{conditional-loading-spinner condition=loading}}
