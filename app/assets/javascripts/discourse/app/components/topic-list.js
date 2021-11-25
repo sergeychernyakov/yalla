@@ -7,8 +7,8 @@ import { on } from "@ember/object/evented";
 import { schedule } from "@ember/runloop";
 
 export default Component.extend(LoadMore, {
-  tagName: "table",
-  classNames: ["topic-list"],
+  tagName: "ul", //table
+  classNames: ["responsive-table"], //topic-list
   showTopicPostBadges: true,
   listTitle: "topic.title",
 

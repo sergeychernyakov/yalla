@@ -60,6 +60,7 @@
   {{plugin-outlet name="before-topic-list" args=(hash category=category)}}
 
   {{#if hasTopics}}
+    <div class="table">
     {{topic-list
       highlightLastVisited=true
       top=top
@@ -81,6 +82,7 @@
       discoveryList=true
       scrollOnLoad=true
       onScroll=discoveryTopicList.saveScrollPosition}}
+    </div>
   {{/if}}
 
   {{plugin-outlet name="after-topic-list" args=(hash category=category)}}
