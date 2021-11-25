@@ -47,6 +47,10 @@ export default EmberObject.extend({
       name.push("num");
     }
 
+    if (this.addClass) {
+      name.push(this.addClass)
+    }
+
     return name.join(" ");
   },
 

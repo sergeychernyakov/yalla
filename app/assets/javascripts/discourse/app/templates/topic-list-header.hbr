@@ -6,17 +6,18 @@
     {{/if}}
   </th>
 {{/if}}
-{{raw "topic-list-header-column" order='default' name=listTitle bulkSelectEnabled=bulkSelectEnabled showBulkToggle=toggleInTitle canBulkSelect=canBulkSelect}}
+{{raw "topic-list-header-column" order='default' name=listTitle bulkSelectEnabled=bulkSelectEnabled showBulkToggle=toggleInTitle canBulkSelect=canBulkSelect addClass='col col-6'}}
 {{#if showPosters}}
   {{raw "topic-list-header-column" order='posters' ariaLabel=(i18n "category.sort_options.posters")}}
 {{/if}}
-{{raw "topic-list-header-column" sortable=sortable number='true' order='posts' name='replies'}}
+{{raw "topic-list-header-column" name='' addClass='col col-2'}}
+{{raw "topic-list-header-column" sortable=sortable number='true' order='posts' name='replies' addClass='col col-1'}}
 {{#if showLikes}}
   {{raw "topic-list-header-column" sortable=sortable number='true' order='likes' name='likes'}}
 {{/if}}
 {{#if showOpLikes}}
   {{raw "topic-list-header-column" sortable=sortable number='true' order='op_likes' name='likes'}}
 {{/if}}
-{{raw "topic-list-header-column" sortable=sortable number='true' order='views' name='views'}}
-{{raw "topic-list-header-column" sortable=sortable number='true' order='activity' name='activity'}}
+{{raw "topic-list-header-column" sortable=sortable number='true' order='views' name='views' addClass='col col-1'}}
+{{raw "topic-list-header-column" sortable=sortable number='true' order='activity' name='activity' addClass='col col-2'}}
 {{~raw-plugin-outlet name="topic-list-header-after"~}}

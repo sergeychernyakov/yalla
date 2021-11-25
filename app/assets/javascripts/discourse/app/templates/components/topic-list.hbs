@@ -1,5 +1,6 @@
 {{#unless skipHeader}}
-  <thead>
+  {{!-- <thead> --}}
+  <li class="table-header">
     {{raw "topic-list-header"
       canBulkSelect=canBulkSelect
       toggleInTitle=toggleInTitle
@@ -12,7 +13,8 @@
       sortable=sortable
       listTitle=listTitle
       bulkSelectEnabled=bulkSelectEnabled}}
-  </thead>
+  </li>
+  {{!-- </thead> --}}
 {{/unless}}
 
 {{plugin-outlet
