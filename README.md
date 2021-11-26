@@ -2,8 +2,8 @@
 ## Set up with Docker
 
 ```
-git clone https://github.com/sergeychernyakov/yallatest
-cd yallatest
+git clone https://github.com/sergeychernyakov/yalla
+cd yalla
 ```
 
 (from your source root)
