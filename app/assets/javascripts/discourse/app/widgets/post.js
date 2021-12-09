@@ -245,7 +245,7 @@ function showReplyTab(attrs, siteSettings) {
 }
 
 createWidget("post-meta-data", {
-  tagName: "div.topic-meta-data",
+  tagName: "div.topic-meta-data.card_header",
 
   settings: {
     displayPosterName: true,
@@ -552,7 +552,7 @@ createWidget("post-notice", {
 });
 
 createWidget("post-body", {
-  tagName: "div.topic-body.clearfix",
+  tagName: "div.topic-body.card.clearfix",
 
   html(attrs, state) {
     const postContents = this.attach("post-contents", attrs);
