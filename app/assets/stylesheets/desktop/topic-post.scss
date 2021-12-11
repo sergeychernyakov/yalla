@@ -583,7 +583,6 @@ blockquote {
   float: left;
   position: relative;
   border-top: 1px solid var(--primary-low);
-  padding: 12px 0 0 0;
   .topic-meta-data {
     padding: 0 $topic-body-width-padding 0.25em $topic-body-width-padding;
   }
@@ -599,11 +598,15 @@ blockquote {
 }
 
 .topic-avatar {
-  border-top: 1px solid var(--primary-low);
-  padding-top: 15px;
-  width: $topic-avatar-width;
-  float: left;
-  z-index: z("base") + 1;
+  display: inline-block;
+  background: #007a5c;
+  height: 62px;
+  width: 62px;
+  line-height: 62px;
+  text-align: center;
+  font-size: 22px;
+  color: #fff;
+  border-radius: 5px;
 }
 
 .gap {
@@ -636,6 +639,10 @@ blockquote {
 .posts-wrapper {
   position: relative;
   -webkit-font-smoothing: subpixel-antialiased;
+  font-size: 13px;
+  color: #737373;
+  font-weight: 500;
+  margin-bottom: 0px;
 }
 
 .dropdown {
@@ -712,6 +719,7 @@ a.attachment:before {
   .names {
     display: flex;
     align-items: center;
+    float: left;
   }
 
   &:after {
@@ -775,8 +783,8 @@ span.highlighted {
     right: 15%;
   }
   .topic-body {
-    box-sizing: border-box;
     width: calc(100% - 47px); //100% - [width of .topic-avatar + 2px]
+    float: left;
   }
   .embedded-posts {
     // top means "in reply to expansion" above a post
