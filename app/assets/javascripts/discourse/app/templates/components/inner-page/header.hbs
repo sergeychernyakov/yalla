@@ -27,15 +27,18 @@
                 <a class="nav-link" href="/c/p/advertise-on-swapd/">{{i18n "ui.nav_menu.advertise"}}</a>
               </li>
               <li class="nav-item">
-                <input type="text" name="" placeholder={{i18n "ui.texts.content.search_placeholder"}}>
+                <input id="search-term" autocomplete="discourse" value="" type="text" placeholder={{i18n "ui.texts.content.search_placeholder"}}>
                 <span><img src="/assets/search_icon.png"></span>
               </li>
-              <li class="nav-item">
-                {{#link-to "signup" class="nav-link su_btn"}}{{i18n "ui.nav_menu.sign_up"}}{{/link-to}}
-              </li>
-              <li class="nav-item">
-                {{#link-to "login" class="nav-link li_btn"}}<img src="/assets/login_icon.png"> {{i18n "ui.nav_menu.log_in"}}{{/link-to}}
-              </li>
+              {{#if this.currentUser}}
+              {{else}}
+                <li class="nav-item">
+                  {{#link-to "signup" class="nav-link su_btn"}}{{i18n "ui.nav_menu.sign_up"}}{{/link-to}}
+                </li>
+                <li class="nav-item">
+                  {{#link-to "login" class="nav-link li_btn"}}<img src="/assets/login_icon.png"> {{i18n "ui.nav_menu.log_in"}}{{/link-to}}
+                </li>
+              {{/if}}
             </ul>
           </div>
         </nav>

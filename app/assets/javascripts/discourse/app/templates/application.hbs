@@ -15,14 +15,15 @@
   {{software-update-prompt id="software-update-prompt"}}
   {{plugin-outlet name="below-site-header" tagName="" args=(hash currentPath=router._router.currentPath)}}
 
-  <Common::NotificationTop />
+  <div id="main-outlet" class="wrap" role="main">
+    <Common::NotificationTop />
 
-  {{outlet}}
+    {{outlet}}
 
-  {{outlet "user-card"}}
+    {{outlet "user-card"}}
+  </div>
 
   <Common::OldFooter/>
 
   <Common::Footer/>
-
 {{/discourse-root}}
