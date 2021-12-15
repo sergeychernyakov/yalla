@@ -17,8 +17,14 @@ const MAX_SCROLLAREA_HEIGHT = 300;
 
 function scrollareaHeight() {
   const composerHeight =
-      document.getElementById("reply-control").offsetHeight || 0,
+    document.getElementById("reply-control").offsetHeight || 0;
+
+  let headerHeight = null;
+  try {
     headerHeight = document.querySelectorAll(".d-header")[0].offsetHeight || 0;
+  } catch (err) {
+    headerHeight = 0;
+  }
 
   // scrollarea takes up about half of the timeline's height
   const availableHeight =

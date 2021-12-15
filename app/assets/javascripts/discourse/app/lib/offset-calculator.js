@@ -9,8 +9,14 @@ export function minimumOffset() {
 
   // if the header has a positive offset from the top of the window, we need to include the offset
   // this covers cases where a site has a custom header above d-header (covers fixed and unfixed)
-  const headerWrap = document.querySelector(".d-header-wrap"),
+  const headerWrap = document.querySelector(".d-header-wrap");
+  let headerWrapOffset = null;
+  if (headerWrap === null) {
+    headerWrapOffset = 0;
+  } else {
     headerWrapOffset = headerWrap.getBoundingClientRect();
+    headerWrapOffset = headerWrapOffset.top;
+  }
 
   return header
     ? header.offsetHeight + headerWrapOffset.top + iPadNavHeight

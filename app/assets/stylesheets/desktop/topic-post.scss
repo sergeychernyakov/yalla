@@ -431,7 +431,7 @@ pre.copy-codeblocks:hover .copy-cmd {
 }
 
 #topic-footer-buttons {
-  max-width: calc(690px + (11px * 2) + 45px);
+  margin-left: 77px;
 
   @media screen and (max-width: 924px) {
     .topic-footer-main-buttons {
@@ -641,7 +641,6 @@ blockquote {
   -webkit-font-smoothing: subpixel-antialiased;
   font-size: 13px;
   color: #737373;
-  font-weight: 500;
   margin-bottom: 0px;
 }
 

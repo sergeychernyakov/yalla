@@ -784,7 +784,7 @@ li.mt_4 {
 
 #blog_content {
   background: #fbf7ed;
-  padding: 60px 0px;
+  padding: 0px 0px;
   margin-bottom: 40px;
 }
 
@@ -841,7 +841,6 @@ border-radius: 5px;
 display: inline-block;
 background: #fff;
 border-radius: 5px;
-border: 1px solid #737373;
 margin-left: 5px;
 }
 
@@ -849,7 +848,7 @@ margin-left: 5px;
   display: inline-block;
   width: 100%;
   padding: 15px 20px;
-  border-bottom: 1px solid #007a5c;
+  border-bottom: 0.2px solid lightgrey;
 }
 
 #blog_content .card .card_header ul {
