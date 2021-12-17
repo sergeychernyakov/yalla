@@ -431,7 +431,7 @@ pre.copy-codeblocks:hover .copy-cmd {
 }
 
 #topic-footer-buttons {
-  max-width: calc(690px + (11px * 2) + 45px);
+  margin-left: 77px;
 
   @media screen and (max-width: 924px) {
     .topic-footer-main-buttons {
@@ -455,7 +455,6 @@ pre.copy-codeblocks:hover .copy-cmd {
 }
 
 .suggested-topics {
-  margin: 4.5em 0 1em;
 
   table {
     margin-top: 10px;
@@ -466,6 +465,18 @@ pre.copy-codeblocks:hover .copy-cmd {
   padding: 0;
   .d-icon {
     font-size: 1em;
+  }
+}
+
+.bottom-suggested-topic {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  background: #008060;
+  a {
+    color: lightblue;
+  }
+  .category-name {
+    color: lightblue;
   }
 }
 

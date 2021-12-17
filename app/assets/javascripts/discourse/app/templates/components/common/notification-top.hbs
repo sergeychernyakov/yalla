@@ -1,0 +1,16 @@
+{{plugin-outlet name="above-main-container" tagName=""}}
+
+<div class="container ">
+  <div class="row">
+    <div class="col-lg-12 col-xs-12 col-sm-12">
+      {{#if showTop}}
+        {{custom-html name="top"}}
+      {{/if}}
+      {{notification-consent-banner}}
+      {{pwa-install-banner}}
+      {{global-notice}}
+      {{create-topics-notice}}
+      {{plugin-outlet name="top-notices" tagName="" args=(hash currentPath=router._router.currentPath)}}
+    </div>
+  </div>
+</div>

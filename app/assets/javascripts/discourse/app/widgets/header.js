@@ -313,20 +313,20 @@ createWidget("header-buttons-menu", {
   template: hbs`
   <ul class="navbar-nav ml-auto js-append-around">
       <li class="nav-item active">
-          <a class="nav-link" href="#">How it Works?</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Earn Money</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Start Checkout</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Search Listings</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Advertise</a>
-        </li>
+        <a class="nav-link" href="/t/how-does-yallaswap-work/">{{i18n "ui.nav_menu.how_it_works"}}</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/c/p/earn-money/">{{i18n "ui.nav_menu.earn_money"}}</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/c/p/start-checkout/">{{i18n "ui.nav_menu.start_checkout"}}</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/c/p/search-listings/">{{i18n "ui.nav_menu.search_listings"}}</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/c/p/advertise-on-swapd/">{{i18n "ui.nav_menu.advertise"}}</a>
+      </li>
   </ul>
   `,
 });
@@ -381,7 +381,11 @@ export default createWidget("header", {
         return headerIcons;
       }
 
-      const panels = [this.attach("header-buttons-menu", attrs), this.attach("header-buttons", attrs), headerIcons];
+      const panels = [
+        this.attach("header-buttons-menu", attrs),
+        this.attach("header-buttons", attrs),
+        headerIcons,
+      ];
 
       if (state.searchVisible) {
         const contextType = this.searchContextType();

@@ -1134,6 +1134,9 @@ a.mention-group {
       (0.8em * 2)
   );
   padding: 0.8em;
+  margin-top: 2px;
+  margin-left: 67px;
+  margin-bottom: 2px;
 
   &.old {
     background-color: unset;
@@ -1156,7 +1159,6 @@ a.mention-group {
 }
 
 #topic-footer-buttons {
-  margin: var(--below-topic-margin) 0;
   padding: 0;
 
   .topic-footer-main-buttons {

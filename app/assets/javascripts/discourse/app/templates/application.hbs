@@ -1,73 +1,29 @@
 {{#discourse-root}}
-  {{outlet}}
+  {{d-document}}
+  {{plugin-outlet name="above-site-header" tagName=""}}
 
-  {{plugin-outlet name="above-footer" tagName="" args=(hash showFooter=showFooter)}}
-  {{#if showFooter}}
-    {{custom-html name="footer" triggerAppEvent="true"}}
+  {{#if (eq currentRouteName "discovery.latest")}}
+    <MainPage::Header />
+  {{else if (eq currentRouteName "topic.fromParams")}}
+    <InnerPage::Header />
+  {{else if (eq currentRouteName "topic.fromParamsNear")}}
+    <InnerPage::Header />
+  {{else}}
+    <Common::Header />
   {{/if}}
-  {{plugin-outlet name="below-footer" tagName="" args=(hash showFooter=showFooter)}}
 
-  {{outlet "modal"}}
-  {{topic-entrance}}
-  {{outlet "composer"}}
+  {{software-update-prompt id="software-update-prompt"}}
+  {{plugin-outlet name="below-site-header" tagName="" args=(hash currentPath=router._router.currentPath)}}
 
-  {{!-- {{#if showFooterNav}}
-    {{footer-nav}}
-  {{/if}} --}}
+  <div id="main-outlet" class="wrap" role="main">
+    <Common::NotificationTop />
 
-  <section id="footer">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-12 col-xs-12 col-sm-12 text-center">
-          <div class="row">
-            <div class="col-lg-7 col-xs-12 col-sm-12 flush text-left">
-              <a href="#" class="ft_logo"><img src="/assets/footer_logo.png" alt=""></a>
-              <p>
-                {{i18n "ui.texts.footer.yalla_description"}}
-              </p>
-            </div>
-            <div class="col-lg-5 col-xs-12 col-sm-12 flush">
-              <div class="row">
-                <div class="col-lg-6 col-xs-12 col-sm-6 text-left">
-                  <ul>
-                    <li>
-                      <h2>{{i18n "ui.texts.footer.quick_links.title"}}</h2>
-                    </li>
-                    <li><a href="/t/how-to-use-yallaswap/11/2">{{i18n "ui.texts.footer.quick_links.how_to_use"}}</a></li>
-                    <li><a href="/t/quick-rules-yallaswap/15/2">{{i18n "ui.texts.footer.quick_links.quick_rules"}}</a></li>
-                    <li><a href="/t/faq-yallaswap-you-can-start-here/16/2">{{i18n "ui.texts.footer.quick_links.faq"}}</a></li>
-                    <li><a href="/t/faq-yallaswap-rewards-program/21/2">{{i18n "ui.texts.footer.quick_links.rewards"}}</a></li>
-                    <li><a href="/c/p/advertise-on-swapd/">{{i18n "ui.texts.footer.quick_links.advertice"}}</a></li>
-                  </ul>
-                </div>
-                <div class="col-lg-6 col-xs-12 col-sm-6 text-left">
-                  <h2>{{i18n "ui.texts.footer.quick_links.contact_us"}}</h2>
-                  <a href="#">+1 (234) 567-89-00</a><br>
-                  <a href="/contact-us">yallaswap.com/contact-us</a>
-                  <ul class="footer_social">
-                    <li><a href="#"><img src="/assets/ft_icon_1.png"></a></li>
-                    <li><a href="#"><img src="/assets/ft_icon_2.png"></a></li>
-                    <li><a href="#"><img src="/assets/ft_icon_3.png"></a></li>
-                    <li><a href="#"><img src="/assets/ft_icon_4.png"></a></li>
-                    <li><a href="#"><img src="/assets/ft_icon_5.png"></a></li>
-                    <li><a href="#"><img src="/assets/ft_icon_6.png"></a></li>
-                    <li><a href="#"><img src="/assets/ft_icon_7.png"></a></li>
-                    <li><a href="#"><img src="/assets/ft_icon_8.png"></a></li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-          <p class="last">{{i18n "ui.texts.footer.copyright"}}</p>
-        </div>
-      </div>
-    </div>
+    {{outlet}}
 
-    <div class="footer_vector">
-      <img class="top_left" src="/assets/ft_left_top.png" alt="">
-      <img class="right_top" src="/assets/ft_right_top.png" alt="">
-      <img class="bottom_left" src="/assets/bottom_left.png" alt="">
-      <img class="ftcenter" src="/assets/ft_center.png" alt="">
-    </div>
-  </section>
+    {{outlet "user-card"}}
+  </div>
+
+  <Common::OldFooter/>
+
+  <Common::Footer/>
 {{/discourse-root}}
