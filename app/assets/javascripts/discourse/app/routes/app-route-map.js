@@ -9,6 +9,8 @@ export default function () {
 
   this.route("post", { path: "/p/:id" });
 
+  this.route("transaction", { path: "/transaction", resetNamespace: true });
+
   // Topic routes
   this.route(
     "topic",

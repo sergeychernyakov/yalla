@@ -611,6 +611,8 @@ Discourse::Application.routes.draw do
     put "admin/groups/:id/members" => "groups#add_members", constraints: AdminConstraint.new
 
     resources :transaction_tickets
+    get "/transaction" => "transaction_tickets#transaction"
+
     resources :posts do
       delete "bookmark", to: "posts#destroy_bookmark"
       put "wiki"

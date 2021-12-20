@@ -167,6 +167,23 @@ input {
   }
 }
 
+#blog_content.calculator a {
+  display: inline-block;
+  color: #fff;
+  background: #d84444;
+  font-size: 22px;
+  text-decoration: none;
+  text-align: center;
+  border-radius: 10px;
+  height: 72px;
+  padding: 0px 70px;
+  line-height: 72px;
+  font-weight: 600;
+  position: relative;
+  bottom: 35px;
+  transition: 1s;
+}
+
 /* bootstrap columns */
 
 .offset {
