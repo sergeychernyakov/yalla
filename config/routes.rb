@@ -378,6 +378,7 @@ Discourse::Application.routes.draw do
     get "privacy" => "static#show", id: "privacy", as: 'privacy'
     get "signup" => "static#show", id: "signup"
     get "login-preferences" => "static#show", id: "login"
+    get 'fee-calculator' => 'fee_calculator#index'
 
     %w{guidelines rules conduct}.each do |faq_alias|
       get faq_alias => "static#show", id: "guidelines", as: faq_alias

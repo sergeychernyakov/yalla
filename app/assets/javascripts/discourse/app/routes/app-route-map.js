@@ -8,6 +8,10 @@ export default function () {
   this.route("about", { path: "/about", resetNamespace: true });
 
   this.route("post", { path: "/p/:id" });
+  this.route("fee-calculator", {
+    path: "/fee-calculator",
+    resetNamespace: true,
+  });
 
   // Topic routes
   this.route(

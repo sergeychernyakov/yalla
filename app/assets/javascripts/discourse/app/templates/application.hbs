@@ -8,6 +8,10 @@
     <InnerPage::Header />
   {{else if (eq currentRouteName "topic.fromParamsNear")}}
     <InnerPage::Header />
+  {{else if (eq currentRouteName "fee-calculator")}}
+    <Transaction::Header />
+  {{else if (eq currentRouteName "transaction")}}
+    <Transaction::Header />
   {{else}}
     <Common::Header />
   {{/if}}
