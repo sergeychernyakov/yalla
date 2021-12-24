@@ -13,6 +13,8 @@ export default function () {
     resetNamespace: true,
   });
 
+  this.route("transaction", { path: "/transaction", resetNamespace: true });
+
   // Topic routes
   this.route(
     "topic",

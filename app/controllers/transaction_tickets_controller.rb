@@ -4,6 +4,10 @@ class TransactionTicketsController < ApplicationController
   include Api::Pagination
   before_action :load_transaction_ticket, only: %i[destroy update show schedule_tasks ]
 
+  def transaction
+    render json: { success: true, message: 'Start transaction' }
+  end
+
   def index
     @transaction_tickets = TransactionTicket.order('created_at DESC')
     @transaction_tickets = @transaction_tickets.by_keyword(params[:keyword]) if params[:keyword].present?
