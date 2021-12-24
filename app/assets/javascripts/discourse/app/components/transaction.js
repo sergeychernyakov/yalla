@@ -1,32 +1,32 @@
 import Component from "@ember/component";
 
 export default Component.extend({
-  keyUp(e) {
+  keyUp(event) {
     if ($(".row-step-2").hasClass("hidden")) {
-      testEmail($(e.target), $(e.target).val());
+      testEmail($(event.target), $(event.target).val());
     } else {
-      testFields($(e.target), $(e.target).val());
+      testFields($(event.target), $(event.target).val());
     }
     return true;
   },
 });
 
-function testEmail(obj, val) {
+function testEmail(object, value) {
   if (
-    val === "" ||
-    !/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(val)
+    value === "" ||
+    !/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value)
   ) {
-    obj.next().css("visibility", "visible");
+    object.next().css("visibility", "visible");
   } else {
-    obj.next().css("visibility", "hidden");
+    object.next().css("visibility", "hidden");
   }
 }
 
-function testFields(obj, val) {
-  if (val === "") {
-    obj.next().css("visibility", "visible");
+function testFields(object, value) {
+  if (value === "") {
+    object.next().css("visibility", "visible");
     $("#lastStep").css("visibility", "hidden");
   } else {
-    obj.next().css("visibility", "hidden");
+    object.next().css("visibility", "hidden");
   }
 }

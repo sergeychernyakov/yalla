@@ -167,7 +167,8 @@ input {
   }
 }
 
-#blog_content.calculator a {
+#blog_content.calculator a.calc-fee,
+a.transaction-button {
   display: inline-block;
   color: #fff;
   background: #d84444;
