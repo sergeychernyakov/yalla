@@ -1,0 +1,185 @@
+{{#fee-calculator}}
+  <section id="blog_content" class="calculator" style="color:#737373;">
+    <div class="container">
+      <div class="fc-container">
+        <div class="fee-calculator">
+          <div class="row">
+            <div class="col-lg-8 col-md-8">
+
+              <div class="fc-left">
+                <h1 style="color:#737373;">FEE CALCULATOR</h1>
+
+                <p class="fc-intro">
+                  Sellers are responsible for all fees in each transaction conducted on YALLASWAP. Use
+                  our fee calculator to see how much exactly you will end up with, so you know exactly what to charge
+                  your buyers. For more information, please see our <a href="/faq">current payment options</a> and
+                  <a href="/faq">fee chart.</a> Please remember, <a href="/faq">auction</a> fees are not included in
+                  the calculator, to see our current fee chart for auctions, <a href="/faq">click here.</a>
+                </p>
+
+                <div class="row">
+                  <div class="col-lg-7 col-md-7">
+                    <div class="fc-section-help">
+                      <div class="fc-section-num">
+                        <span>1</span>
+                      </div>
+                      <div class="fc-section-msg">
+                        Enter the sold (final) price amount. Please remember that company only operates in USD.
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-lg-5 col-md-5">
+                    <div class="fc-section-input">
+                      <input placeholder="Example: 3000" id="actual-total-amount" class="ember-text-field ember-view"
+                        type="text">
+                      <span style="color: red;" class="hiddenErrorMessage">Enter an amount</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-lg-7 col-md-7">
+                    <div class="fc-section-help">
+                      <div class="fc-section-num">
+                        <span>2</span>
+                      </div>
+
+                      <div class="fc-section-msg">
+                        Please choose which category you're selling in, as each category has different
+                        <a href="/faq">fees.</a>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-lg-5 col-md-5">
+                    <div class="fc-section-input">
+                      <select placeholder="Select category i.e. domain" id="ember64" class="ember-text-field ember-view"
+                        type="text">
+                        <option value="" disabled selected>CATEGORY</option>
+                        <option value="sm">SOCIAL MEDIA</option>
+                        <option value="do">DOMAINS</option>
+                        <option value="we">WEBSITES</option>
+                        <option value="si">SHOUTOUT/INFLUENCE</option>
+                        <option value="tr">TRADES</option>
+                        <option value="se">SERVICES (OTHER)</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-lg-7 col-md-7">
+                    <div class="fc-section-help">
+                      <div class="fc-section-num">
+                        <span>3</span>
+                      </div>
+                      <div class="fc-section-msg">
+                        Pick which payment merchant you and the buyer will choose. To view which merchant will save you
+                        the most money, <a href="/faq">click here.</a>.
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-5 col-md-5">
+                    <div class="fc-section-input">
+                      <select placeholder="Select Payment Merchant" id="ember64" class="ember-text-field ember-view"
+                        type="text">
+                        <option value="" disabled selected>PAYMENT TYPE</option>
+                        <option class="name">PAYPAL</option>
+                        <option class="name">BANK WIRE</option>
+                        <option class="name">BTC</option>
+                        <option class="name">ETH</option>
+                        <option class="name">USDT</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-lg-7 col-md-7">
+                    <div class="fc-section-help">
+                      <div class="fc-section-num">
+                        <span>4</span>
+                      </div>
+                      <div class="fc-section-msg">
+                        Our VIP members have lower (progressive) rates on transactions. To find out more about our VIP
+                        status, <a href="/faq">click here.</a>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-5 col-md-5">
+                    <div class="fc-section-input">
+                      <select placeholder="Select Membership Status" id="ember64" class="ember-text-field ember-view"
+                        type="text">
+                        <option value="" disabled selected>ARE YOU A VIP MEMBER?</option>
+                        <option class="name">NO</option>
+                        <option class="name">YES</option>
+                        <option class="name">I AM A DIAMOND MEMBER</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-lg-7 col-md-7">
+                    <div class="fc-section-help">
+                      <div class="fc-section-num"><span></span></div>
+                      <div class="fc-section-msg"></div>
+                    </div>
+                  </div>
+                  <div class="col-lg-5 col-md-5">
+                    <div id="blog_content" class="calculator">
+                      <a href="#" class="calc-fee" {{action "transaction" }}>Calculate Fee</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-4 col-md-4">
+              <div class="fc-right show-result hidden">
+                <h2>TOTAL PROFIT</h2>
+                <p>
+                  This is the final amount (estimated) you would end up with. Please know that the final amount may
+                  vary, please read our disclaimer:
+                </p>
+
+                <div class="fc-final-amount"></div>
+                <div class="fc-fee-breakdown">
+                  <strong>FEE BREAKDOWN</strong>
+                  <div>YALLASWAP FEE: 25 USD</div>
+                  <div>MONEY TRANSFER FEE: 35 USD</div>
+                </div>
+
+                <div class="fc-payment-msg">
+                  <b>Note:</b> YALLASWAP offers ERC20 and TRC20 USDT transfers. ERC is an expensive way to move USDT,
+                  with an average of 35-45 USD per transaction. TRC transfers average around 1 USD dollar per
+                  transaction. The fee calculator factors in the ERC fee, but the final received amount will depend on
+                  which network the buyer and seller agree on. <br> <br> USDT is a form of cryptocurrency dubbed
+                  <a href="/faq" rel="noopener noreferrer">stablecoin.</a> Stablecoins have the advantage of keeping their
+                  value over time, which makes them (in theory) a safer crypto investment. To learn more about USDT and
+                  the technology behind it, <a href="/faq" rel="noopener noreferrer">click here.</a> USDT, while
+                  controversial, is
+                  the go-to cryptocurrency for most YALLASWAP users who buy and sell on our website. The reason behind
+                  it is the stability of the coin, which always holds a one-to-one USD value. However, due to the rocky
+                  history of this coin (please see the above links), YALLASWAP will take no responsibility if, for any
+                  reason, your payment/payout loses the promised 1:1 value.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fc-disclaimer">
+          <h3 style="color: #737373;">DISCLAIMER</h3>
+          <p>
+            Fee calculations will be off (+/-) a few dollars. Due to different bank fees, exchange rates, buyer/seller
+            geo-location, account types (business or personal), and a few other factors, it's impossible to accurately
+            predict the correct totals. This fee calculator only gives an approximate amount the sellers will have to
+            cover. For more information on our fees, <a href="/faq">click here.</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+{{/fee-calculator}}
