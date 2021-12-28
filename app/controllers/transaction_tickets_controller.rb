@@ -15,6 +15,17 @@ class TransactionTicketsController < ApplicationController
     render json: { success: true, message: 'List of all Transaction Tickets', data: @transaction_tickets.as_json, meta_attributes: meta_attributes(@transaction_tickets) }, status: :ok
   end
 
+  def find_user
+    user = User.find_by_email(params[:email])
+
+    if user.blank?
+      render json: { success: false, message: 'Errors', error: [
+        "Please register this user first"] }, status: :unprocessable_entity
+    else
+      render json: { user_id: user.id }
+    end
+  end
+
   def create
     @transaction_ticket = TransactionTicket.new(transaction_ticket_params)
     @transaction_ticket.creator_id = current_user&.id

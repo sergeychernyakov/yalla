@@ -8,11 +8,31 @@
             <h2>BUY, SELL & TRADE ANYTHING VIRTUAL IN SAFETY BY USING <br>SWAPD ESCROW SERVICES.</h2>
 
             <div class="calcy">
-              <div class="row row-step-1">
+              {{#if this.currentUser}}
+                <div class="row-step-1">
+                  <div class="row justify-content-center">
+                    <div class="col-lg-6 col-xs-12 col-sm-12 text-center">
+                      <label>Are you the buyer or seller in this transaction? </label>
+                      <select id="userSellerOrBuyer" type="text">
+                        <option value="" disabled selected>CHOOSE</option>
+                        <option value="seller">Seller</option>
+                        <option value="buyer">Buyer</option>
+                      </select>
+                      <br>
+                      <span style="color: red; visibility: hidden;">Select 1 Option</span>
+                      <input type="hidden" value={{this.currentUser.username}} id="initiatorEmail">
+                      <input type="hidden" value={{this.currentUser.id}} id="initiatorId">
+                    </div>
+                  </div>
+                </div>
+              {{/if}}
+
+              <div class="row row-step-2 {{if this.currentUser "hidden"}}">
                 <div class="col-lg-5 col-xs-12 col-sm-5 text-center">
                   <label>Sellers Email</label>
                   <input type="email" id="sellers-email" name="sellers-email" placeholder="enter selers email id">
                   <span style="color: red;">Enter valid email</span>
+                  <input type="hidden" id="sellers-email-hidden">
                 </div>
                 <div class="col-lg-2 col-xs-12 col-sm-2 text-center">
                   <img src="/assets/convert.png">
@@ -21,10 +41,11 @@
                   <label>Buyers Email</label>
                   <input type="email" id="buyer-email" name="buyer-email" placeholder="enter buyers email id">
                   <span style="color: red;">Enter valid email</span>
+                  <input type="hidden" id="buyer-email-hidden">
                 </div>
               </div>
 
-              <div class="row-step-2 hidden">
+              <div class="row-step-3 hidden">
                 <div class="row justify-content-center">
                   <div class="col-lg-6 col-xs-12 col-sm-12 text-center">
                     <label>Amount</label>

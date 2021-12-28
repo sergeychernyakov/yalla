@@ -613,6 +613,7 @@ Discourse::Application.routes.draw do
 
     resources :transaction_tickets
     get "/transaction" => "transaction_tickets#transaction"
+    post "transaction_tickets/find_user" => "transaction_tickets#find_user"
 
     resources :posts do
       delete "bookmark", to: "posts#destroy_bookmark"

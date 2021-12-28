@@ -1,33 +1,56 @@
 import Controller from "@ember/controller";
 
 export default Controller.extend({
+  init() {
+    this._super(...arguments);
+    this.set("user_step", 1);
+  },
   actions: {
     transaction() {
-      if ($(".row-step-2").hasClass("hidden")) {
-        stepOneProcess();
-      } else {
-        stepTwoProcess();
+      this.set("user_step", whichStep());
+      switch (this.user_step) {
+        case 1:
+          stepOneProcess();
+          break;
+        case 2:
+          if (stepTwoProcess()) {
+            this.set("user_step", 3);
+          }
+          break;
+        case 3:
+          stepThreeProcess();
+          break;
       }
     },
   },
 });
 
 function stepOneProcess() {
-  if (
-    $("#sellers-email").next().css("visibility") === "hidden" &&
-    $("#buyer-email").next().css("visibility") === "hidden"
-  ) {
-    //  ajax POST (1st api call)
-    //    success: run the following code:
-    //    wait: show the processing ... text in green
-    //    failure: show in red that "user does not exist please register first"
+  let sellerOrBuyer = $("#userSellerOrBuyer");
+
+  if (sellerOrBuyer.val() !== null) {
     $(".row-step-1").addClass("hidden");
     $(".row-step-2").removeClass("hidden");
-    $(".transaction-button").text("Finish Transaction");
+    $(".transaction-button").text("Continue");
+
+    setSellerOrBuyerField(sellerOrBuyer);
+  } else {
+    sellerOrBuyer.nextAll("span").css("visibility", "visible");
   }
 }
 
 function stepTwoProcess() {
+  if (
+    $("#sellers-email").nextAll("input").val() !== "" &&
+    $("#buyer-email").nextAll("input").val() !== ""
+  ) {
+    $(".row-step-2").addClass("hidden");
+    $(".row-step-3").removeClass("hidden");
+    $(".transaction-button").text("Finish Transaction");
+  }
+}
+
+function stepThreeProcess() {
   if (
     $("#total-amount").next().css("visibility") === "hidden" &&
     $("#ticket-type").next().css("visibility") === "hidden" &&
@@ -37,5 +60,41 @@ function stepTwoProcess() {
     //    success: redirect to root page with alert success message
     //    wait: show -> "processing ..." text in green
     $("#lastStep").css("visibility", "visible");
+  }
+}
+
+function whichStep() {
+  if (
+    !$(".row-step-1").hasClass("hidden") &&
+    $(".row-step-1").val() !== undefined
+  ) {
+    return 1;
+  } else if (!$(".row-step-2").hasClass("hidden")) {
+    return 2;
+  } else if (!$(".row-step-3").hasClass("hidden")) {
+    return 3;
+  }
+}
+
+function setSellerOrBuyerField(sellerOrBuyer) {
+  let user_email = $("#initiatorEmail").val(),
+    user_id = $("#initiatorId").val(),
+    sellerField = $("#sellers-email"),
+    buyerField = $("#buyer-email");
+
+  if (sellerOrBuyer.val() === "seller") {
+    sellerField
+      .val(user_email)
+      .attr("disabled", "disabled")
+      .nextAll("input")
+      .val(user_id);
+    sellerField.nextAll("span").css("color", "green").text("Verified!");
+  } else {
+    buyerField
+      .val(user_email)
+      .attr("disabled", "disabled")
+      .nextAll("input")
+      .val(user_id);
+    buyerField.nextAll("span").css("color", "green").text("Verified!");
   }
 }
