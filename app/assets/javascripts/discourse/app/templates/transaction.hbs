@@ -31,7 +31,7 @@
                 <div class="col-lg-5 col-xs-12 col-sm-5 text-center">
                   <label>Sellers Email</label>
                   <input type="email" id="sellers-email" name="sellers-email" placeholder="enter selers email id">
-                  <span style="color: red;">Enter valid email</span>
+                  <span style="color: red;"></span>
                   <input type="hidden" id="sellers-email-hidden">
                 </div>
                 <div class="col-lg-2 col-xs-12 col-sm-2 text-center">
@@ -40,7 +40,7 @@
                 <div class="col-lg-5 col-xs-12 col-sm-5 text-center">
                   <label>Buyers Email</label>
                   <input type="email" id="buyer-email" name="buyer-email" placeholder="enter buyers email id">
-                  <span style="color: red;">Enter valid email</span>
+                  <span style="color: red;"></span>
                   <input type="hidden" id="buyer-email-hidden">
                 </div>
               </div>
@@ -57,7 +57,15 @@
                 <div class="row justify-content-center">
                   <div class="col-lg-6 col-lg-offset-3 col-xs-12 col-sm-12 text-center">
                     <label>Ticket Type</label>
-                    <input type="text" id="ticket-type" name="ticket-type" placeholder="enter type of ticket">
+                    <select id="ticket-type">
+                      <option value="" disabled selected>Select Category</option>
+                      <option value="sm">SOCIAL MEDIA</option>
+                      <option value="do">DOMAINS</option>
+                      <option value="we">WEBSITES</option>
+                      <option value="si">SHOUTOUT/INFLUENCE</option>
+                      <option value="tr">TRADES</option>
+                      <option value="se">SERVICES (OTHER)</option>
+                    </select>
                     <span style="color: red;">Enter valid ticket type</span>
                   </div>
                 </div>
@@ -65,11 +73,18 @@
                 <div class="row justify-content-center">
                   <div class="col-lg-6 col-lg-offset-3 col-xs-12 col-sm-12 text-center">
                     <label>Payment Method</label>
-                    <input type="text" id="payment-method" name="payment-method" placeholder="enter payment method">
+                    <select id="payment-method">
+                      <option value="" disabled selected>Select Payment Type</option>
+                      <option value="paypal">PAYPAL</option>
+                      <option value="bank-wire">BANK WIRE</option>
+                      <option value="btc">BTC</option>
+                      <option value="eth">ETH</option>
+                      <option value="usdt">USDT</option>
+                    </select>
                     <span style="color: red;">Enter payment method</span>
                   </div>
                 </div>
-                <span id="lastStep" style="color: green;visibility:hidden;">You are all done!</span>
+                <span id="lastStep" style="color: green;visibility:hidden;"></span>
               </div>
             </div>
             <a href="#" class="transaction-button" {{action "transaction" }}>Begin Transaction</a>

@@ -1,71 +1,35 @@
 import Component from "@ember/component";
 import { ajax } from "discourse/lib/ajax";
-import { popupAjaxError } from "discourse/lib/ajax-error";
 
 export default Component.extend({
   keyUp(event) {
-    switch (whichStep()) {
-      case 2:
-        // step 2 form validation handling
-        testEmail($(event.target), $(event.target).val());
-        break;
-      case 3:
-        // step 3 form validation handling
-        testFields($(event.target), $(event.target).val());
-        break;
-    }
+    validateFormFields($(event.target), "keyUp");
     return true;
   },
   change(event) {
-    switch (whichStep()) {
-      case 1:
-        // step 1 form validation handling
-        testNull($(event.target), $(event.target).val());
-        break;
-      case 2:
-        // step 2 form validation handling
-        testEmail($(event.target), $(event.target).val());
-        testEmailAjax($(event.target), $(event.target).val());
-        break;
-      case 3:
-        // step 3 form validation handling
-        testFields($(event.target), $(event.target).val());
-        break;
-    }
+    validateFormFields($(event.target), "change");
     return true;
   },
 });
 
-function testEmail(object, value) {
-  if (
-    value === "" ||
-    !/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value)
-  ) {
-    object.next().css("visibility", "visible");
-  } else {
-    object.next().css("visibility", "hidden");
+// @ return: VOID
+// @ define: transaction ticket form validation handling
+// @ scope: ONLY transaction.js component
+function validateFormFields(object, eventType) {
+  let stepNumber = whichStep();
+  if (stepNumber === 1 && eventType === "change") {
+    testNull(object); // step # 1 form fields validation handling
+  } else if (stepNumber === 2) {
+    testEmail(object, eventType); // step # 2 form fields validation handling
+  } else if (stepNumber === 3) {
+    testFields(object); // step # 3 form fields validation handling
   }
 }
 
-function testEmailAjax(object, value) {
-  if (
-    value !== "" &&
-    /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value)
-  ) {
-    getUserId(object);
-  }
-}
+// step # 1 form fields validation handling
+function testNull(object) {
+  let value = object.val();
 
-function testFields(object, value) {
-  if (value === "") {
-    object.next().css("visibility", "visible");
-    $("#lastStep").css("visibility", "hidden");
-  } else {
-    object.next().css("visibility", "hidden");
-  }
-}
-
-function testNull(object, value) {
   if (value === null) {
     object.nextAll("span").css("visibility", "visible");
   } else {
@@ -73,6 +37,40 @@ function testNull(object, value) {
   }
 }
 
+// step # 2 form fields validation handling
+function testEmail(object, eventType) {
+  let value = object.val();
+  if (
+    value === "" ||
+    !/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value)
+  ) {
+    object
+      .nextAll("span")
+      .css("visibility", "visible")
+      .text("Enter valid email");
+  } else {
+    object.nextAll("span").css("visibility", "hidden");
+    if (eventType === "change") {
+      verifyEmail(object);
+    }
+  }
+}
+
+// step # 3 form fields validation handling
+function testFields(object) {
+  let value = object.val();
+
+  if (value === "") {
+    object.nextAll("span").css("visibility", "visible");
+    $("#lastStep").css("visibility", "hidden");
+  } else {
+    object.nextAll("span").css("visibility", "hidden");
+  }
+}
+
+// @ return: the step # of transaction ticket
+// @ define: calculate the step # for multi step form
+// @ scope: ONLY transaction.js component
 function whichStep() {
   if (
     !$(".row-step-1").hasClass("hidden") &&
@@ -86,14 +84,20 @@ function whichStep() {
   }
 }
 
-function getUserId(userObject) {
+// @ return: VOID
+// @ define:
+//   -  verifies email from the backend, if its an existed user's email or not
+//   -  validates the 2nd step form field
+// @ scope: ONLY transaction.js component
+function verifyEmail(userObject) {
   userObject
     .next()
     .css({ visibility: "visible", color: "green" })
     .text("waiting...");
 
   let errors = true,
-    user_id = false;
+    user_id = false,
+    message = "";
 
   ajax({
     url: "/transaction_tickets/find_user",
@@ -106,7 +110,9 @@ function getUserId(userObject) {
       user_id = result.user_id;
       errors = false;
     })
-    .catch(popupAjaxError)
+    .catch((result) => {
+      message = result.jqXHR.responseJSON.error[0];
+    })
     .finally(() => {
       userObject
         .next()
@@ -114,7 +120,7 @@ function getUserId(userObject) {
           visibility: "visible",
           color: errors === true ? "red" : "green",
         })
-        .text(errors === true ? "Enter valid email" : "Verified!");
+        .text(errors === true ? message : "Verified!");
       if (errors === false) {
         userObject.attr("disabled", "disabled");
         userObject.nextAll("input").val(user_id);

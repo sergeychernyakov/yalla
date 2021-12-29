@@ -13,9 +13,7 @@ export default Controller.extend({
           stepOneProcess();
           break;
         case 2:
-          if (stepTwoProcess()) {
-            this.set("user_step", 3);
-          }
+          stepTwoProcess();
           break;
         case 3:
           stepThreeProcess();
@@ -52,14 +50,22 @@ function stepTwoProcess() {
 
 function stepThreeProcess() {
   if (
-    $("#total-amount").next().css("visibility") === "hidden" &&
-    $("#ticket-type").next().css("visibility") === "hidden" &&
-    $("#payment-method").next().css("visibility") === "hidden"
+    $("#total-amount").val() !== "" &&
+    $("#ticket-type").val() !== null &&
+    $("#payment-method").val() !== null
   ) {
     //  ajax POST (2nd api call)
     //    success: redirect to root page with alert success message
     //    wait: show -> "processing ..." text in green
-    $("#lastStep").css("visibility", "visible");
+    $("#lastStep").css("visibility", "visible").text("You're all done!");
+  } else {
+    if ($("#ticket-type").val() === null) {
+      $("#ticket-type").nextAll("span").css("visibility", "visible");
+    }
+    if ($("#payment-method").val() === null) {
+      $("#payment-method").nextAll("span").css("visibility", "visible");
+    }
+    $("#lastStep").text("");
   }
 }
 
