@@ -21,7 +21,7 @@
                       <br>
                       <span style="color: red; visibility: hidden;">Select 1 Option</span>
                       <input type="hidden" value={{this.currentUser.username}} id="initiatorEmail">
-                      <input type="hidden" value={{this.currentUser.id}} id="initiatorId">
+                      <input type="hidden" value={{this.currentUser.id}} id="creator_id">
                     </div>
                   </div>
                 </div>
@@ -32,7 +32,7 @@
                   <label>Sellers Email</label>
                   <input type="email" id="sellers-email" name="sellers-email" placeholder="enter selers email id">
                   <span style="color: red;"></span>
-                  <input type="hidden" id="sellers-email-hidden">
+                  <input type="hidden" id="seller_id">
                 </div>
                 <div class="col-lg-2 col-xs-12 col-sm-2 text-center">
                   <img src="/assets/convert.png">
@@ -41,7 +41,7 @@
                   <label>Buyers Email</label>
                   <input type="email" id="buyer-email" name="buyer-email" placeholder="enter buyers email id">
                   <span style="color: red;"></span>
-                  <input type="hidden" id="buyer-email-hidden">
+                  <input type="hidden" id="buyer_id">
                 </div>
               </div>
 
@@ -49,7 +49,7 @@
                 <div class="row justify-content-center">
                   <div class="col-lg-6 col-xs-12 col-sm-12 text-center">
                     <label>Amount</label>
-                    <input type="number" id="total-amount" name="total-amount" placeholder="enter total amount">
+                    <input type="number" id="amount" placeholder="enter total amount">
                     <span style="color: red;">Enter amount</span>
                   </div>
                 </div>
@@ -57,14 +57,11 @@
                 <div class="row justify-content-center">
                   <div class="col-lg-6 col-lg-offset-3 col-xs-12 col-sm-12 text-center">
                     <label>Ticket Type</label>
-                    <select id="ticket-type">
-                      <option value="" disabled selected>Select Category</option>
-                      <option value="sm">SOCIAL MEDIA</option>
-                      <option value="do">DOMAINS</option>
-                      <option value="we">WEBSITES</option>
-                      <option value="si">SHOUTOUT/INFLUENCE</option>
-                      <option value="tr">TRADES</option>
-                      <option value="se">SERVICES (OTHER)</option>
+                    <select id="ticket_type">
+                      <option value="" disabled selected>Select Ticket Type</option>
+                      <option value="service">Service</option>
+                      <option value="item">Item</option>
+                      <option value="other">Other</option>
                     </select>
                     <span style="color: red;">Enter valid ticket type</span>
                   </div>
@@ -73,18 +70,18 @@
                 <div class="row justify-content-center">
                   <div class="col-lg-6 col-lg-offset-3 col-xs-12 col-sm-12 text-center">
                     <label>Payment Method</label>
-                    <select id="payment-method">
-                      <option value="" disabled selected>Select Payment Type</option>
+                    <select id="payment_method">
+                      <option value="" disabled selected>Select Payment Method</option>
                       <option value="paypal">PAYPAL</option>
-                      <option value="bank-wire">BANK WIRE</option>
-                      <option value="btc">BTC</option>
-                      <option value="eth">ETH</option>
+                      <option value="bank_wire">BANK WIRE</option>
+                      <option value="bit_coin">BTC</option>
+                      <option value="ethereum">ETH</option>
                       <option value="usdt">USDT</option>
                     </select>
                     <span style="color: red;">Enter payment method</span>
                   </div>
                 </div>
-                <span id="lastStep" style="color: green;visibility:hidden;"></span>
+                <span id="lastStep"></span>
               </div>
             </div>
             <a href="#" class="transaction-button" {{action "transaction" }}>Begin Transaction</a>

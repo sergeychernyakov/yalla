@@ -28,9 +28,8 @@ class TransactionTicketsController < ApplicationController
 
   def create
     @transaction_ticket = TransactionTicket.new(transaction_ticket_params)
-    @transaction_ticket.creator_id = current_user&.id
     if @transaction_ticket.save
-      TicketAdmin.create!(transaction_ticket_id: @transaction_ticket.id, admin_id: current_user&.id)
+      TicketAdmin.create!(transaction_ticket_id: @transaction_ticket.id, admin_id: @transaction_ticket.creator_id)
       render json: { success: true, message: 'Transaction Ticket Created Successfully', data: @transaction_ticket.as_json }, status: :ok
     else
       render json: { success: false, message: 'Errors', error: @transaction_ticket.errors.full_messages }, status: :unprocessable_entity

@@ -1,4 +1,8 @@
 import Controller from "@ember/controller";
+import { ajax } from "discourse/lib/ajax";
+
+const sellerOrBuyerField = "#userSellerOrBuyer",
+  missingStepOneField = "Select 1 Option";
 
 export default Controller.extend({
   init() {
@@ -24,7 +28,7 @@ export default Controller.extend({
 });
 
 function stepOneProcess() {
-  let sellerOrBuyer = $("#userSellerOrBuyer");
+  let sellerOrBuyer = $(sellerOrBuyerField);
 
   if (sellerOrBuyer.val() !== null) {
     $(".row-step-1").addClass("hidden");
@@ -33,7 +37,7 @@ function stepOneProcess() {
 
     setSellerOrBuyerField(sellerOrBuyer);
   } else {
-    sellerOrBuyer.nextAll("span").css("visibility", "visible");
+    sellerOrBuyer.nextAll("span").text(missingStepOneField);
   }
 }
 
@@ -50,20 +54,51 @@ function stepTwoProcess() {
 
 function stepThreeProcess() {
   if (
-    $("#total-amount").val() !== "" &&
-    $("#ticket-type").val() !== null &&
-    $("#payment-method").val() !== null
+    $("#amount").val() !== "" &&
+    $("#ticket_type").val() !== null &&
+    $("#payment_method").val() !== null
   ) {
-    //  ajax POST (2nd api call)
-    //    success: redirect to root page with alert success message
-    //    wait: show -> "processing ..." text in green
-    $("#lastStep").css("visibility", "visible").text("You're all done!");
+    // ajax post to create transaction ticket
+    let message = null,
+      errorExists = {};
+    ajax({
+      url: "/transaction_tickets",
+      type: "POST",
+      data: {
+        transaction_ticket: {
+          buyer_id: $("#buyer_id").val(),
+          seller_id: $("#seller_id").val(),
+          creator_id:
+            $("#creator_id").val() === undefined
+              ? $("#buyer_id").val()
+              : $("#creator_id").val(),
+          ticket_type: $("#ticket_type").val(),
+          payment_method: $("#payment_method").val(),
+          amount: $("#amount").val(),
+        },
+      },
+    })
+      .then((result) => {
+        message = result.message;
+        errorExists = { color: "green" };
+      })
+      .catch((result) => {
+        if (result.jqXHR.responseJSON.error === undefined) {
+          message = result.jqXHR.responseJSON.errors.join(" ");
+        } else {
+          message = result.jqXHR.responseJSON.error.join(" ");
+        }
+        errorExists = { color: "red" };
+      })
+      .finally(() => {
+        $("#lastStep").css(errorExists).text(message);
+      });
   } else {
-    if ($("#ticket-type").val() === null) {
-      $("#ticket-type").nextAll("span").css("visibility", "visible");
+    if ($("#ticket_type").val() === null) {
+      $("#ticket_type").nextAll("span").css("visibility", "visible");
     }
-    if ($("#payment-method").val() === null) {
-      $("#payment-method").nextAll("span").css("visibility", "visible");
+    if ($("#payment_method").val() === null) {
+      $("#payment_method").nextAll("span").css("visibility", "visible");
     }
     $("#lastStep").text("");
   }
@@ -84,7 +119,7 @@ function whichStep() {
 
 function setSellerOrBuyerField(sellerOrBuyer) {
   let user_email = $("#initiatorEmail").val(),
-    user_id = $("#initiatorId").val(),
+    user_id = $("#creator_id").val(),
     sellerField = $("#sellers-email"),
     buyerField = $("#buyer-email");
 
