@@ -20,7 +20,7 @@ export default Controller.extend({
           stepTwoProcess();
           break;
         case 3:
-          stepThreeProcess();
+          stepThreeProcess(this);
           break;
       }
     },
@@ -52,7 +52,7 @@ function stepTwoProcess() {
   }
 }
 
-function stepThreeProcess() {
+function stepThreeProcess($thisObject) {
   if (
     $("#amount").val() !== "" &&
     $("#ticket_type").val() !== null &&
@@ -60,7 +60,8 @@ function stepThreeProcess() {
   ) {
     // ajax post to create transaction ticket
     let message = null,
-      errorExists = {};
+      errorExists = {},
+      success = false;
     ajax({
       url: "/transaction_tickets",
       type: "POST",
@@ -81,6 +82,7 @@ function stepThreeProcess() {
       .then((result) => {
         message = result.message;
         errorExists = { color: "green" };
+        success = true;
       })
       .catch((result) => {
         if (result.jqXHR.responseJSON.error === undefined) {
@@ -92,6 +94,9 @@ function stepThreeProcess() {
       })
       .finally(() => {
         $("#lastStep").css(errorExists).text(message);
+        if (success) {
+          $thisObject.transitionToRoute("discovery.latest");
+        }
       });
   } else {
     if ($("#ticket_type").val() === null) {
