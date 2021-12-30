@@ -477,7 +477,7 @@ GEM
     will_paginate (3.3.1)
     xorcist (1.1.2)
     yaml-lint (0.0.10)
-    zeitwerk (2.5.1)
+    zeitwerk (2.5.3)
 
 PLATFORMS
   arm64-darwin-20
