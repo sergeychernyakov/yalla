@@ -2,7 +2,8 @@ import Controller from "@ember/controller";
 import { ajax } from "discourse/lib/ajax";
 
 const sellerOrBuyerField = "#userSellerOrBuyer",
-  missingStepOneField = "Select 1 Option";
+  missingStepOneField = "Select 1 Option",
+  linkToHome = " <a href='/'> Home Page</a>";
 
 export default Controller.extend({
   init() {
@@ -20,7 +21,7 @@ export default Controller.extend({
           stepTwoProcess();
           break;
         case 3:
-          stepThreeProcess(this);
+          stepThreeProcess();
           break;
       }
     },
@@ -52,7 +53,7 @@ function stepTwoProcess() {
   }
 }
 
-function stepThreeProcess($thisObject) {
+function stepThreeProcess() {
   if (
     $("#amount").val() !== "" &&
     $("#ticket_type").val() !== null &&
@@ -60,7 +61,7 @@ function stepThreeProcess($thisObject) {
   ) {
     // ajax post to create transaction ticket
     let message = null,
-      errorExists = {},
+      messageStyle = {},
       success = false;
     ajax({
       url: "/transaction_tickets",
@@ -81,7 +82,7 @@ function stepThreeProcess($thisObject) {
     })
       .then((result) => {
         message = result.message;
-        errorExists = { color: "green" };
+        messageStyle = { color: "green" };
         success = true;
       })
       .catch((result) => {
@@ -90,13 +91,12 @@ function stepThreeProcess($thisObject) {
         } else {
           message = result.jqXHR.responseJSON.error.join(" ");
         }
-        errorExists = { color: "red" };
+        messageStyle = { color: "red" };
       })
       .finally(() => {
-        $("#lastStep").css(errorExists).text(message);
-        if (success) {
-          $thisObject.transitionToRoute("discovery.latest");
-        }
+        message = message + (success === true ? linkToHome : "");
+        $("#lastStep").css(messageStyle).html(message);
+        $(".transaction-button").attr("disabled", "disabled");
       });
   } else {
     if ($("#ticket_type").val() === null) {
