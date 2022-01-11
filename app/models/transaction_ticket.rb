@@ -29,7 +29,7 @@ class TransactionTicket < ActiveRecord::Base
 
   PAYMENT_METHOD = %i[
     paypal
-    bank_wife
+    bank_wire
     bit_coin
     ethereum
     usdt
