@@ -7,13 +7,16 @@ class UserBadge < ActiveRecord::Base
   belongs_to :notification, dependent: :destroy
   belongs_to :post
 
-  scope :grouped_with_count, -> {
+  def self.grouped_with_count
+    attr_names = UserBadge.attribute_names.dup
+    attr_names.delete("is_favorite")
+
     group(:badge_id, :user_id)
-      .select(UserBadge.attribute_names.map { |x| "MAX(user_badges.#{x}) AS #{x}" },
+      .select(attr_names.map { |x| "MAX(user_badges.#{x}) AS #{x}" },
               'COUNT(*) AS "count"')
       .order('MAX(featured_rank) ASC')
       .includes(:user, :granted_by, { badge: :badge_type }, post: :topic)
-  }
+  end
 
   scope :for_enabled_badges, -> { where('user_badges.badge_id IN (SELECT id FROM badges WHERE enabled)') }
 

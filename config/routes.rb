@@ -378,6 +378,7 @@ Discourse::Application.routes.draw do
     get "privacy" => "static#show", id: "privacy", as: 'privacy'
     get "signup" => "static#show", id: "signup"
     get "login-preferences" => "static#show", id: "login"
+    get 'fee-calculator' => 'fee_calculator#index'
 
     %w{guidelines rules conduct}.each do |faq_alias|
       get faq_alias => "static#show", id: "guidelines", as: faq_alias
@@ -611,6 +612,9 @@ Discourse::Application.routes.draw do
     put "admin/groups/:id/members" => "groups#add_members", constraints: AdminConstraint.new
 
     resources :transaction_tickets
+    get "/transaction" => "transaction_tickets#transaction"
+    post "transaction_tickets/find_user" => "transaction_tickets#find_user"
+
     resources :posts do
       delete "bookmark", to: "posts#destroy_bookmark"
       put "wiki"

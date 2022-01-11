@@ -1,83 +1,7 @@
-{{d-document}}
-{{plugin-outlet name="above-site-header" tagName=""}}
-
-<section id="header" class="post">
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-12 col-xs-12 col-sm-12 flush">
-        <nav class="navbar navbar-expand-md navbar-dark">
-          <a class="navbar-brand" href="/"><img src="/assets/logo.png" alt="YallaSwap Logo"></a>
-          <button class="navbar-toggler js-offcanvas-toggler" data-button-options="{'wrapText':false}"
-            aria-label="Toggle navigation" type="button">
-            <span class="navbar-toggler-icon"><img src="/assets/hambur_img.png"></span>
-          </button>
-
-          <div class="collapse navbar-collapse" id="navbarsExampleDefault" data-set="bs">
-            <ul class="navbar-nav ml-auto js-append-around">
-              <li class="nav-item active">
-                <a class="nav-link" href="/t/how-does-yallaswap-work/">{{i18n "ui.nav_menu.how_it_works"}}</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/c/p/earn-money/">{{i18n "ui.nav_menu.earn_money"}}</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/c/p/start-checkout/">{{i18n "ui.nav_menu.start_checkout"}}</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/c/p/search-listings/">{{i18n "ui.nav_menu.search_listings"}}</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/c/p/advertise-on-swapd/">{{i18n "ui.nav_menu.advertise"}}</a>
-              </li>
-              <li class="nav-item">
-                <input type="text" name="" placeholder={{i18n "ui.texts.content.search_placeholder"}}>
-                <span><img src="/assets/search_icon.png"></span>
-              </li>
-              <li class="nav-item">
-                {{#link-to "signup" class="nav-link su_btn"}}{{i18n "ui.nav_menu.sign_up"}}{{/link-to}}
-              </li>
-              <li class="nav-item">
-                {{#link-to "login" class="nav-link li_btn"}}<img src="/assets/login_icon.png"> {{i18n "ui.nav_menu.log_in"}}{{/link-to}}
-              </li>
-            </ul>
-          </div>
-        </nav>
-      </div>
-    </div>
-  </div>
-</section>
-
 <main role="main">
-  <section id="banner" class="post_banner trans">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-12 col-xs-12 col-sm-12">
-          <h1><span>{{i18n "ui.texts.banner.buy"}}, {{i18n "ui.texts.banner.sell"}},</span><br>& {{i18n "ui.texts.banner.trade_virtual_properties"}}</h1>
-          <p>{{i18n "ui.texts.banner.text"}}</p>
-          <ul>
-            <li><a href="#"><img src="/assets/mini_so_icon_1.png" alt=""></a></li>
-            <li><a href="#"><img src="/assets/mini_so_icon_2.png" alt=""></a></li>
-            <li><a href="#"><img src="/assets/mini_so_icon_3.png" alt=""></a></li>
-            <li><a href="#"><img src="/assets/mini_so_icon_4.png" alt=""></a></li>
-            <li><a href="#"><img src="/assets/mini_so_icon_5.png" alt=""></a></li>
-            <li><a href="#"><img src="/assets/mini_so_icon_6.png" alt=""></a></li>
-            <li><a href="#"><img src="/assets/mini_so_icon_7.png" alt=""></a></li>
-            <li><a href="#"><img src="/assets/mini_so_icon_8.png" alt=""></a></li>
-            <li><a href="#"><img src="/assets/mini_so_icon_9.png" alt=""></a></li>
-            <li><a href="#"><img src="/assets/mini_so_icon_10.png" alt=""></a></li>
-          </ul>
-          <ul class="btns">
-            <li><a href="#">Get Started</a></li>
-            <li><a href="#">Learn More</a></li>
-          </ul>
-          <img class="side_img" src="/assets/transaction_img.png" alt="">
-        </div>
-      </div>
-    </div>
-  </section>
+
   <section id="blog_content">
 
-    {{!-- <Blog::Content/> --}}
     {{#discourse-topic multiSelect=multiSelect enteredAt=enteredAt topic=model hasScrolled=hasScrolled}}
       {{#if model}}
         {{add-category-tag-classes category=model.category tags=model.tags}}
@@ -449,15 +373,18 @@
               </div>
             {{/if}}
           {{/if}}
-
-          {{plugin-outlet name="topic-above-suggested" args=(hash model=model)}}
-          <div class="{{if model.relatedMessages.length "related-messages-wrapper"}} {{if model.suggestedTopics.length "suggested-topics-wrapper"}}">
-            {{#if model.relatedMessages.length}}
-              {{related-messages topic=model}}
-            {{/if}}
-            {{#if model.suggestedTopics.length}}
-              {{suggested-topics topic=model}}
-            {{/if}}
+          <div class="bottom-suggested-topic">
+            <div class="container">
+              {{plugin-outlet name="topic-above-suggested" args=(hash model=model)}}
+              <div class="{{if model.relatedMessages.length "related-messages-wrapper"}} {{if model.suggestedTopics.length "suggested-topics-wrapper"}}">
+                {{#if model.relatedMessages.length}}
+                  {{related-messages topic=model}}
+                {{/if}}
+                {{#if model.suggestedTopics.length}}
+                  {{suggested-topics topic=model}}
+                {{/if}}
+              </div>
+            </div>
           </div>
         {{/if}}
       {{else}}
@@ -486,5 +413,6 @@
 
       {{quote-button quoteState=quoteState selectText=(action "selectText") topic=model composerVisible=composer.visible}}
     {{/discourse-topic}}
+
   </section>
 </main>
