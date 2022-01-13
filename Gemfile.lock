@@ -330,9 +330,9 @@ GEM
       activerecord (~> 6.0)
       concurrent-ruby
       railties (~> 6.0)
-    rails_multisite (4.0.0)
-      activerecord (> 5.0, < 7)
-      railties (> 5.0, < 7)
+    rails_multisite (4.0.1)
+      activerecord (> 5.0, < 7.1)
+      railties (> 5.0, < 7.1)
     railties (6.1.3.2)
       actionpack (= 6.1.3.2)
       activesupport (= 6.1.3.2)
@@ -477,7 +477,7 @@ GEM
     will_paginate (3.3.1)
     xorcist (1.1.2)
     yaml-lint (0.0.10)
-    zeitwerk (2.5.1)
+    zeitwerk (2.5.3)
 
 PLATFORMS
   arm64-darwin-20
